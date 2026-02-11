@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@400;600&display=swap');
+@import "tailwindcss";
+@source "../**/*.{vue,ts,js,html}";
+
+@theme {
+    --color-ink-900: #111827;
+    --color-ink-700: #374151;
+    --color-ink-500: #6b7280;
+    --color-sand-50: #ffffff;
+    --color-sand-100: #f9fafb;
+    --color-brand-200: #fecaca;
+    --color-brand-500: #dc2626;
+    --color-brand-600: #b91c1c;
+    --color-accent-200: #fee2e2;
+    --color-accent-500: #ef4444;
+    --font-sans: "Space Grotesk", "Segoe UI", sans-serif;
+    --font-display: "Unbounded", "Space Grotesk", sans-serif;
+}
+
+@layer base {
+    body {
+        @apply bg-sand-50 text-ink-900 antialiased;
+        font-family: var(--font-sans);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+    }
+}
+
+@layer components {
+    .panel {
+        @apply rounded-2xl border border-red-100/80 bg-white/90 shadow-sm backdrop-blur;
+    }
+
+    .chip {
+        @apply inline-flex items-center gap-2 rounded-full border border-red-100 bg-white px-3 py-1 text-xs font-medium text-ink-700;
+    }
+
+    .nav-link {
+        @apply flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-red-50 hover:text-ink-900;
+    }
+
+    .nav-link-active {
+        @apply bg-brand-500 text-white hover:bg-brand-600 hover:text-white;
+    }
+
+    .btn-primary {
+        @apply rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-brand-600;
+    }
+
+    .btn-outline {
+        @apply rounded-full border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-600 transition hover:-translate-y-0.5 hover:bg-red-50;
+    }
+}
