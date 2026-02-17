@@ -4,7 +4,7 @@
         <!-- XP Burst -->
         <transition name="fade-scale">
             <div v-if="showXPAnimation" class="absolute bottom-8 right-8 flex flex-col items-center">
-                <BaseLottie path="/lottie/xp-burst.json" :loop="false" :autoplay="true" class="w-28 h-28" />
+                <BaseLottie :animationData="xpBurstAnimation" :loop="false" :autoplay="true" class="w-28 h-28" />
                 <span class="mt-1 text-lg font-bold text-green-500">
                     +{{ xpGained }} XP
                 </span>
@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import BaseLottie from '@/components/BaseLottie.vue'
 import { showXPAnimation, xpGained } from '@/composables/useGamification'
+import xpBurstAnimation from '@/assets/lottie/Warning Status.json'
 </script>
 
 <style scoped>

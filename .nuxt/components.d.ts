@@ -22,7 +22,9 @@ export const SettingToggle: typeof import("../src/components/SettingToggle.vue")
 export const SidebarNav: typeof import("../src/components/SidebarNav.vue")['default']
 export const StatCard: typeof import("../src/components/StatCard.vue")['default']
 export const TaskCard: typeof import("../src/components/TaskCard.vue")['default']
+export const ToastAppToast: typeof import("../src/components/Toast/AppToast.vue")['default']
 export const TopBar: typeof import("../src/components/TopBar.vue")['default']
+export const UILoadingScreen: typeof import("../src/components/UI/LoadingScreen.vue")['default']
 export const VideoCard: typeof import("../src/components/VideoCard.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -55,7 +57,9 @@ export const LazySettingToggle: LazyComponent<typeof import("../src/components/S
 export const LazySidebarNav: LazyComponent<typeof import("../src/components/SidebarNav.vue")['default']>
 export const LazyStatCard: LazyComponent<typeof import("../src/components/StatCard.vue")['default']>
 export const LazyTaskCard: LazyComponent<typeof import("../src/components/TaskCard.vue")['default']>
+export const LazyToastAppToast: LazyComponent<typeof import("../src/components/Toast/AppToast.vue")['default']>
 export const LazyTopBar: LazyComponent<typeof import("../src/components/TopBar.vue")['default']>
+export const LazyUILoadingScreen: LazyComponent<typeof import("../src/components/UI/LoadingScreen.vue")['default']>
 export const LazyVideoCard: LazyComponent<typeof import("../src/components/VideoCard.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

@@ -1,38 +1,3 @@
-<script setup lang="ts">
-import { useRoute } from 'nuxt/app';
-import { computed } from 'vue'
-
-const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
-    mode: 'sidebar',
-})
-
-const route = useRoute()
-
-const isMobile = computed(() => props.mode === 'mobile')
-
-const navItems = [
-    { label: 'Dashboard', path: '/', note: 'Visao geral' },
-    { label: 'Perfil', path: '/perfil', note: 'Medalhas e relatorios' },
-    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos e desbloqueios' },
-    { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e exercicios' },
-    { label: 'Material adicional', path: '/materiais', note: 'Docs e extras' },
-    { label: 'Videos', path: '/videos', note: 'Conteudos gerais' },
-]
-
-const footerItems = [
-    { label: 'Configuracoes', path: '/configuracoes' },
-    { label: 'Sair', path: '/login' },
-]
-
-const isActive = (path: string) => {
-    if (path === '/') {
-        return route.path === '/'
-    }
-
-    return route.path.startsWith(path)
-}
-</script>
-
 <template>
     <aside v-if="!isMobile"
         class="flex w-72 flex-col gap-8 border-r border-slate-200/70 bg-white/70 px-6 py-8 backdrop-blur">
@@ -55,10 +20,17 @@ const isActive = (path: string) => {
         </div>
 
         <div class="space-y-2">
-            <NuxtLink v-for="item in footerItems" :key="item.path" :to="item.path" class="nav-link">
-                <span class="h-2 w-2 rounded-full bg-slate-300"></span>
-                <span>{{ item.label }}</span>
-            </NuxtLink>
+            <template v-for="item in footerItems" :key="item.label">
+                <NuxtLink v-if="item.type === 'link'" :to="item.path" class="nav-link">
+                    <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                    <span>{{ item.label }}</span>
+                </NuxtLink>
+
+                <button v-else type="button" class="nav-link w-full" @click="logout">
+                    <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                    <span>{{ item.label }}</span>
+                </button>
+            </template>
         </div>
     </aside>
 
@@ -69,7 +41,54 @@ const isActive = (path: string) => {
                 <span class="h-2 w-2 rounded-full"
                     :class="isActive(item.path) ? 'bg-brand-500' : 'bg-slate-300'"></span>
                 <span>{{ item.label }}</span>
+
             </NuxtLink>
         </div>
     </nav>
 </template>
+
+<script setup lang="ts">
+import { useRoute } from 'nuxt/app';
+import { computed } from 'vue'
+
+const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
+    mode: 'sidebar',
+})
+
+const route = useRoute()
+
+const isMobile = computed(() => props.mode === 'mobile')
+
+const navItems = [
+    { label: 'Dashboard', path: '/dashboard', note: 'Visao geral' },
+    { label: 'Perfil', path: '/perfil', note: 'Medalhas e relatorios' },
+    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos e desbloqueios' },
+    { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e exercicios' },
+    { label: 'Material adicional', path: '/materiais', note: 'Docs e extras' },
+    { label: 'Videos', path: '/videos', note: 'Conteudos gerais' },
+]
+
+const footerItems = [
+    { label: 'Configuracoes', path: '/configuracoes', type: 'link' },
+    { label: 'Sair', type: 'action' },
+] as const
+
+const isActive = (path: string) => {
+    if (path === '/') {
+        return route.path === '/'
+    }
+
+    return route.path.startsWith(path)
+}
+
+const logout = async () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('loggedUser')
+
+    console.log("Logout User");
+
+    return navigateTo('/')
+}
+</script>
+
+<style scoped lang="scss"></style>
