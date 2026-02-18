@@ -8,10 +8,9 @@
         </div>
 
         <div class="flex min-h-screen">
-            <SidebarNav class="hidden lg:flex" />
+            <SidebarNav class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex" />
 
-            <div class="flex min-h-screen flex-1 flex-col">
-                <TopBar />
+            <div class="flex min-h-screen flex-1 flex-col lg:pl-72">
                 <main class="flex-1 px-5 pb-24 pt-6 lg:px-10">
                     <slot />
                 </main>
@@ -27,6 +26,5 @@
 
 <script setup lang="ts">
 import SidebarNav from '@/components/SidebarNav.vue'
-import TopBar from '@/components/TopBar.vue'
 import GamificationOverlay from '@/components/GamificationOverlay.vue'
 </script>

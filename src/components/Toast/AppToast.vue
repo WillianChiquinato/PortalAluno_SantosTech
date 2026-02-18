@@ -1,7 +1,8 @@
 <template>
     <Toast :key="toastKey" :position="toastPosition" :pt="{
-        root: { class: 'toast-container' },
-        message: { class: 'toast-message-wrapper' },
+        root: { class: 'toast-container', style: 'border:0;outline:0;box-shadow:none;background:transparent;' },
+        message: { class: 'toast-message-wrapper', style: 'border:0;outline:0;box-shadow:none;background:transparent;' },
+        messageContent: { style: 'border:0;outline:0;box-shadow:none;background:transparent;padding:0;' },
         closeButton: { style: 'display: none' }
     }">
         <template #message="slotProps">
@@ -66,17 +67,15 @@ const iconMap: Record<string, string> = {
     gap: 16px;
     align-items: center;
     padding: 10px 20px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-radius: 14px;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
-        0 4px 12px rgba(0, 0, 0, 0.08),
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
     position: relative;
     animation: toastSlideIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.34);
     overflow: hidden;
 }
 
@@ -85,9 +84,10 @@ const iconMap: Record<string, string> = {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 3px;
     height: 100%;
-    box-shadow: 0 0 12px currentColor;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
 }
 
 .app-toast::after {
@@ -129,21 +129,25 @@ const iconMap: Record<string, string> = {
 .app-toast.success {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
     color: #ffffff;
+    border-color: rgba(167, 243, 208, 0.55);
 }
 
 .app-toast.error {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
     color: #ffffff;
+    border-color: rgba(254, 202, 202, 0.55);
 }
 
 .app-toast.warn {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
     color: #ffffff;
+    border-color: rgba(253, 230, 138, 0.55);
 }
 
 .app-toast.info {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
     color: #ffffff;
+    border-color: rgba(191, 219, 254, 0.55);
 }
 
 .toast-icon-wrapper {
@@ -259,22 +263,52 @@ const iconMap: Record<string, string> = {
 /* Override PrimeVue default styles */
 :deep(.p-toast) {
     --p-toast-message-gap: 16px;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 :deep(.p-toast-message) {
+    --p-toast-message-border-width: 0 !important;
+    --p-toast-message-border-color: transparent !important;
     position: relative !important;
     transform: none !important;
     background: transparent !important;
     border: none !important;
+    outline: none !important;
     box-shadow: none !important;
+}
+
+:deep(.p-toast-message-success),
+:deep(.p-toast-message-info),
+:deep(.p-toast-message-warn),
+:deep(.p-toast-message-error) {
+    border: none !important;
+    border-inline-start: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 :deep(.p-toast-message-content) {
     background: transparent !important;
     border: none !important;
+    outline: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin-bottom: 12px;
+}
+
+:deep(.p-toast-message-text),
+:deep(.p-toast-summary),
+:deep(.p-toast-detail),
+:deep(.p-toast-close-button),
+:deep(.p-toast-close-icon),
+:deep(.toast-container),
+:deep(.toast-message-wrapper) {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 :deep(.p-toast-message-icon),
@@ -284,6 +318,9 @@ const iconMap: Record<string, string> = {
 
 :deep(.toast-message-wrapper) {
     margin-bottom: 16px;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 :deep(.toast-message-wrapper:last-child) {

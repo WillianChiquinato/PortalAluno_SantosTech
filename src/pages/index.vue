@@ -88,11 +88,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
+import { useUserStore } from "~/infra/store/userStore";
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
+const route = useRoute();
+const router = useRouter();
 
 const emailLogin = ref("");
 const passwordLogin = ref("");
@@ -120,6 +123,7 @@ async function LoadUserData() {
 
         setToken(loadUser.token);
         setLoggedUser(loadUser.user);
+        useUserStore().setUserId(loadUser.user.id);
 
         toast.success(
             "Bem-vindo de volta!",
@@ -142,6 +146,19 @@ async function LoadUserData() {
         loadingPop();
     }
 }
+
+onMounted(async () => {
+    if (route.query.auth !== 'required') {
+        return;
+    }
+
+    toast.error('Acesso restrito', 'Você precisa estar logado para acessar esta página.', 3500);
+
+    await router.replace({
+        path: '/',
+        query: {},
+    });
+});
 
 definePageMeta({
     layout: 'auth',

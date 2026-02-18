@@ -10,8 +10,8 @@
 
     <transition name="whatsapp-fade">
         <div v-if="showWhatsapp && !isWhatsappMinimized" class="whatsapp-container-float">
-            <a :href="`https://wa.me/+5511986652872?text=Olá, quero tirar duvidas sobre a tricollure!!`" target="_blank"
-                class="whatsapp-float">
+            <a :href="`https://wa.me/+5511986652872?text=Olá, quero tirar duvidas sobre o portal do aluno!!`"
+                target="_blank" class="whatsapp-float">
                 <i class="pi pi-whatsapp whatsapp-icon"></i>
             </a>
 
@@ -61,6 +61,11 @@ const showWhatsapp = computed(() => {
     bottom: 40px;
     right: 40px;
     z-index: 1000;
+
+    @media (max-width: 1000px) {
+        bottom: 70px;
+        right: 20px;
+    }
 }
 
 .whatsapp-float {

@@ -3,7 +3,7 @@
         <div class="loading-screen" role="status" aria-live="polite">
             <div class="loading-card">
                 <img :src="logoSrc" alt="Santos Games" class="brand-logo" />
-                <p class="loading-text">Carregando portal do aluno</p>
+                <p class="loading-text">{{ RandomNames }}</p>
                 <div class="progress-shell" aria-hidden="true">
                     <div class="progress-fill"></div>
                 </div>
@@ -19,6 +19,14 @@
 
 <script setup lang="ts">
 import logoSrc from '@/assets/logoPreta.png';
+
+const RandomNames = [
+    'Carregando conquistas...',
+    'Preparando desafios...',
+    'Ajustando recompensas...',
+    'Sincronizando progresso...',
+    'Gamificando sua jornada...'
+][Math.floor(Math.random() * 5)]
 
 </script>
 

@@ -1,20 +1,27 @@
 <template>
     <aside v-if="!isMobile"
-        class="flex w-72 flex-col gap-8 border-r border-slate-200/70 bg-white/70 px-6 py-8 backdrop-blur">
-        <div class="space-y-2">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Santos Games</p>
-            <h1 class="text-2xl font-semibold">Portal do Aluno</h1>
-            <p class="text-sm text-ink-500">Gamificacao diaria e progresso em tempo real.</p>
+        class="flex h-screen w-72 flex-col gap-8 overflow-hidden border-r border-slate-200/70 bg-white/70 px-6 py-8 backdrop-blur">
+        <div
+            class="flex items-start gap-3 rounded-2xl border border-brand-200/70 bg-gradient-to-br from-brand-200/60 via-accent-200/80 to-white p-4">
+            <img :src="logoColorida" alt="Santos Games Logo" class="h-11 w-auto shrink-0 drop-shadow-sm">
+            <div class="min-w-0 space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-600">Santos Games</p>
+                <h1
+                    class="bg-gradient-to-r from-brand-600 via-brand-500 to-ink-900 bg-clip-text text-2xl font-semibold text-transparent">
+                    Portal do Aluno</h1>
+                <div class="h-1 w-20 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 mb-2"></div>
+            </div>
         </div>
 
-        <div class="flex-1 space-y-2">
+        <div class="flex-1 space-y-4">
             <NuxtLink v-for="item in navItems" :key="item.path" :to="item.path"
-                :class="['nav-link', isActive(item.path) && 'nav-link-active']">
+                :class="['nav-link', isActive(item.path) && 'nav-link-active', isActive(item.path) ? 'text-ink-900 scale-107' : 'text-ink-500']"
+                class="hover:scale-104 transition-transform">
                 <span class="h-2 w-2 rounded-full"
                     :class="isActive(item.path) ? 'bg-accent-200' : 'bg-slate-300'"></span>
                 <span class="flex flex-col">
                     <span>{{ item.label }}</span>
-                    <span class="text-xs font-normal text-ink-500">{{ item.note }}</span>
+                    <span class="text-xs font-normal text-ink-600">{{ item.note }}</span>
                 </span>
             </NuxtLink>
         </div>
@@ -50,6 +57,7 @@
 <script setup lang="ts">
 import { useRoute } from 'nuxt/app';
 import { computed } from 'vue'
+import logoColorida from '@/assets/LogoColorida.png'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
     mode: 'sidebar',
@@ -60,12 +68,11 @@ const route = useRoute()
 const isMobile = computed(() => props.mode === 'mobile')
 
 const navItems = [
-    { label: 'Dashboard', path: '/dashboard', note: 'Visao geral' },
-    { label: 'Perfil', path: '/perfil', note: 'Medalhas e relatorios' },
-    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos e desbloqueios' },
-    { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e exercicios' },
-    { label: 'Material adicional', path: '/materiais', note: 'Docs e extras' },
-    { label: 'Videos', path: '/videos', note: 'Conteudos gerais' },
+    { label: 'Dashboard', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios' },
+    { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e Exercicios' },
+    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos e Desbloqueios' },
+    { label: 'Material adicional', path: '/materiais', note: 'Documentos para Atribuições' },
+    { label: 'Videos', path: '/videos', note: 'Videos Gerais' },
 ]
 
 const footerItems = [
