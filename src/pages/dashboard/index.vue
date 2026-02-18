@@ -24,7 +24,8 @@
                         </div>
                     </div>
 
-                    <button class="btn-outline h-9 px-4 text-xs cursor-pointer">Editar capa</button>
+                    <button class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="openUploadCover">Editar
+                        capa</button>
                 </div>
 
                 <p class="text-sm text-ink-700">{{ profile?.bio ?? 'Bio não disponível' }}</p>
@@ -40,9 +41,10 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                        <div v-for="badge in badgeSlots" :key="badge.name"
-                            class="rounded-xl border p-2 text-center text-xs cursor-pointer"
-                            :class="badge.unlocked ? 'border-brand-200 bg-red-50 text-brand-600' : 'border-slate-200 bg-slate-50 text-ink-500'">
+                        <div v-for="(badge, index) in badgeSlots" :key="badge.name"
+                            class="rounded-xl border p-2 text-center text-xs cursor-pointer" :class="[
+                                badge.unlocked ? 'border-brand-200 bg-red-50 text-brand-600 medal-idle' : 'border-slate-200 bg-slate-50 text-ink-500',
+                            ]" :style="badge.unlocked ? { animationDelay: `${(index % 6) * 0.22}s` } : undefined">
                             <p class="text-base leading-none">{{ badge.unlocked ? '🏅' : '🔒' }}</p>
                             <p class="mt-1 truncate">{{ badge.name }}</p>
                         </div>
@@ -99,6 +101,9 @@
             </div>
         </section>
     </div>
+
+    <NewUploadCover @back="closeUploadCover" @save="fetchUserProfile" v-model:visible="showUploadCover"
+        :name="'Editar capa do perfil'" accept="image/*" />
 </template>
 
 <script setup lang="ts">
@@ -114,6 +119,9 @@ import type { IUserProfileData } from '~/infra/interfaces/services/user'
 import { useUserStore } from '~/infra/store/userStore'
 import type { IBadge } from '~/infra/interfaces/services/badge'
 import type { ICurrentPhaseUser } from '~/infra/interfaces/services/phase'
+import NewUploadCover from '~/components/Modals/newUploadCover.vue'
+
+const showUploadCover = ref(false)
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
@@ -176,6 +184,14 @@ function getUserIdFromSession(): number | null {
 
     userData.setUserId(recoveredId);
     return recoveredId;
+}
+
+function openUploadCover() {
+    showUploadCover.value = true;
+}
+
+function closeUploadCover() {
+    showUploadCover.value = false;
 }
 
 async function fetchRankingUser() {
@@ -312,3 +328,28 @@ onMounted(async () => {
     ranking.value = await fetchRankingUser();
 })
 </script>
+
+<style scoped>
+.medal-idle {
+    animation: medalFloat 1.6s ease-in-out infinite;
+    will-change: transform;
+}
+
+@keyframes medalFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .medal-idle {
+        animation: none;
+    }
+}
+</style>

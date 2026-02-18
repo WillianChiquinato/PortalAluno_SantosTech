@@ -15,8 +15,10 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 interface _GlobalComponents {
   BaseLottie: typeof import("../../src/components/BaseLottie.vue")['default']
+  ClickEffect: typeof import("../../src/components/ClickEffect.vue")['default']
   CourseCard: typeof import("../../src/components/CourseCard.vue")['default']
   GamificationOverlay: typeof import("../../src/components/GamificationOverlay.vue")['default']
+  ModalsNewUploadCover: typeof import("../../src/components/Modals/newUploadCover.vue")['default']
   PhaseCard: typeof import("../../src/components/PhaseCard.vue")['default']
   SettingToggle: typeof import("../../src/components/SettingToggle.vue")['default']
   SidebarNav: typeof import("../../src/components/SidebarNav.vue")['default']
@@ -49,8 +51,10 @@ interface _GlobalComponents {
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
   LazyBaseLottie: LazyComponent<typeof import("../../src/components/BaseLottie.vue")['default']>
+  LazyClickEffect: LazyComponent<typeof import("../../src/components/ClickEffect.vue")['default']>
   LazyCourseCard: LazyComponent<typeof import("../../src/components/CourseCard.vue")['default']>
   LazyGamificationOverlay: LazyComponent<typeof import("../../src/components/GamificationOverlay.vue")['default']>
+  LazyModalsNewUploadCover: LazyComponent<typeof import("../../src/components/Modals/newUploadCover.vue")['default']>
   LazyPhaseCard: LazyComponent<typeof import("../../src/components/PhaseCard.vue")['default']>
   LazySettingToggle: LazyComponent<typeof import("../../src/components/SettingToggle.vue")['default']>
   LazySidebarNav: LazyComponent<typeof import("../../src/components/SidebarNav.vue")['default']>

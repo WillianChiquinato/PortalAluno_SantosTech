@@ -5,7 +5,7 @@
             class="flex items-start gap-3 rounded-2xl border border-brand-200/70 bg-gradient-to-br from-brand-200/60 via-accent-200/80 to-white p-4">
             <img :src="logoColorida" alt="Santos Games Logo" class="h-11 w-auto shrink-0 drop-shadow-sm">
             <div class="min-w-0 space-y-2">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-600">Santos Games</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-600">Santos Tech</p>
                 <h1
                     class="bg-gradient-to-r from-brand-600 via-brand-500 to-ink-900 bg-clip-text text-2xl font-semibold text-transparent">
                     Portal do Aluno</h1>

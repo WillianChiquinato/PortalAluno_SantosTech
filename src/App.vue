@@ -1,4 +1,5 @@
 <template>
+    <ClickEffect />
     <AppToast />
     <div>
         <LoadingScreen v-if="isLoading" class="loading-overlay" />
@@ -32,6 +33,7 @@
 <script setup lang="ts">
 import LoadingScreen from '~/components/UI/LoadingScreen.vue';
 import AppToast from './components/Toast/AppToast.vue';
+import ClickEffect from './components/ClickEffect.vue';
 
 const { isLoading } = useLoading();
 
