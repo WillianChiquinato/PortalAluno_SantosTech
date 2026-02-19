@@ -3,9 +3,11 @@ import type { IClientHttp } from "~/infra/interfaces/config";
 import AuthService from "~/infra/interfaces/services/auth";
 import BadgeService from "~/infra/interfaces/services/badge";
 import ClassService from "~/infra/interfaces/services/class";
+import MaterialService from "~/infra/interfaces/services/material";
 import PhaseService from "~/infra/interfaces/services/phase";
 import PointService from "~/infra/interfaces/services/point";
 import UserService from "~/infra/interfaces/services/user";
+import VideoService from "~/infra/interfaces/services/video";
 
 export default defineNuxtPlugin(()=>{
 
@@ -15,6 +17,8 @@ export default defineNuxtPlugin(()=>{
 		class: new ClassService(),
 		point: new PointService(),
 		phase: new PhaseService(),
+		video: new VideoService(),
+		material: new MaterialService(),
 		auth: new AuthService(),
 	};
 
