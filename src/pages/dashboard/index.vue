@@ -24,8 +24,13 @@
                         </div>
                     </div>
 
-                    <button class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="openUploadCover">Editar
-                        capa</button>
+                    <div class="flex flex-row gap-2">
+                        <button class="btn-outline h-9 px-4 text-xs cursor-pointer"
+                            @click="openUploadCoverAndPicture">Editar
+                            Fotos</button>
+                        <button class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="openEditAttributes">Editar
+                            Perfil</button>
+                    </div>
                 </div>
 
                 <p class="text-sm text-ink-700">{{ profile?.bio ?? 'Bio não disponível' }}</p>
@@ -102,8 +107,57 @@
         </section>
     </div>
 
-    <NewUploadCover @back="closeUploadCover" @save="fetchUserProfile" v-model:visible="showUploadCover"
-        :name="'Editar capa do perfil'" accept="image/*" />
+    <NewUploadCover @back="closeUploadCoverAndPicture" @save="saveCoverAndProfile"
+        v-model:visible="showUploadCoverAndPicture" :name="'Editar fotos do perfil'" accept="image/*" />
+
+    <CreatedEditModal :name="'Editar atributos do perfil'" @back="closeEditAttributes" @save="UpdateUserProfile"
+        v-model:visible="showEditAttributes">
+        <p class="text-sm text-ink-500">Atualize as informações básicas do seu perfil.</p>
+
+        <div class="space-y-3">
+            <div class="panel border-red-100/80 p-3">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Nome</label>
+                <input v-model="profile!.name" type="text" class="input w-full" placeholder="Digite seu nome" />
+
+            </div>
+
+            <div class="panel border-red-100/80 p-3">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Email</label>
+                <input v-model="profile!.email" type="email" class="input w-full"
+                    :class="isEmailValid(profile!.email) ? 'border-green-500' : 'border-red-500'"
+                    placeholder="Digite seu email" />
+                <p v-if="!isEmailValid(profile!.email)" class="text-xs text-red-500">Email inválido</p>
+            </div>
+
+            <div class="panel border-red-100/80 p-3">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Senha</label>
+                <input v-model="profile!.passwordHash" :type="showPassword ? 'text' : 'password'" class="input w-full"
+                    placeholder="Digite uma nova senha" />
+
+                <button type="button"
+                    class="absolute right-4 top-8 text-ink-500 text-xl hover:text-ink-700 hover:scale-110"
+                    @click="handleEyePassword">
+                    <i :class="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                </button>
+            </div>
+
+            <div class="panel border-red-100/80 p-3">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Bio</label>
+                <textarea v-model="profile!.bio" class="input w-full" placeholder="Fale um pouco sobre você"
+                    rows="4"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="closeEditAttributes">
+                    Voltar
+                </button>
+                <button type="button" class="btn-primary h-9 px-4 text-xs cursor-pointer" @click="UpdateUserProfile"
+                    :disabled="!isEmailValid(profile!.email)">
+                    Salvar alterações
+                </button>
+            </div>
+        </div>
+    </CreatedEditModal>
 </template>
 
 <script setup lang="ts">
@@ -115,13 +169,26 @@ import warningStatus from '@/assets/lottie/Warning Status.json'
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
 import { getLoggedUser } from '~/composables/useAuth'
-import type { IUserProfileData } from '~/infra/interfaces/services/user'
+import { UserRole, type IUserProfileData } from '~/infra/interfaces/services/user'
 import { useUserStore } from '~/infra/store/userStore'
 import type { IBadge } from '~/infra/interfaces/services/badge'
 import type { ICurrentPhaseUser } from '~/infra/interfaces/services/phase'
 import NewUploadCover from '~/components/Modals/newUploadCover.vue'
+import CreatedEditModal from '~/components/Modals/CreatedEditModal.vue'
 
-const showUploadCover = ref(false)
+import { isEmailValid } from '#imports'
+
+const showUploadCoverAndPicture = ref(false)
+
+//Password.
+const showPassword = ref(false)
+
+function handleEyePassword() {
+    showPassword.value = !showPassword.value;
+}
+
+//Edit user.
+const showEditAttributes = ref(false)
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
@@ -133,9 +200,7 @@ const userBadges = ref<IBadge[] | undefined>();
 const badgeSlots = ref<(IBadge & { unlocked: boolean })[]>([]);
 
 const currentPhase = ref<ICurrentPhaseUser | null>(null);
-
 const ranking = ref<{ position: number; points: number; pointsToNext: number } | null>(null);
-
 const rankingMessage = computed(() => {
     if (!ranking.value) return 'Ranking indisponível';
 
@@ -170,6 +235,11 @@ const highlights = [
 
 const unlockedMedals = computed(() => badgeSlots.value.filter((badge) => badge.unlocked).length);
 
+type UploadProfileImagesPayload = {
+    coverFile: File | null
+    profileFile: File | null
+}
+
 function getUserIdFromSession(): number | null {
     if (userData.userId && userData.userId > 0) {
         return userData.userId;
@@ -186,12 +256,106 @@ function getUserIdFromSession(): number | null {
     return recoveredId;
 }
 
-function openUploadCover() {
-    showUploadCover.value = true;
+function openUploadCoverAndPicture() {
+    showUploadCoverAndPicture.value = true;
 }
 
-function closeUploadCover() {
-    showUploadCover.value = false;
+function closeUploadCoverAndPicture() {
+    showUploadCoverAndPicture.value = false;
+}
+
+function openEditAttributes() {
+    showEditAttributes.value = true;
+}
+
+function closeEditAttributes() {
+    showEditAttributes.value = false;
+}
+
+async function UpdateUserProfile() {
+    loadingPush();
+
+    try {
+        const userId = getUserIdFromSession();
+
+        if (!userId) {
+            toast.error('Sessão inválida', 'Faça login novamente para atualizar seu perfil.', 4000)
+            loadingPop();
+            return;
+        }
+
+        var RoleUpdateUser = UserRole.Student ? 1 : UserRole.Teacher ? 2 : 3;
+
+        var payloadUpdateUser = {
+            id: userId,
+            name: profile.value?.name ?? '',
+            bio: profile.value?.bio ?? '',
+            email: profile.value?.email ?? '',
+            password: String(profile.value?.passwordHash ?? ''),
+            role: RoleUpdateUser,
+            profilePictureUrl: profile.value?.profilePictureUrl ?? '',
+            coverPictureUrl: profile.value?.coverPictureUrl ?? '',
+            updatedAt: new Date(),
+        }
+
+        var response = await $httpClient.user.UpdateProfile(payloadUpdateUser);
+
+        if (response.result == null) {
+            toast.error('Erro', 'Não foi possível atualizar os dados do perfil. Tente novamente mais tarde.', 4000)
+            return;
+        }
+
+        closeEditAttributes();
+        toast.success('Perfil atualizado', 'Seus dados do perfil foram atualizados com sucesso.', 3000);
+    } catch (error) {
+        console.error('Erro ao atualizar perfil do usuário:', error)
+        toast.error('Erro', 'Não foi possível atualizar os dados do perfil. Tente novamente mais tarde.', 4000)
+    } finally {
+        loadingPop();
+    }
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onload = () => {
+            resolve(String(reader.result ?? ''))
+        }
+
+        reader.onerror = () => {
+            reject(new Error('Falha ao converter arquivo para base64.'))
+        }
+
+        reader.readAsDataURL(file)
+    })
+}
+
+async function saveCoverAndProfile(payload: UploadProfileImagesPayload) {
+    try {
+        if (!profile.value) {
+            await fetchUserProfile()
+        }
+
+        if (!profile.value) {
+            toast.error('Erro', 'Não foi possível carregar os dados do perfil para salvar as imagens.', 4000)
+            return
+        }
+
+        if (payload.coverFile) {
+            profile.value.coverPictureUrl = await fileToDataUrl(payload.coverFile)
+        }
+
+        if (payload.profileFile) {
+            profile.value.profilePictureUrl = await fileToDataUrl(payload.profileFile)
+        }
+
+        await UpdateUserProfile()
+        closeUploadCoverAndPicture()
+    } catch (error) {
+        console.error('Erro ao salvar imagens do perfil:', error)
+        toast.error('Erro', 'Não foi possível salvar as imagens de capa e perfil.', 4000)
+    }
 }
 
 async function fetchRankingUser() {

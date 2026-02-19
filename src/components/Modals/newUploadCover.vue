@@ -12,28 +12,53 @@
                     </div>
 
                     <div class="space-y-4 bg-gradient-to-b from-white to-red-50/30 px-6 py-5">
-                        <p class="text-sm text-ink-500">Selecione um arquivo para enviar.</p>
+                        <p class="text-sm text-ink-500">Selecione os arquivos para enviar.</p>
 
                         <input ref="fileInput" type="file" class="hidden" :accept="props.accept"
                             @change="onFileChange" />
+                        <input ref="fileInputProfile" type="file" class="hidden" :accept="props.accept"
+                            @change="onProfileFileChange" />
 
                         <button type="button"
                             class="upload-drop panel w-full border-dashed border-red-200 p-5 text-left transition cursor-pointer"
                             @click="openFilePicker">
-                            <p class="text-sm font-semibold text-ink-900">Escolher arquivo</p>
+                            <p class="text-sm font-semibold text-ink-900">Escolher arquivo de capa</p>
                             <p class="mt-1 text-xs text-ink-500">Clique para selecionar no computador.</p>
                         </button>
 
-                        <div v-if="selectedFile" class="panel flex items-center gap-3 p-3">
-                            <img v-if="previewUrl" :src="previewUrl" alt="Preview do arquivo"
+                        <button type="button"
+                            class="upload-drop panel w-full border-dashed border-red-200 p-5 text-left transition cursor-pointer"
+                            @click="openFilePickerProfile">
+                            <p class="text-sm font-semibold text-ink-900">Escolher arquivo de perfil</p>
+                            <p class="mt-1 text-xs text-ink-500">Clique para selecionar no computador.</p>
+                        </button>
+
+                        <div v-if="selectedCoverFile" class="panel flex items-center gap-3 p-3">
+                            <img v-if="coverPreviewUrl" :src="coverPreviewUrl" alt="Preview da capa"
                                 class="h-12 w-12 rounded-lg border border-red-100 object-cover" />
 
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-medium text-ink-900">{{ selectedFile.name }}</p>
-                                <p class="text-xs text-ink-500">{{ fileSizeLabel }}</p>
+                                <p class="truncate text-sm font-medium text-ink-900">{{ selectedCoverFile.name }}</p>
+                                <p class="text-xs text-ink-500">{{ coverFileSizeLabel }}</p>
                             </div>
 
-                            <button type="button" class="chip cursor-pointer" @click="removeFile" :disabled="loading">
+                            <button type="button" class="chip cursor-pointer" @click="removeFile('cover')"
+                                :disabled="loading">
+                                Remover
+                            </button>
+                        </div>
+
+                        <div v-if="selectedProfileFile" class="panel flex items-center gap-3 p-3">
+                            <img v-if="profilePreviewUrl" :src="profilePreviewUrl" alt="Preview do perfil"
+                                class="h-12 w-12 rounded-lg border border-red-100 object-cover" />
+
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-ink-900">{{ selectedProfileFile.name }}</p>
+                                <p class="text-xs text-ink-500">{{ profileFileSizeLabel }}</p>
+                            </div>
+
+                            <button type="button" class="chip cursor-pointer" @click="removeFile('profile')"
+                                :disabled="loading">
                                 Remover
                             </button>
                         </div>
@@ -49,7 +74,7 @@
 
                         <button type="button"
                             class="btn-primary h-9 px-4 text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                            @click="handleSave" :disabled="loading || !selectedFile">
+                            @click="handleSave" :disabled="loading || (!selectedCoverFile && !selectedProfileFile)">
                             {{ loading ? 'Salvando...' : 'Salvar' }}
                         </button>
                     </div>
@@ -64,7 +89,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 
 const emit = defineEmits<{
     (event: 'back'): void
-    (event: 'save', file: File): void
+    (event: 'save', files: { coverFile: File | null, profileFile: File | null }): void
 }>()
 
 const model = defineModel<boolean>('visible', { default: false })
@@ -77,28 +102,53 @@ const props = withDefaults(defineProps<{
 })
 
 const loading = ref(false)
-const selectedFile = ref<File | null>(null)
-const previewUrl = ref('')
+const selectedCoverFile = ref<File | null>(null)
+const selectedProfileFile = ref<File | null>(null)
+const coverPreviewUrl = ref('')
+const profilePreviewUrl = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const fileInputProfile = ref<HTMLInputElement | null>(null)
 
-const fileSizeLabel = computed(() => {
-    if (!selectedFile.value) return ''
-    return `${(selectedFile.value.size / 1024 / 1024).toFixed(2)} MB`
+const coverFileSizeLabel = computed(() => {
+    if (!selectedCoverFile.value) return ''
+    return `${(selectedCoverFile.value.size / 1024 / 1024).toFixed(2)} MB`
 })
 
-function cleanupPreview() {
-    if (previewUrl.value) {
-        URL.revokeObjectURL(previewUrl.value)
-        previewUrl.value = ''
+const profileFileSizeLabel = computed(() => {
+    if (!selectedProfileFile.value) return ''
+    return `${(selectedProfileFile.value.size / 1024 / 1024).toFixed(2)} MB`
+})
+
+function cleanupPreview(type: 'cover' | 'profile') {
+    if (type === 'cover' && coverPreviewUrl.value) {
+        URL.revokeObjectURL(coverPreviewUrl.value)
+        coverPreviewUrl.value = ''
+        return
+    }
+
+    if (type === 'profile' && profilePreviewUrl.value) {
+        URL.revokeObjectURL(profilePreviewUrl.value)
+        profilePreviewUrl.value = ''
     }
 }
 
-function setSelectedFile(file: File | null) {
-    cleanupPreview()
-    selectedFile.value = file
+function setSelectedFile(type: 'cover' | 'profile', file: File | null) {
+    cleanupPreview(type)
+
+    if (type === 'cover') {
+        selectedCoverFile.value = file
+
+        if (file?.type.startsWith('image/')) {
+            coverPreviewUrl.value = URL.createObjectURL(file)
+        }
+
+        return
+    }
+
+    selectedProfileFile.value = file
 
     if (file?.type.startsWith('image/')) {
-        previewUrl.value = URL.createObjectURL(file)
+        profilePreviewUrl.value = URL.createObjectURL(file)
     }
 }
 
@@ -106,25 +156,45 @@ function openFilePicker() {
     fileInput.value?.click()
 }
 
+function openFilePickerProfile() {
+    fileInputProfile.value?.click()
+}
+
 function onFileChange(event: Event) {
     const target = event.target as HTMLInputElement
     const file = target.files?.[0] ?? null
-    setSelectedFile(file)
+    setSelectedFile('cover', file)
 }
 
-function removeFile() {
-    setSelectedFile(null)
+function onProfileFileChange(event: Event) {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0] ?? null
+    setSelectedFile('profile', file)
+}
 
-    if (fileInput.value) {
+function removeFile(type: 'cover' | 'profile') {
+    setSelectedFile(type, null)
+
+    if (type === 'cover' && fileInput.value) {
         fileInput.value.value = ''
+        return
+    }
+
+    if (type === 'profile' && fileInputProfile.value) {
+        fileInputProfile.value.value = ''
     }
 }
 
 function handleSave() {
-    if (!selectedFile.value) return
+    if (!selectedCoverFile.value && !selectedProfileFile.value) return
 
     loading.value = true
-    emit('save', selectedFile.value)
+    emit('save', {
+        coverFile: selectedCoverFile.value,
+        profileFile: selectedProfileFile.value,
+    })
+    loading.value = false
+    model.value = false
 }
 
 function handleBack() {
@@ -136,12 +206,14 @@ function handleBack() {
 watch(model, (newValue) => {
     if (!newValue) {
         loading.value = false
-        removeFile()
+        removeFile('cover')
+        removeFile('profile')
     }
 })
 
 onUnmounted(() => {
-    cleanupPreview()
+    cleanupPreview('cover')
+    cleanupPreview('profile')
 })
 
 </script>

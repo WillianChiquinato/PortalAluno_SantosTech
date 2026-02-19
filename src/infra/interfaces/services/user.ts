@@ -16,10 +16,24 @@ export interface IUser {
   updatedAt: Date
 }
 
+export interface IUpdateUserProfileRequest {
+  id: number
+  name: string
+  email: string
+  password: string
+  role: UserRole
+  bio: string
+  profilePictureUrl: string
+  coverPictureUrl: string
+  updatedAt: Date
+}
+
 export interface IUserProfileData {
   id: number
   name: string
   email: string
+  passwordHash: number
+  role: UserRole
   bio: string
   profilePictureUrl: string
   coverPictureUrl: string
@@ -71,5 +85,16 @@ export default class UserService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<IUserProfileData>
+  }
+
+  UpdateProfile = async (
+    request: IUpdateUserProfileRequest,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IUpdateUserProfileRequest>> => {
+    return (await this.fetchInstance(`${this.address}/UpdateUser`, {
+      method: 'PUT',
+      body: request,
+      ...config,
+    })) as ApiResponse<IUpdateUserProfileRequest>
   }
 }
