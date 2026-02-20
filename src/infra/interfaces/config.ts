@@ -1,6 +1,7 @@
 import type AuthService from "./services/auth";
 import type BadgeService from "./services/badge";
 import type ClassService from "./services/class";
+import type CourseService from "./services/course";
 import type MaterialService from "./services/material";
 import type PhaseService from "./services/phase";
 import type PointService from "./services/point";
@@ -15,5 +16,6 @@ export interface IClientHttp {
 	class: ClassService;
 	phase: PhaseService;
 	point: PointService;
+	course: CourseService;
 	auth: AuthService;
 }

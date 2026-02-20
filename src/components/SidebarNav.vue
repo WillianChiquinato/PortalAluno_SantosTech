@@ -70,7 +70,7 @@ const isMobile = computed(() => props.mode === 'mobile')
 const navItems = [
     { label: 'Dashboard', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios' },
     { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e Exercicios' },
-    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos e Desbloqueios' },
+    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos Pagos e Personalizados' },
     { label: 'Material adicional', path: '/materiais', note: 'Documentos para Atribuições' },
     { label: 'Videos', path: '/videos', note: 'Videos Gerais' },
 ]
