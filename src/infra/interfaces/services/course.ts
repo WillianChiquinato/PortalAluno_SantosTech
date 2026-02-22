@@ -10,7 +10,20 @@ export interface ICoursePaid {
   price: number
   duration: number // Duration in hours
   levelDifficulty: string
-  paidFocus: string
+  paidFocus: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ICourseAvailable {
+  id: number
+  name: string
+  description: string
+  isPaid: boolean
+  price: number
+  duration: number
+  levelDifficulty: string
+  paidFocus: string | null
   createdAt: string
   updatedAt: string
 }
@@ -39,5 +52,16 @@ export default class CourseService extends ClientService<any> {
       method: 'GET',
       ...options,
     })) as ApiResponse<{ courseId: number; progress: number }[]>
+  }
+
+  GetCoursesAvailables = async (
+    options?: FetchOptions,
+  ): Promise<ApiResponse<ICourseAvailable[]>> => {
+    let urlParams = `/GetCoursesAvailables`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...options,
+    })) as ApiResponse<ICourseAvailable[]>
   }
 }

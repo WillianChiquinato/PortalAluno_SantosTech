@@ -21,33 +21,22 @@
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <article class="rounded-2xl border border-red-100 bg-white/95 p-4">
-                        <p class="text-xs uppercase tracking-wide text-ink-500">Classe atual</p>
-                        <p class="mt-1 text-lg font-semibold">Desenvolvedor em Formação</p>
-                        <p class="mt-2 text-xs text-ink-500">Iniciante → Aprendiz → Programador</p>
-                    </article>
-
-                    <article class="rounded-2xl border border-red-100 bg-white/95 p-4">
-                        <p class="text-xs uppercase tracking-wide text-ink-500">Progresso da jornada</p>
-                        <div class="mt-2 h-2 rounded-full bg-red-100">
-                            <div class="h-2 w-2/3 rounded-full bg-brand-500"></div>
-                        </div>
-                        <p class="mt-2 text-xs text-ink-500">XP da semana: +420</p>
-                    </article>
+                    <CoursesCardResume v-for="course in coursesAvailable" :key="course.id" :course="course" />
                 </div>
 
                 <div class="grid gap-2 text-sm text-ink-700">
                     <div class="flex items-center gap-2 rounded-xl bg-red-50/70 px-3 py-2">
                         <i class="pi pi-code text-brand-500"></i>
-                        <span>Reinos disponíveis: Games, Front-End, Back-End e Mobile</span>
+                        <span>Reinos disponíveis: FullStack, Informatica</span>
                     </div>
                     <div class="flex items-center gap-2 rounded-xl bg-red-50/70 px-3 py-2">
                         <i class="pi pi-bolt text-brand-500"></i>
-                        <span>Tasks diárias e desafios semanais para manter consistência</span>
+                        <span>Tasks diárias, Desafios semanais e Challengers finais de modulo para manter
+                            consistência</span>
                     </div>
                     <div class="flex items-center gap-2 rounded-xl bg-red-50/70 px-3 py-2">
                         <i class="pi pi-trophy text-brand-500"></i>
-                        <span>Medalhas, títulos e recompensas exclusivas ao evoluir</span>
+                        <span>Medalhas, Títulos e Recompensas exclusivas ao evoluir</span>
                     </div>
                 </div>
             </div>
@@ -89,6 +78,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import CoursesCardResume from "~/components/CoursesCardResume.vue";
+import type { ICourseAvailable } from "~/infra/interfaces/services/course";
 import { useUserStore } from "~/infra/store/userStore";
 
 const { $httpClient } = useNuxtApp();
@@ -96,6 +87,8 @@ const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
 const route = useRoute();
 const router = useRouter();
+
+const coursesAvailable = ref<ICourseAvailable[]>([]);
 
 const emailLogin = ref("");
 const passwordLogin = ref("");
@@ -147,6 +140,24 @@ async function LoadUserData() {
     }
 }
 
+async function fetchLoadAvailableCourses() {
+    loadingPush();
+
+    try {
+        const response = await $httpClient.course.GetCoursesAvailables()
+
+        if (response.success) {
+            coursesAvailable.value = response.result ?? [];
+        }
+    } catch (error) {
+        console.error('Erro ao buscar cursos disponíveis:', error)
+        toast.error('Não foi possível carregar os cursos disponíveis. Tente novamente mais tarde.')
+        coursesAvailable.value = [];
+    } finally {
+        loadingPop()
+    }
+}
+
 onMounted(async () => {
     if (route.query.auth !== 'required') {
         return;
@@ -159,6 +170,10 @@ onMounted(async () => {
         query: {},
     });
 });
+
+onBeforeMount(async () => {
+    await fetchLoadAvailableCourses();
+})
 
 definePageMeta({
     layout: 'auth',

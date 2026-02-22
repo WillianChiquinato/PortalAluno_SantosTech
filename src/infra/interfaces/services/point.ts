@@ -7,6 +7,11 @@ export interface IPointRanking {
     totalPoints: number;
 }
 
+export interface IRedeemPointsForUser {
+    userId: number;
+    pointsToRedeem: number;
+}
+
 export default class PointService extends ClientService<any> {
   constructor() {
     super("Point", "api/Point");
@@ -19,5 +24,15 @@ export default class PointService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<IPointRanking[]>;
+  }
+
+  AddPointsForUser = async (payload: IRedeemPointsForUser, config: FetchOptions = {}): Promise<ApiResponse<void>> => {
+    let urlParams = `/AddPointsForUser`;
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'POST',
+      body: payload,
+      ...config,
+    })) as ApiResponse<void>;
   }
 }

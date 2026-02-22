@@ -62,10 +62,16 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold">Tarefas diarias</h3>
-                    <span class="chip">3 pendentes</span>
+                    <span class="chip">{{ dailyTasksCards.length }} pendentes</span>
                 </div>
-                <div class="space-y-3">
-                    <TaskCard v-for="task in tasks" :key="task.title" v-bind="task" />
+                <div v-if="dailyTaskGroups.length" class="space-y-4">
+                    <TaskCard v-for="task in dailyTasksCards" :key="task.id" :title="task.title" :due="task.due"
+                        :points="task.points" :status="task.status" @select="openDailyTask(task)" />
+                </div>
+                <div v-else class="panel p-5">
+                    <p class="text-sm font-semibold">Nenhuma tarefa diária disponível.</p>
+                    <p class="text-xs text-ink-500 mt-1">Quando novas atividades forem liberadas, elas aparecerão aqui.
+                    </p>
                 </div>
             </div>
 
@@ -158,6 +164,13 @@
             </div>
         </div>
     </CreatedEditModal>
+
+    <ExercisesCard :visible="showTaskQuizModal" :task="selectedTask" :daily-task="selectedDailyTask"
+        :exercises="availableExercises" :loading="quizLoading" :questions="quizQuestions"
+        :selected-answers="selectedAnswers" :current-question-index="currentQuestionIndex" :quiz-result="taskResult"
+        @close="closeTaskQuiz" @start-quiz="startExerciseQuiz"
+        @select-answer="selectAnswer($event.questionId, $event.optionIndex)" @back-to-exercises="backToExercises"
+        @finish-quiz="finishExercise" />
 </template>
 
 <script setup lang="ts">
@@ -175,8 +188,12 @@ import type { IBadge } from '~/infra/interfaces/services/badge'
 import type { ICurrentPhaseUser } from '~/infra/interfaces/services/phase'
 import NewUploadCover from '~/components/Modals/newUploadCover.vue'
 import CreatedEditModal from '~/components/Modals/CreatedEditModal.vue'
+import ExercisesCard from '~/components/ExercisesCard.vue'
 
 import { isEmailValid } from '#imports'
+import type { IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
+import { formatDate } from '~/utils/Format'
+import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 
 const showUploadCoverAndPicture = ref(false)
 
@@ -222,11 +239,74 @@ const stats = computed<Array<{
     { label: 'Desafio Diário', value: 'Liberado', helper: 'Entrega ate sexta', status: 'warning' },
 ])
 
-const tasks = [
-    { title: 'Revisar classes CSS', due: 'Hoje, 18:00', points: '120', status: 'Em aberto' },
-    { title: 'Quiz de grid layout', due: 'Amanha, 10:00', points: '80', status: 'Em aberto' },
-    { title: 'Video: Flexbox aplicado', due: 'Quarta, 20:00', points: '60', status: 'Em andamento' },
-]
+const tasks = ref<IDailyTaskGroup[]>([]);
+
+type TaskCardView = {
+    id: number
+    title: string
+    due: string
+    points: string
+    status: string
+    description: string
+    termAt: string
+    source: ExerciseQuestionSource
+}
+
+type DailyTaskGroupView = {
+    id: string
+    name: string
+    title: string
+    due: string
+    points: string
+    status: string
+    description: string
+    termAt: string
+    exercises: TaskCardView[]
+}
+
+const showTaskQuizModal = ref(false)
+const selectedDailyTask = ref<DailyTaskGroupView | null>(null)
+const selectedTask = ref<TaskCardView | null>(null)
+const quizLoading = ref(false)
+const quizQuestions = ref<QuizQuestion[]>([])
+const selectedAnswers = ref<Record<number, number | null>>({})
+const currentQuestionIndex = ref(0)
+const taskResult = ref<{ correct: number; total: number; accuracy: number; gainedPoints: number } | null>(null)
+
+const isCorrectAnswer = computed(() => {
+    if (!currentQuestion.value) return false
+    const selectedOptionIndex = selectedAnswers.value[currentQuestion.value.id]
+    return selectedOptionIndex === currentQuestion.value.correctOptionIndex
+})
+
+const dailyTaskGroups = computed<DailyTaskGroupView[]>(() => {
+    return tasks.value.map((group) => ({
+        id: `${group.phaseId}-${group.id}`,
+        name: group.name,
+        exercises: [...group.exercises]
+            .sort((a, b) => a.indexOrder - b.indexOrder)
+            .map((exercise) => mapExerciseToTaskCard(exercise)),
+        title: group.name,
+        due: formatDate(getNearestTermAt(group.exercises), 'pt-BR', { dateStyle: 'short' }),
+        points: String(sumGroupPoints(group.exercises)),
+        status: getGroupStatus(group.exercises),
+        description: `${group.exercises.length} exercício(s) diário(s) disponíveis.`,
+        termAt: getNearestTermAt(group.exercises),
+    }))
+})
+
+const dailyTasksCards = computed(() => dailyTaskGroups.value)
+
+const availableExercises = computed(() => selectedDailyTask.value?.exercises ?? [])
+
+const currentQuestion = computed(() => quizQuestions.value[currentQuestionIndex.value] ?? null)
+const answeredCount = computed(() => Object.values(selectedAnswers.value).filter((answer) => answer !== null && answer !== undefined).length)
+const allQuestionsAnswered = computed(() => quizQuestions.value.length > 0 && answeredCount.value === quizQuestions.value.length)
+const hasAnswerForCurrentQuestion = computed(() => {
+    if (!currentQuestion.value) return false
+    const answer = selectedAnswers.value[currentQuestion.value.id]
+    return answer !== null && answer !== undefined
+})
 
 const highlights = [
     { label: 'Ranking diario', value: '#4', helper: 'Subiu 2 posicoes hoje' },
@@ -234,6 +314,186 @@ const highlights = [
 ]
 
 const unlockedMedals = computed(() => badgeSlots.value.filter((badge) => badge.unlocked).length);
+
+function getTaskStatus(termAt: string): string {
+    const dueDate = new Date(termAt)
+    const now = new Date()
+
+    const dueStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+    const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    if (dueStart.getTime() < nowStart.getTime()) return 'Atrasada'
+    if (dueStart.getTime() === nowStart.getTime()) return 'Vence hoje'
+
+    return 'Em aberto'
+}
+
+function sumGroupPoints(exercises: IDailyExercise[]): number {
+    return exercises.reduce((acc, exercise) => acc + exercise.pointsRedeem, 0)
+}
+
+function getNearestTermAt(exercises: IDailyExercise[]): string {
+    if (!exercises.length) return new Date().toISOString()
+
+    return exercises.reduce((nearest, exercise) => {
+        return new Date(exercise.termAt).getTime() < new Date(nearest).getTime() ? exercise.termAt : nearest
+    }, exercises[0].termAt)
+}
+
+function getGroupStatus(exercises: IDailyExercise[]): string {
+    if (!exercises.length) return 'Em aberto'
+
+    const statuses = exercises.map((exercise) => getTaskStatus(exercise.termAt))
+
+    if (statuses.includes('Atrasada')) return 'Atrasada'
+    if (statuses.includes('Vence hoje')) return 'Vence hoje'
+    return 'Em aberto'
+}
+
+function mapExerciseToTaskCard(exercise: IDailyExercise): TaskCardView {
+    return {
+        id: exercise.id,
+        title: exercise.title,
+        due: formatDate(exercise.termAt, 'pt-BR', { dateStyle: 'short' }),
+        points: String(exercise.pointsRedeem),
+        status: getTaskStatus(exercise.termAt),
+        description: exercise.description,
+        termAt: exercise.termAt,
+        source: {
+            id: exercise.id,
+            title: exercise.title,
+            description: exercise.description,
+            pointsRedeem: exercise.pointsRedeem,
+            typeExercise: exercise.typeExercise,
+            difficulty: exercise.difficulty,
+        },
+    }
+}
+
+function resetQuizState() {
+    currentQuestionIndex.value = 0
+    selectedAnswers.value = {}
+
+    for (const question of quizQuestions.value) {
+        selectedAnswers.value[question.id] = null
+    }
+
+    taskResult.value = null
+}
+
+function openDailyTask(task: DailyTaskGroupView) {
+    selectedDailyTask.value = task
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    taskResult.value = null
+    currentQuestionIndex.value = 0
+    showTaskQuizModal.value = true
+}
+
+async function startExerciseQuiz(task: TaskCardView) {
+    selectedTask.value = task
+    quizLoading.value = true
+
+    try {
+        const response = await $httpClient.exercise.GetQuizQuestionsForExercise(task.id)
+        const options = (response.result ?? []) as IQuizQuestionOption[]
+
+        if (response.success && options.length) {
+            quizQuestions.value = buildTaskQuestionsFromOptions(task.source, options)
+        } else {
+            quizQuestions.value = buildTaskQuestions(task.source)
+        }
+
+        resetQuizState()
+    } catch (error) {
+        console.error('Erro ao carregar questões do exercício:', error)
+        toast.error('Erro', 'Não foi possível carregar as questões. Tente novamente mais tarde.', 3500)
+        quizQuestions.value = buildTaskQuestions(task.source)
+        resetQuizState()
+    } finally {
+        quizLoading.value = false
+    }
+}
+
+function backToExercises() {
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    currentQuestionIndex.value = 0
+    taskResult.value = null
+}
+
+function closeTaskQuiz() {
+    showTaskQuizModal.value = false
+    selectedDailyTask.value = null
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    currentQuestionIndex.value = 0
+    taskResult.value = null
+}
+
+function selectAnswer(questionId: number, optionIndex: number) {
+    selectedAnswers.value[questionId] = optionIndex
+}
+
+async function finishExercise() {
+    if (!selectedTask.value) return
+
+    if (!allQuestionsAnswered.value) {
+        toast.warn('Responda todas as questões', 'Preencha todas as respostas antes de finalizar o exercício.', 3000)
+        return
+    }
+
+    const userId = getUserIdFromSession();
+
+    const correct = quizQuestions.value.reduce((acc, question) => {
+        return acc + (selectedAnswers.value[question.id] === question.correctOptionIndex ? 1 : 0)
+    }, 0)
+
+    const total = quizQuestions.value.length
+    const accuracy = Math.round((correct / total) * 100)
+    const gainedPoints = Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100)
+
+    taskResult.value = {
+        correct,
+        total,
+        accuracy,
+        gainedPoints,
+    }
+
+    var payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
+        exerciseId: selectedTask.value!.source.id,
+        userId: userId ?? 0,
+        questionId: question.id,
+        submissionData: {
+            selectedOption: selectedAnswers.value[question.id] ?? -1,
+            isCorrect: selectedAnswers.value[question.id] === question.correctOptionIndex,
+            pointsEarned: selectedAnswers.value[question.id] === question.correctOptionIndex ? Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100) : 0,
+            submittedAt: new Date(),
+        },
+    }))
+
+    try {
+        var responseAnswer = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise);
+
+        if (responseAnswer.success) {
+            var payloadUserPoints = {
+                userId: userId ?? 0,
+                pointsToRedeem: gainedPoints
+            }
+
+            await $httpClient.point.AddPointsForUser(payloadUserPoints)
+        }
+    } catch (error) {
+        console.error('Erro ao resgatar pontos do exercício:', error)
+        toast.error('Erro', 'Não foi possível resgatar os pontos do exercício. Tente novamente mais tarde.', 3500)
+    }
+}
 
 type UploadProfileImagesPayload = {
     coverFile: File | null
@@ -487,13 +747,32 @@ async function currentStatsUser() {
     }
 }
 
+async function randomDailyTasks() {
+    loadingPush();
+
+    try {
+
+        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentPhase.value?.id ?? 0);
+
+        if (response.result != null) {
+            tasks.value = response.result;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar tarefas diárias:', error)
+        toast.error('Erro', 'Não foi possível carregar as tarefas diárias. Tente novamente mais tarde.', 4000)
+    } finally {
+        loadingPop();
+    }
+}
+
 onMounted(async () => {
     await fetchUserProfile();
+    await randomDailyTasks();
     ranking.value = await fetchRankingUser();
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .medal-idle {
     animation: medalFloat 1.6s ease-in-out infinite;
     will-change: transform;

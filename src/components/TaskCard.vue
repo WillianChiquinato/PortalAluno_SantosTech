@@ -1,4 +1,8 @@
 <script setup lang="ts">
+const emit = defineEmits<{
+  (event: 'select'): void
+}>()
+
 defineProps<{
   title: string
   due: string
@@ -8,7 +12,9 @@ defineProps<{
 </script>
 
 <template>
-  <article class="panel flex items-center justify-between gap-4 p-4">
+  <article class="panel flex items-center justify-between gap-4 p-4 cursor-pointer transition hover:-translate-y-0.5"
+    role="button" tabindex="0" @click="emit('select')" @keydown.enter.prevent="emit('select')"
+    @keydown.space.prevent="emit('select')">
     <div class="space-y-1">
       <p class="text-sm font-semibold">{{ title }}</p>
       <p class="text-xs text-ink-500">Prazo: {{ due }}</p>
