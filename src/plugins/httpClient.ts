@@ -4,6 +4,7 @@ import AuthService from "~/infra/interfaces/services/auth";
 import BadgeService from "~/infra/interfaces/services/badge";
 import ClassService from "~/infra/interfaces/services/class";
 import CourseService from "~/infra/interfaces/services/course";
+import ExerciseService from "~/infra/interfaces/services/exercise";
 import MaterialService from "~/infra/interfaces/services/material";
 import PhaseService from "~/infra/interfaces/services/phase";
 import PointService from "~/infra/interfaces/services/point";
@@ -21,6 +22,7 @@ export default defineNuxtPlugin(()=>{
 		video: new VideoService(),
 		material: new MaterialService(),
 		course: new CourseService(),
+		exercise: new ExerciseService(),
 		auth: new AuthService(),
 	};
 

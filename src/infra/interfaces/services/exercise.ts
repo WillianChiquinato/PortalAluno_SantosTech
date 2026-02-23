@@ -31,6 +31,7 @@ export interface IDailyExercise {
   indexOrder: number
   isDailyTask: boolean
   isFinalExercise: boolean
+  isCompletedAnswer: boolean
 }
 
 export interface IDailyTaskGroup {
@@ -68,9 +69,10 @@ export default class ExerciseService extends ClientService<any> {
 
   GetDailyTasksForPhase = async (
     phaseId: number,
+    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IDailyTaskGroup[]>> => {
-    let urlParams = `/GetDailyTasksForPhase?phaseId=${phaseId}`
+    let urlParams = `/GetDailyTasksForPhase?phaseId=${phaseId}&userId=${userId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

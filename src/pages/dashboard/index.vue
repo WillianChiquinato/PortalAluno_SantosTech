@@ -66,7 +66,8 @@
                 </div>
                 <div v-if="dailyTaskGroups.length" class="space-y-4">
                     <TaskCard v-for="task in dailyTasksCards" :key="task.id" :title="task.title" :due="task.due"
-                        :points="task.points" :status="task.status" @select="openDailyTask(task)" />
+                        :points="task.points" :status="task.status" :disabled="task.disabled"
+                        @select="openDailyTask(task)" />
                 </div>
                 <div v-else class="panel p-5">
                     <p class="text-sm font-semibold">Nenhuma tarefa diária disponível.</p>
@@ -233,11 +234,14 @@ const stats = computed<Array<{
     value: string
     helper: string
     status: 'success' | 'progress' | 'warning'
-}>>(() => [
-    { label: 'Pontuacao Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
-    { label: 'Fase atual', value: currentPhase.value?.name ?? 'Indisponível', helper: currentPhase.value?.module?.name ?? 'Modulo Indisponível', status: 'progress' },
-    { label: 'Desafio Diário', value: 'Liberado', helper: 'Entrega ate sexta', status: 'warning' },
-])
+}>>(() => {
+    const allExercises = tasks.value.flatMap(group => group.exercises);
+    return [
+        { label: 'Pontuacao Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
+        { label: 'Fase atual', value: currentPhase.value?.name ?? 'Indisponível', helper: currentPhase.value?.module?.name ?? 'Modulo Indisponível', status: 'progress' },
+        { label: 'Tarefas Diárias', value: 'Liberado', helper: `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}`, status: 'warning' },
+    ]
+})
 
 const tasks = ref<IDailyTaskGroup[]>([]);
 
@@ -249,6 +253,7 @@ type TaskCardView = {
     status: string
     description: string
     termAt: string
+    isCompletedAnswer: boolean
     source: ExerciseQuestionSource
 }
 
@@ -261,6 +266,7 @@ type DailyTaskGroupView = {
     status: string
     description: string
     termAt: string
+    disabled: boolean
     exercises: TaskCardView[]
 }
 
@@ -292,6 +298,7 @@ const dailyTaskGroups = computed<DailyTaskGroupView[]>(() => {
         status: getGroupStatus(group.exercises),
         description: `${group.exercises.length} exercício(s) diário(s) disponíveis.`,
         termAt: getNearestTermAt(group.exercises),
+        disabled: group.exercises.length > 0 && group.exercises.every((exercise) => exercise.isCompletedAnswer),
     }))
 })
 
@@ -340,8 +347,18 @@ function getNearestTermAt(exercises: IDailyExercise[]): string {
     }, exercises[0].termAt)
 }
 
+function getLatestTermAt(exercises: IDailyExercise[]): string {
+    if (!exercises.length) return new Date().toISOString()
+
+    return exercises.reduce((latest, exercise) => {
+        return new Date(exercise.termAt).getTime() > new Date(latest).getTime() ? exercise.termAt : latest
+    }, exercises[0].termAt)
+}
+
 function getGroupStatus(exercises: IDailyExercise[]): string {
     if (!exercises.length) return 'Em aberto'
+
+    if (exercises.every((exercise) => exercise.isCompletedAnswer)) return 'Concluída'
 
     const statuses = exercises.map((exercise) => getTaskStatus(exercise.termAt))
 
@@ -359,6 +376,7 @@ function mapExerciseToTaskCard(exercise: IDailyExercise): TaskCardView {
         status: getTaskStatus(exercise.termAt),
         description: exercise.description,
         termAt: exercise.termAt,
+        isCompletedAnswer: exercise.isCompletedAnswer,
         source: {
             id: exercise.id,
             title: exercise.title,
@@ -382,6 +400,8 @@ function resetQuizState() {
 }
 
 function openDailyTask(task: DailyTaskGroupView) {
+    if (task.disabled) return
+
     selectedDailyTask.value = task
     selectedTask.value = null
     quizLoading.value = false
@@ -393,6 +413,8 @@ function openDailyTask(task: DailyTaskGroupView) {
 }
 
 async function startExerciseQuiz(task: TaskCardView) {
+    if (task.isCompletedAnswer) return
+
     selectedTask.value = task
     quizLoading.value = true
 
@@ -441,6 +463,36 @@ function selectAnswer(questionId: number, optionIndex: number) {
     selectedAnswers.value[questionId] = optionIndex
 }
 
+function markExerciseCompletedLocally(exerciseId: number) {
+    for (const group of tasks.value) {
+        const targetExercise = group.exercises.find((exercise) => exercise.id === exerciseId)
+
+        if (targetExercise) {
+            targetExercise.isCompletedAnswer = true
+            break
+        }
+    }
+
+    if (!selectedDailyTask.value) return
+
+    const selectedExercise = selectedDailyTask.value.exercises.find((exercise) => exercise.id === exerciseId)
+    if (selectedExercise) {
+        selectedExercise.isCompletedAnswer = true
+    }
+
+    const allExercisesCompleted = selectedDailyTask.value.exercises.length > 0
+        && selectedDailyTask.value.exercises.every((exercise) => exercise.isCompletedAnswer)
+
+    if (allExercisesCompleted) {
+        selectedDailyTask.value.disabled = true
+        selectedDailyTask.value.status = 'Concluída'
+    }
+
+    if (selectedTask.value?.id === exerciseId) {
+        selectedTask.value.isCompletedAnswer = true
+    }
+}
+
 async function finishExercise() {
     if (!selectedTask.value) return
 
@@ -458,6 +510,7 @@ async function finishExercise() {
     const total = quizQuestions.value.length
     const accuracy = Math.round((correct / total) * 100)
     const gainedPoints = Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100)
+    const finishedExerciseId = selectedTask.value.id
 
     taskResult.value = {
         correct,
@@ -492,6 +545,8 @@ async function finishExercise() {
     } catch (error) {
         console.error('Erro ao resgatar pontos do exercício:', error)
         toast.error('Erro', 'Não foi possível resgatar os pontos do exercício. Tente novamente mais tarde.', 3500)
+    } finally {
+        markExerciseCompletedLocally(finishedExerciseId)
     }
 }
 
@@ -751,8 +806,15 @@ async function randomDailyTasks() {
     loadingPush();
 
     try {
+        const userId = getUserIdFromSession();
 
-        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentPhase.value?.id ?? 0);
+        if (!userId) {
+            toast.error('Sessão inválida', 'Faça login novamente para carregar as tarefas diárias.', 4000)
+            await navigateTo('/')
+            return;
+        }
+
+        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentPhase.value?.id ?? 0, userId);
 
         if (response.result != null) {
             tasks.value = response.result;

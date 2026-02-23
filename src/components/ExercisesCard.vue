@@ -28,13 +28,24 @@
 
                                 <div v-else class="mt-4 space-y-3">
                                     <button v-for="exercise in props.exercises" :key="exercise.id" type="button"
-                                        class="w-full rounded-xl border border-red-100/80 bg-white p-4 text-left transition cursor-pointer hover:border-brand-200 hover:bg-red-50/40"
-                                        @click="startExerciseQuiz(exercise)">
-                                        <div class="flex items-center justify-between gap-2">
+                                        class="relative w-full overflow-hidden rounded-xl border p-4 text-left transition"
+                                        :class="exercise.isCompletedAnswer
+                                            ? 'cursor-not-allowed border-slate-300 bg-slate-100/90 text-ink-500'
+                                            : 'cursor-pointer border-red-100/80 bg-white hover:border-brand-200 hover:bg-red-50/40'"
+                                        :disabled="exercise.isCompletedAnswer" @click="startExerciseQuiz(exercise)">
+                                        <div class="flex items-center justify-between gap-2"
+                                            :class="exercise.isCompletedAnswer ? 'opacity-55' : ''">
                                             <p class="text-sm font-semibold text-ink-900">{{ exercise.title }}</p>
                                             <span class="chip">{{ exercise.points }} pts</span>
                                         </div>
-                                        <p class="mt-1 text-xs text-ink-500">Prazo: {{ exercise.due }}</p>
+                                        <p class="mt-1 text-xs text-ink-500"
+                                            :class="exercise.isCompletedAnswer ? 'opacity-55' : ''">Prazo: {{
+                                            exercise.due }}</p>
+
+                                        <span v-if="exercise.isCompletedAnswer"
+                                            class="pointer-events-none absolute inset-x-3 top-1/2 -translate-y-1/2 rounded-md border border-slate-300/80 bg-white/90 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-500">
+                                            Exercício concluído
+                                        </span>
                                     </button>
                                 </div>
                             </template>
@@ -174,6 +185,7 @@ type ExerciseCardTask = {
     description: string
     termAt?: string
     source?: unknown
+    isCompletedAnswer?: boolean
 }
 
 type DailyTaskSummary = {
