@@ -7,7 +7,7 @@
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Biblioteca</p>
                         <h2 class="text-2xl font-semibold text-white">Vídeos de conhecimento</h2>
-                        <p class="mt-1 text-sm text-white/80">Conteúdos extras produzidos pela Santos Games.</p>
+                        <p class="mt-1 text-sm text-white/80">Conteúdos extras produzidos pela Santos Tech.</p>
                     </div>
 
                     <span
