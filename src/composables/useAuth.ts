@@ -1,63 +1,85 @@
-import { useNuxtApp } from "#app";
+import { useNuxtApp } from '#app'
+
+function getStorage(): Storage | null {
+  if (!import.meta.client) {
+    return null
+  }
+
+  return window.localStorage
+}
 
 export function getToken() {
-  return localStorage.getItem("token");
+  return getStorage()?.getItem('token') ?? null
 }
 
 export function setToken(token: string) {
-  localStorage.setItem("token", token);
+  getStorage()?.setItem('token', token)
 }
 
 export function verifyToken(): boolean {
-  const token = getToken();
+  const token = getToken()
 
-  if (!token) return false;
+  if (!token) return false
 
-  return !isTokenExpired(token);
+  return !isTokenExpired(token)
 }
 
 export function removeToken() {
-  localStorage.removeItem("token");
+  getStorage()?.removeItem('token')
 }
 
 export function clearAuth() {
-  removeToken();
-  localStorage.removeItem("loggedUser");
+  removeToken()
+  getStorage()?.removeItem('loggedUser')
 }
 
 export function getLoggedUser() {
   if (!verifyToken()) {
-    clearAuth();
-    return null;
+    clearAuth()
+    return null
   }
 
-  const user = localStorage.getItem("loggedUser");
-  return user ? JSON.parse(user) : null;
+  const user = getStorage()?.getItem('loggedUser')
+
+  if (!user) {
+    return null
+  }
+
+  try {
+    return JSON.parse(user)
+  } catch {
+    clearAuth()
+    return null
+  }
 }
 
 export function setLoggedUser(user: any) {
-  localStorage.setItem("loggedUser", JSON.stringify(user));
+  getStorage()?.setItem('loggedUser', JSON.stringify(user))
 }
 
 function isTokenExpired(token: string): boolean {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.exp * 1000 < Date.now();
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
   } catch {
-    return true;
+    return true
   }
 }
 
 export async function checkAuth() {
-  const token = getToken();
-  if (!token) return false;
+  if (!import.meta.client) {
+    return false
+  }
+
+  const token = getToken()
+  if (!token) return false
 
   try {
-    const { $httpClient } = useNuxtApp();
-    await $httpClient.auth.Logged();
-    return true;
+    const { $httpClient } = useNuxtApp()
+    await $httpClient.auth.Logged()
+    return true
   } catch {
-    clearAuth();
-    return false;
+    clearAuth()
+    return false
   }
 }
