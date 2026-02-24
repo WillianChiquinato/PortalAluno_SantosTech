@@ -28,7 +28,8 @@
                         <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600"
                             @click="openUploadCoverAndPicture">Editar
                             Fotos</button>
-                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600" @click="openEditAttributes">Editar
+                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600"
+                            @click="openEditAttributes">Editar
                             Perfil</button>
                     </div>
                 </div>
@@ -155,11 +156,12 @@
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1">
-                <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer" @click="closeEditAttributes">
+                <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                    @click="closeEditAttributes">
                     Voltar
                 </button>
-                <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer" @click="UpdateUserProfile"
-                    :disabled="!isEmailValid(profile!.email)">
+                <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
+                    @click="UpdateUserProfile" :disabled="!isEmailValid(profile!.email)">
                     Salvar alterações
                 </button>
             </div>
@@ -537,7 +539,8 @@ async function finishExercise() {
         if (responseAnswer.success) {
             var payloadUserPoints = {
                 userId: userId ?? 0,
-                pointsToRedeem: gainedPoints
+                pointsToAdd: gainedPoints,
+                exerciseDate: selectedTask.value.termAt,
             }
 
             await $httpClient.point.AddPointsForUser(payloadUserPoints)
