@@ -1,13 +1,21 @@
 # Build stage
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
+
 WORKDIR /app
+
 COPY package*.json ./
 RUN yarn install
+
 COPY . .
 RUN yarn build
 
 # Production stage
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/.output ./.output
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]
