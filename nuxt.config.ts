@@ -2,6 +2,9 @@ export default defineNuxtConfig({
   srcDir: 'src/',
   modules: ['@pinia/nuxt'],
   css: ['@/assets/styles.css'],
+  vite: {
+    assetsInclude: ['**/*.lottie'],
+  },
   postcss: {
     plugins: {
       '@tailwindcss/postcss': {},

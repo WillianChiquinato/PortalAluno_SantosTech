@@ -71,13 +71,13 @@
 
                                 <div v-if="!props.loading"
                                     class="mt-6 flex flex-wrap items-center justify-between gap-2">
-                                    <button type="button" class="btn-outline h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                                         @click="backToExercises">
                                         Voltar
                                     </button>
 
 
-                                    <button type="button" class="btn-primary h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
                                         @click="finishQuiz">
                                         Responder Exercicio
                                     </button>
@@ -140,7 +140,7 @@
                                 </div>
 
                                 <div class="mt-6 flex flex-wrap items-center justify-between gap-2">
-                                    <button type="button" class="btn-primary h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
                                         @click="backToExercises">
                                         Voltar para exercícios
                                     </button>

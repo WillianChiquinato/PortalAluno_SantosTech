@@ -2,6 +2,7 @@
     <ClickEffect />
     <AppToast />
     <div>
+        <NotificationEmail v-if="showNotificationEmail" :email="loggedUserEmail" class="Notification-Toast" />
         <LoadingScreen v-if="isLoading" class="loading-overlay" />
 
         <NuxtLayout>
@@ -34,13 +35,39 @@
 import LoadingScreen from '~/components/UI/LoadingScreen.vue';
 import AppToast from './components/Toast/AppToast.vue';
 import ClickEffect from './components/ClickEffect.vue';
+import NotificationEmail from './components/Toast/NotificationEmail.vue';
+import { useLoadingConfigurations } from './composables/useLoadingConfigurations';
+import { getLoggedUser, verifyToken } from './composables/useAuth';
+import { useUserStore } from './infra/store/userStore';
 
+const userConfigs = useUserStore()
 const { isLoading } = useLoading();
+const { loadConfigurations } = useLoadingConfigurations();
+const loggedUserEmail = computed(() => {
+    return getLoggedUser()?.email ?? ''
+})
+
+const showNotificationEmail = computed(() => {
+    if (!verifyToken() || !userConfigs.getConfigurationsLoaded) {
+        return false
+    }
+
+    return userConfigs.getReceiveEmailNotifications === false
+})
 
 const isWhatsappMinimized = ref(false);
 const showWhatsapp = computed(() => {
     return true;
 });
+
+onMounted(async () => {
+    if (!verifyToken()) {
+        return;
+    }
+
+    await loadConfigurations();
+});
+
 </script>
 
 <style scoped lang="scss">
@@ -56,6 +83,13 @@ const showWhatsapp = computed(() => {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+}
+
+.Notification-Toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
 }
 
 .whatsapp-container-float {

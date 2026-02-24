@@ -26,7 +26,7 @@
                 <span class="chip !px-2.5 !py-1 !text-[11px]">{{ uploadedAtLabel }}</span>
 
                 <a :href="resolvedFileUrl" target="_blank" rel="noopener noreferrer"
-                    class="btn-outline h-9 px-4 text-xs" :aria-label="`Abrir material ${title}`">
+                    class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs" :aria-label="`Abrir material ${title}`">
                     Abrir material
                 </a>
             </div>

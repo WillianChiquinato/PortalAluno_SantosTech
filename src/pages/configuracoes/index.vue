@@ -25,16 +25,24 @@
             </div>
 
             <div class="grid gap-3">
-                <SettingToggle v-for="toggle in toggles" :key="toggle.title" v-bind="toggle" />
+                <SettingToggle v-for="toggle in toggles" :key="toggle.title" v-bind="toggle"
+                    @update:enabled="(value) => onToggleChange(toggle.title, value)"
+                    @changeLanguage="onLanguageChange" />
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button class="btn-primary text-ink-900 px-4 text-sm cursor-pointer" @click="saveConfigurations">Salvar
+                    Configurações</button>
             </div>
         </section>
 
         <section class="panel flex flex-col gap-4 p-6">
-            <h3 class="text-lg font-semibold">Seguranca</h3>
+            <h3 class="text-lg font-semibold">Segurança</h3>
             <p class="text-sm text-ink-500">Atualize dados sensíveis e mantenha sua conta protegida.</p>
             <div class="flex flex-wrap items-center gap-3">
-                <button class="btn-outline h-10 px-4 text-sm cursor-pointer">Alterar senha</button>
-                <button class="btn-primary h-10 px-4 text-sm cursor-pointer">Confirmar email</button>
+                <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 text-sm cursor-pointer">Alterar
+                    senha</button>
+                <button class="text-ink-900 btn-primary h-10 px-4 text-sm cursor-pointer">Confirmar email</button>
             </div>
         </section>
     </div>
@@ -42,30 +50,92 @@
 
 <script setup lang="ts">
 import SettingToggle from '@/components/SettingToggle.vue'
+import { computed, reactive } from 'vue'
+import type { IAuthConfigUser, IAuthConfigUserUpdateRequest } from '~/infra/interfaces/services/auth';
+import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
+
+import { useUserStore } from '~/infra/store/userStore';
+
+const userConfigs = useUserStore();
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
+const toast = useToastService();
 
 type SettingItem = {
     title: string
     description: string
-    enabled: boolean
-    variant?: 'default' | 'theme-lottie'
+    enabled?: boolean
+    variant?: 'default' | 'theme-lottie' | 'language'
 }
 
-const toggles: SettingItem[] = [
+const form = reactive({
+    receiveEmailNotifications: userConfigs.getReceiveEmailNotifications,
+    darkModeEnabled: userConfigs.getDarkModeEnabled,
+    reportFrequency: userConfigs.getReportFrequency,
+    acessibilityMode: userConfigs.getAcessibilityMode,
+    preferredLanguage: userConfigs.getPreferredLanguage,
+})
+
+const toggles = computed<SettingItem[]>(() => [
     {
-        title: 'Notificações de tarefas',
-        description: 'Receber alertas de prazos no email e no celular.',
-        enabled: true,
+        title: 'Relatórios de desempenho',
+        description: 'Receber notificações sobre progresso, desempenho e áreas de melhoria via email.',
+        enabled: form.reportFrequency,
     },
     {
-        title: 'Resumo semanal',
-        description: 'Enviar resumo de progresso toda sexta-feira.',
-        enabled: false,
+        title: 'Acessibilidade',
+        description: 'Recursos para melhorar a experiência de usuários com necessidades especiais, dicas e ajustes de interface.',
+        enabled: form.acessibilityMode,
+    },
+    {
+        title: 'Idioma preferido',
+        description: 'Definir o idioma da interface para português, inglês ou espanhol.',
+        variant: 'language',
     },
     {
         title: 'Tematização',
         description: 'Personalizar a aparência da plataforma com temas claros ou escuros.',
-        enabled: false,
+        enabled: form.darkModeEnabled,
         variant: 'theme-lottie',
     },
-]
+])
+
+function onToggleChange(title: string, value: boolean) {
+    if (title === 'Relatórios de desempenho') form.reportFrequency = value
+    if (title === 'Acessibilidade') form.acessibilityMode = value
+    if (title === 'Tematização') form.darkModeEnabled = value
+}
+
+function onLanguageChange(value: string) {
+    form.preferredLanguage = value
+    userConfigs.setPreferredLanguage(value)
+}
+
+async function saveConfigurations() {
+    loadingPush();
+
+    try {
+        const userId = getUserIdFromSession();
+
+        const payloadConfigs: IAuthConfigUserUpdateRequest = {
+            userId: userId ?? 0,
+            receiveEmailNotifications: form.receiveEmailNotifications,
+            darkModeEnabled: form.darkModeEnabled,
+            reportFrequency: form.reportFrequency,
+            acessibilityMode: form.acessibilityMode,
+            preferredLanguage: form.preferredLanguage,
+        }
+
+        const responseConfig = await $httpClient.auth.UpdateConfigurations(payloadConfigs)
+
+        if (responseConfig.result) {
+            toast.success('Configurações salvas com sucesso.');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar configurações:', error);
+        toast.error('Erro ao salvar configurações. Por favor, tente novamente.');
+    } finally {
+        loadingPop();
+    }
+}
 </script>

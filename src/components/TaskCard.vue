@@ -32,7 +32,7 @@ function handleSelect() {
     </div>
 
     <span v-if="props.disabled"
-      class="pointer-events-none absolute inset-x-3 top-1/2 -translate-y-1/2 rounded-md border border-slate-300/80 bg-white/90 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-500">
+      class="pointer-events-none absolute inset-x-3 top-1/2 -translate-y-1/2 rounded-md border border-slate-300/80 bg-white/85 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-500">
       Tarefa concluída
     </span>
   </article>

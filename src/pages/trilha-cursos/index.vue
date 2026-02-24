@@ -86,7 +86,7 @@
 
                 <p class="mt-4 text-xs text-ink-500">Atualizado em {{ formatDate(course.updatedAt) }}</p>
 
-                <button class="btn-outline mt-4 h-10 px-4">Continuar trilha</button>
+                <button class="bg-red-50 text-ink-900 btn-outline mt-4 h-10 px-4">Continuar trilha</button>
             </article>
         </section>
 

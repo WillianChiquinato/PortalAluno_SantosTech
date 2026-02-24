@@ -120,7 +120,7 @@ const RandomNames = [
     margin: 0;
     font-size: 0.9rem;
     letter-spacing: 0.02em;
-    color: color-mix(in srgb, var(--color-sand-100) 88%, transparent);
+    color: color-mix(in srgb, var(--color-loading) 88%, transparent);
 }
 
 .progress-shell {

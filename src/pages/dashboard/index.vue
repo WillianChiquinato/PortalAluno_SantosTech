@@ -25,10 +25,10 @@
                     </div>
 
                     <div class="flex flex-row gap-2">
-                        <button class="btn-outline h-9 px-4 text-xs cursor-pointer"
+                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600"
                             @click="openUploadCoverAndPicture">Editar
                             Fotos</button>
-                        <button class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="openEditAttributes">Editar
+                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600" @click="openEditAttributes">Editar
                             Perfil</button>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                 <div class="panel mt-2 flex flex-col gap-2 bg-red-50 p-4">
                     <p class="text-sm font-semibold">Desafio semanal</p>
                     <p class="text-xs text-ink-500">Estilizar carrossel central usando classes e IDs.</p>
-                    <button class="btn-primary mt-2 h-9 px-4 text-xs">Ver briefing</button>
+                    <button class="btn-primary mt-2 h-9 px-4 text-xs text-ink-900">Ver briefing</button>
                 </div>
             </div>
         </section>
@@ -155,10 +155,10 @@
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1">
-                <button type="button" class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="closeEditAttributes">
+                <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer" @click="closeEditAttributes">
                     Voltar
                 </button>
-                <button type="button" class="btn-primary h-9 px-4 text-xs cursor-pointer" @click="UpdateUserProfile"
+                <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer" @click="UpdateUserProfile"
                     :disabled="!isEmailValid(profile!.email)">
                     Salvar alterações
                 </button>

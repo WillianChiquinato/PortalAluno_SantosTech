@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import CoursesCardResume from "~/components/CoursesCardResume.vue";
+import { useLoadingConfigurations } from "~/composables/useLoadingConfigurations";
 import type { ICourseAvailable } from "~/infra/interfaces/services/course";
 import { useUserStore } from "~/infra/store/userStore";
 
@@ -87,6 +88,7 @@ const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
 const route = useRoute();
 const router = useRouter();
+const { loadConfigurations } = useLoadingConfigurations();
 
 const coursesAvailable = ref<ICourseAvailable[]>([]);
 
@@ -119,11 +121,12 @@ async function LoadUserData() {
         useUserStore().setUserId(loadUser.user.id);
 
         toast.success(
-            "Bem-vindo de volta!",
+            "Bem-vindo!",
             "Login realizado com sucesso.",
             3000
         );
 
+        await loadConfigurations();
         emailLogin.value = "";
         passwordLogin.value = "";
 

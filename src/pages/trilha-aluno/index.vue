@@ -117,7 +117,7 @@
                                     {{ island.blips.length }} exercícios nesta ilha
                                 </p>
 
-                                <button class="h-10 px-4" :class="island.status === 'locked'
+                                <button class="h-10 px-4 text-ink-900" :class="island.status === 'locked'
                                     ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
                                     : 'btn-primary cursor-pointer'" :disabled="island.status === 'locked'"
                                     @click="enterIsland(island)">
@@ -153,7 +153,7 @@
                                 class="chip !border-brand-200 !bg-red-50 !text-brand-600">
                                 Lower fixa • +30%
                             </span>
-                            <button class="btn-outline h-10 px-4" @click="leaveIsland">Voltar para ilhas</button>
+                            <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer" @click="leaveIsland">Voltar para ilhas</button>
                         </div>
                     </div>
 

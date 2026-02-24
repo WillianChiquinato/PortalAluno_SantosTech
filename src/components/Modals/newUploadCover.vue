@@ -67,13 +67,13 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2 border-t border-red-100/80 px-6 py-4">
-                        <button type="button" class="btn-outline h-9 px-4 text-xs cursor-pointer" @click="handleBack"
-                            :disabled="loading">
+                        <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                            @click="handleBack" :disabled="loading">
                             Voltar
                         </button>
 
                         <button type="button"
-                            class="btn-primary h-9 px-4 text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                            class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                             @click="handleSave" :disabled="loading || (!selectedCoverFile && !selectedProfileFile)">
                             {{ loading ? 'Salvando...' : 'Salvar' }}
                         </button>
@@ -237,7 +237,7 @@ onUnmounted(() => {
 
 .upload-drop {
     border-width: 2px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.7) 100%);
+    background: linear-gradient(180deg, var(--color-accent-300) 0%, var(--color-accent-200) 100%);
 }
 
 .upload-drop:hover {

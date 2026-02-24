@@ -8,19 +8,28 @@
         <p class="text-xs text-ink-500">{{ description }}</p>
       </div>
 
-      <div v-if="variant !== 'theme-lottie'" class="h-7 w-12 rounded-full border p-1 transition"
+      <div v-if="variant === 'default'" class="h-7 w-12 rounded-full border p-1 transition"
         :class="isEnabled ? 'border-brand-200 bg-red-50' : 'border-slate-200 bg-sand-100'">
         <div class="h-5 w-5 rounded-full transition-all duration-200"
           :class="isEnabled ? 'translate-x-5 bg-brand-500 shadow-sm' : 'bg-white'" />
       </div>
 
+      <div v-else-if="variant === 'language'">
+        <select v-model="SelectedLanguage" @change="onChangeLanguage"
+          class="h-9 w-45 border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200">
+          <option value="pt-BR">PT</option>
+          <option value="en-US">EN</option>
+          <option value="es-ES">ES</option>
+        </select>
+      </div>
+
       <div v-else class="h-9 w-16 overflow-hidden rounded-full border border-brand-200 bg-red-50 p-0.5">
-        <div ref="lottieContainer" class="h-full w-full"></div>
+        <canvas ref="themeCanvas" class="h-full w-full pointer-events-none"></canvas>
       </div>
     </div>
 
-    <div class="mt-3 h-px w-full bg-slate-100"></div>
-    <p class="mt-2 text-[11px] font-semibold uppercase tracking-wide"
+    <div v-if="variant !== 'language'" class="mt-3 h-px w-full bg-slate-100"></div>
+    <p v-if="variant !== 'language'" class="mt-2 text-[11px] font-semibold uppercase tracking-wide"
       :class="isEnabled ? 'text-brand-600' : 'text-ink-500'">
       {{ isEnabled ? 'Ativado' : 'Desativado' }}
     </p>
@@ -29,15 +38,20 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import lottie from 'lottie-web'
-import type { AnimationItem } from 'lottie-web'
-import toggleAnimation from '@/assets/lottie/Toogle.json'
+import type { DotLottie } from '@lottiefiles/dotlottie-web'
+import toggleAnimation from '@/assets/lottie/Toogle.lottie'
+
+const SelectedLanguage = ref('pt-BR')
+
+const onChangeLanguage = () => {
+  emit('changeLanguage', SelectedLanguage.value)
+}
 
 const props = withDefaults(defineProps<{
   title: string
   description: string
-  enabled: boolean
-  variant?: 'default' | 'theme-lottie'
+  enabled?: boolean
+  variant?: 'default' | 'theme-lottie' | 'language'
 }>(), {
   variant: 'default',
 })
@@ -45,117 +59,154 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'change', value: boolean): void
   (event: 'update:enabled', value: boolean): void
+  (event: 'changeLanguage', value: string): void
 }>()
 
-const isEnabled = ref(props.enabled)
-const lottieContainer = ref<HTMLDivElement | null>(null)
-const isLottieAnimating = ref(false)
+const isEnabled = ref(props.enabled ?? false)
+const themeCanvas = ref<HTMLCanvasElement | null>(null)
 const isLottieReady = ref(false)
+const isThemeTransitioning = ref(false)
 
-let animation: AnimationItem | null = null
-let lottieTargetFrame = 0
-let unlockAnimationTimer: ReturnType<typeof setTimeout> | null = null
+let animation: DotLottie | null = null
+let pendingThemeSync: boolean | null = null
+let themeApplyTimer: ReturnType<typeof setTimeout> | null = null
 
-function getAnimationFrames() {
-  if (!animation) {
-    return { halfFrame: 0, lastFrame: 0 }
-  }
+const THEME_CLASS_NAME = 'dark'
+const THEME_STORAGE_KEY = 'portal-theme'
+const THEME_APPLY_DELAY_MS = 0
 
-  const totalFrames = Math.max(2, Math.floor(animation.getDuration(true)))
-  const lastFrame = totalFrames
-  const halfFrame = Math.floor(lastFrame / 2)
-
-  return { halfFrame, lastFrame }
-}
-
-function clearUnlockAnimationTimer() {
-  if (!unlockAnimationTimer) {
+function clearThemeApplyTimer() {
+  if (!themeApplyTimer) {
     return
   }
 
-  clearTimeout(unlockAnimationTimer)
-  unlockAnimationTimer = null
+  clearTimeout(themeApplyTimer)
+  themeApplyTimer = null
 }
 
-function finalizeAnimationFrame() {
-  if (!animation) {
+function setDocumentTheme(enabled: boolean) {
+  if (!import.meta.client) {
     return
   }
 
-  animation.stop()
-  animation.goToAndStop(lottieTargetFrame, true)
-  isLottieAnimating.value = false
-  clearUnlockAnimationTimer()
+  document.documentElement.classList.toggle(THEME_CLASS_NAME, enabled)
+  localStorage.setItem(THEME_STORAGE_KEY, enabled ? 'dark' : 'light')
 }
 
-function syncAnimationToState(animate = false) {
+function scheduleThemeApply(enabled: boolean) {
+  clearThemeApplyTimer()
+  themeApplyTimer = setTimeout(() => {
+    setDocumentTheme(enabled)
+    themeApplyTimer = null
+  }, THEME_APPLY_DELAY_MS)
+}
+
+function getTargetIdleState(enabled: boolean) {
+  return enabled ? 'Night Idle' : 'Day Idle'
+}
+
+function applyThemeState(enabled: boolean, animate: boolean) {
   if (!animation || !isLottieReady.value) {
-    return
+    return false
   }
 
-  const { halfFrame, lastFrame } = getAnimationFrames()
-  const targetFrame = isEnabled.value ? halfFrame : lastFrame
+  const targetIdleState = getTargetIdleState(enabled)
+  const currentState = animation.stateMachineGetCurrentState()
+
+  if (currentState === targetIdleState) {
+    animation.stateMachineSetBooleanInput('toggle', enabled)
+    return true
+  }
 
   if (!animate) {
-    isLottieAnimating.value = false
-    lottieTargetFrame = targetFrame
-    animation.goToAndStop(targetFrame, true)
-    return
+    animation.stateMachineOverrideState(targetIdleState, true)
+    animation.stateMachineSetBooleanInput('toggle', enabled)
+    scheduleThemeApply(enabled)
+    return true
   }
 
-  if (isLottieAnimating.value) {
-    return
-  }
-
-  const startFrame = isEnabled.value ? 0 : halfFrame
-
-  isLottieAnimating.value = true
-  lottieTargetFrame = targetFrame
-  animation.stop()
-  animation.goToAndStop(startFrame, true)
-  animation.playSegments([startFrame, targetFrame], true)
-
-  clearUnlockAnimationTimer()
-  unlockAnimationTimer = setTimeout(() => {
-    finalizeAnimationFrame()
-  }, 900)
+  animation.stateMachineFireEvent('transition')
+  scheduleThemeApply(enabled)
+  isThemeTransitioning.value = true
+  return true
 }
 
-function loadThemeAnimation() {
-  if (!lottieContainer.value || props.variant !== 'theme-lottie') {
+function requestThemeSync(enabled: boolean, animate: boolean) {
+  if (isThemeTransitioning.value && animate) {
+    pendingThemeSync = enabled
     return
   }
 
-  animation?.destroy()
-  clearUnlockAnimationTimer()
+  const applied = applyThemeState(enabled, animate)
+  if (!applied) {
+    pendingThemeSync = enabled
+  }
+}
+
+async function loadThemeAnimation() {
+  if (!themeCanvas.value || props.variant !== 'theme-lottie') {
+    return
+  }
+
+  if (animation) {
+    animation.destroy()
+    animation = null
+  }
+
+  const { DotLottie } = await import('@lottiefiles/dotlottie-web')
+
   isLottieReady.value = false
-  isLottieAnimating.value = false
-  animation = lottie.loadAnimation({
-    container: lottieContainer.value,
-    renderer: 'svg',
+
+  animation = new DotLottie({
+    canvas: themeCanvas.value,
+    src: toggleAnimation,
+    autoplay: true,
     loop: false,
-    autoplay: false,
-    animationData: toggleAnimation,
+    stateMachineId: 'StateMachine1',
+    renderConfig: {
+      autoResize: true,
+      freezeOnOffscreen: false,
+    },
   })
 
-  animation.setSpeed(1.25)
-  animation.addEventListener('complete', () => {
-    if (!animation || !isLottieAnimating.value) {
+  animation.addEventListener('load', () => {
+    if (!animation) {
       return
     }
 
-    finalizeAnimationFrame()
+    animation.stateMachineLoad('StateMachine1')
+    animation.stateMachineStart()
+    isLottieReady.value = true
+    isThemeTransitioning.value = false
+    requestThemeSync(isEnabled.value, false)
   })
 
-  animation.addEventListener('DOMLoaded', () => {
-    isLottieReady.value = true
-    isLottieAnimating.value = false
-    animation?.goToAndStop(0, true)
+  animation.addEventListener('stateMachineStateEntered', ({ state }) => {
+    if (state === 'Day Idle' || state === 'Night Idle') {
+      isThemeTransitioning.value = false
+
+      if (pendingThemeSync !== null) {
+        const nextEnabled = pendingThemeSync
+        pendingThemeSync = null
+        requestThemeSync(nextEnabled, true)
+      }
+      return
+    }
+
+    if (state === 'Day to Night' || state === 'Night to Day') {
+      isThemeTransitioning.value = true
+      scheduleThemeApply(state === 'Day to Night')
+    }
+  })
+
+  animation.addEventListener('loadError', () => {
+    isLottieReady.value = false
+    isThemeTransitioning.value = false
   })
 }
 
 function toggleEnabled() {
-  if (props.variant === 'theme-lottie' && (!isLottieReady.value || isLottieAnimating.value)) {
+  if (props.variant === 'theme-lottie' && (!isLottieReady.value || !animation || isThemeTransitioning.value)) {
     return
   }
 
@@ -164,7 +215,7 @@ function toggleEnabled() {
   emit('change', isEnabled.value)
 
   if (props.variant === 'theme-lottie') {
-    syncAnimationToState(true)
+    requestThemeSync(isEnabled.value, true)
   }
 }
 
@@ -177,7 +228,7 @@ watch(
 
     isEnabled.value = newValue
     if (props.variant === 'theme-lottie') {
-      syncAnimationToState(true)
+      requestThemeSync(isEnabled.value, true)
     }
   },
 )
@@ -186,26 +237,34 @@ watch(
   () => props.variant,
   (newValue) => {
     if (newValue === 'theme-lottie') {
-      loadThemeAnimation()
+      void loadThemeAnimation()
       return
     }
 
-    animation?.destroy()
-    animation = null
+    isLottieReady.value = false
+    isThemeTransitioning.value = false
+    pendingThemeSync = null
+    if (animation) {
+      animation.destroy()
+      animation = null
+    }
   },
 )
 
 onMounted(() => {
   if (props.variant === 'theme-lottie') {
-    loadThemeAnimation()
+    void loadThemeAnimation()
   }
 })
 
 onBeforeUnmount(() => {
-  clearUnlockAnimationTimer()
+  clearThemeApplyTimer()
   isLottieReady.value = false
-  isLottieAnimating.value = false
-  animation?.destroy()
-  animation = null
+  isThemeTransitioning.value = false
+  pendingThemeSync = null
+  if (animation) {
+    animation.destroy()
+    animation = null
+  }
 })
 </script>
