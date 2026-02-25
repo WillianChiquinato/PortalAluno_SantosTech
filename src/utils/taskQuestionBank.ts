@@ -2,6 +2,7 @@ export type ExerciseQuestionSource = {
   id: number
   title: string
   description: string
+  videoUrl?: string | null
   pointsRedeem: number
   typeExercise: number
   difficulty: number
@@ -19,6 +20,7 @@ export type QuizQuestion = {
   statement: string
   options: string[]
   correctOptionIndex: number
+  typeExercise: number
 }
 
 type QuestionTemplate = {
@@ -65,10 +67,14 @@ export function buildTaskQuestions(task: ExerciseQuestionSource): QuizQuestion[]
   const template = getQuestionTemplate(task)
 
   const QuestionDataTemplate: QuizQuestion = {
-    id: task.id * 10 + 1,
+    id: task.id,
     statement: task.description,
-    options: template?.options ?? ['Opção A', 'Opção B', 'Opção C', 'Opção D'],
-    correctOptionIndex: template?.correctOptionIndex ?? 0,
+    options:
+      task.typeExercise === 2
+        ? []
+        : (template?.options ?? ['Opção A', 'Opção B', 'Opção C', 'Opção D']),
+    correctOptionIndex: task.typeExercise === 2 ? -1 : (template?.correctOptionIndex ?? 0),
+    typeExercise: task.typeExercise,
   }
 
   return [QuestionDataTemplate]
@@ -78,7 +84,7 @@ export function buildTaskQuestionsFromOptions(
   task: ExerciseQuestionSource,
   options: QuizQuestionOption[],
 ): QuizQuestion[] {
-  if (!options.length) {
+  if (task.typeExercise === 2 || !options.length) {
     return buildTaskQuestions(task)
   }
 
@@ -98,10 +104,11 @@ export function buildTaskQuestionsFromOptions(
     const correctOptionIndex = groupedOptions.findIndex((item) => item.correctAnswer)
 
     return {
-      id: questionId || task.id * 10 + index + 1,
+      id: questionId || task.id,
       statement: index === 0 ? task.description : `Pergunta ${index + 1}`,
       options: groupedOptions.map((item) => item.question),
       correctOptionIndex: correctOptionIndex >= 0 ? correctOptionIndex : 0,
+      typeExercise: task.typeExercise,
     }
   })
 }

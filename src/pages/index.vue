@@ -61,9 +61,10 @@
                         class="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
                         placeholder="********" />
                 </label>
-                <button type="submit" :disabled="isFormInvalid"
+                <button type="submit" :disabled="isFormInvalid || isSubmitting"
                     class="h-11 w-full rounded-xl bg-brand-500 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer">
-                    <span>Iniciar missão</span>
+                    <span v-if="!isSubmitting">Iniciar missão</span>
+                    <span v-else>Carregando...</span>
                 </button>
             </form>
 
@@ -90,6 +91,7 @@ const route = useRoute();
 const router = useRouter();
 const { loadConfigurations } = useLoadingConfigurations();
 
+const isSubmitting = ref(false);
 const coursesAvailable = ref<ICourseAvailable[]>([]);
 
 const emailLogin = ref("");
@@ -99,11 +101,11 @@ const isFormInvalid = computed(
 );
 
 async function LoadUserData() {
-    if (isFormInvalid.value) {
+    if (isFormInvalid.value || isSubmitting.value) {
         return;
     }
 
-    console.log("Loading...");
+    isSubmitting.value = true;
     loadingPush();
 
     try {
@@ -112,7 +114,7 @@ async function LoadUserData() {
             passwordLogin.value
         );
 
-        if (!loadUser || !loadUser.token) {
+        if (!loadUser?.token) {
             return;
         }
 
@@ -127,19 +129,37 @@ async function LoadUserData() {
         );
 
         await loadConfigurations();
+
         emailLogin.value = "";
         passwordLogin.value = "";
 
         setTimeout(() => {
             navigateTo("/dashboard");
-        }, 1000);
+        }, 800);
     }
     catch (error) {
-        toast.error("Erro", "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.", 4000);
-        console.error("Login error:", error);
+        if (error.error == 'rate_limit_exceeded') {
+            toast.error(
+                "Muitas tentativas",
+                "Você excedeu o número de tentativas de login. Por favor, aguarde um momento antes de tentar novamente.",
+                4000
+            );
+            return;
+        }
+
+        toast.error(
+            "Erro no login",
+            "Ocorreu um erro ao tentar fazer login. Verifique suas credenciais e tente novamente.",
+            3000
+        );
+
+        console.error("Erro ao fazer login:", error);
     }
     finally {
         loadingPop();
+        setTimeout(() => {
+            isSubmitting.value = false;
+        }, 500);
     }
 }
 

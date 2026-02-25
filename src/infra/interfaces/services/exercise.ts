@@ -59,6 +59,7 @@ export interface IAnswer {
   selectedOption: number
   isCorrect: boolean
   pointsEarned: number
+  answerText?: string
   submittedAt: Date
 }
 

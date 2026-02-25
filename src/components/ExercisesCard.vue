@@ -40,7 +40,7 @@
                                         </div>
                                         <p class="mt-1 text-xs text-ink-500"
                                             :class="exercise.isCompletedAnswer ? 'opacity-55' : ''">Prazo: {{
-                                            exercise.due }}</p>
+                                                exercise.due }}</p>
 
                                         <span v-if="exercise.isCompletedAnswer"
                                             class="pointer-events-none absolute inset-x-3 top-1/2 -translate-y-1/2 rounded-md border border-slate-300/80 bg-white/90 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-500">
@@ -53,8 +53,34 @@
                             <template v-else-if="!props.quizResult && currentQuestion">
                                 <h4 class="mt-4 text-xl font-semibold leading-snug">{{ currentQuestion.statement }}</h4>
 
+                                <div v-if="referenceVideoUrl"
+                                    class="mt-4 rounded-xl border border-red-100/80 bg-red-50/30 p-3">
+                                    <p class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-ink-500">Vídeo
+                                        de referência</p>
+
+                                    <div v-if="referenceVideoEmbedUrl"
+                                        class="overflow-hidden rounded-lg border border-red-100/80 bg-white">
+                                        <iframe :src="referenceVideoEmbedUrl" class="referencesVideo"
+                                            title="Vídeo de referência do exercício"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen></iframe>
+                                    </div>
+
+                                    <a v-else :href="referenceVideoUrl" target="_blank" rel="noopener noreferrer"
+                                        class="text-sm font-medium text-brand-600 underline underline-offset-2">
+                                        Abrir vídeo de referência
+                                    </a>
+                                </div>
+
                                 <div v-if="props.loading" class="mt-4">
                                     <p class="text-sm text-ink-500">Carregando questões do exercício...</p>
+                                </div>
+
+                                <div v-else-if="currentQuestion.typeExercise === 2" class="mt-4 space-y-3">
+                                    <p class="text-sm text-ink-500">Dica: Se quiser, faça o exercício em uma IDE, após o término, cole sua resposta no campo abaixo e envie para avaliação.</p>
+                                    <CodeEditor :model-value="props.selectedCodeAnswers[currentQuestion.id] ?? ''"
+                                        placeholder="Digite seu código aqui..."
+                                        @update:model-value="updateCodeAnswer(currentQuestion.id, $event)" />
                                 </div>
 
                                 <div v-else class="mt-4 space-y-3">
@@ -71,13 +97,15 @@
 
                                 <div v-if="!props.loading"
                                     class="mt-6 flex flex-wrap items-center justify-between gap-2">
-                                    <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button"
+                                        class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                                         @click="backToExercises">
                                         Voltar
                                     </button>
 
 
-                                    <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button"
+                                        class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
                                         @click="finishQuiz">
                                         Responder Exercicio
                                     </button>
@@ -92,27 +120,36 @@
                                     : 'border-red-200 bg-red-50/30'">
                                     <div class="flex items-start gap-3">
                                         <div class="flex h-10 w-10 items-center justify-center rounded-xl border"
-                                            :class="isExerciseCorrect
-                                                ? 'border-brand-200 text-brand-600'
-                                                : 'border-red-200 text-red-600'">
-                                            <i class="pi text-lg"
-                                                :class="isExerciseCorrect ? 'pi-check-circle' : 'pi-times-circle'"></i>
+                                            :class="hasDissertativeQuestion
+                                                ? 'border-blue-200 text-blue-600'
+                                                : (isExerciseCorrect
+                                                    ? 'border-brand-200 text-brand-600'
+                                                    : 'border-red-200 text-red-600')">
+                                            <i class="pi text-lg" :class="hasDissertativeQuestion
+                                                ? 'pi-file-edit'
+                                                : (isExerciseCorrect ? 'pi-check-circle' : 'pi-times-circle')"></i>
                                         </div>
 
                                         <div>
-                                            <p class="text-base font-semibold"
-                                                :class="isExerciseCorrect ? 'text-brand-700' : 'text-red-700'">
-                                                {{ isExerciseCorrect ? 'Parabéns! Você acertou o exercício.' : 'Você errou o exercício.' }}
+                                            <p class="text-base font-semibold" :class="hasDissertativeQuestion
+                                                ? 'text-blue-700'
+                                                : (isExerciseCorrect ? 'text-brand-700' : 'text-red-700')">
+                                                {{ hasDissertativeQuestion
+                                                    ? 'Resposta dissertativa enviada com sucesso.'
+                                                    : (isExerciseCorrect ? 'Parabéns! Você acertou o exercício.' : 'Você errou o exercício.') }}
                                             </p>
                                             <p class="mt-1 text-sm text-ink-600">
-                                                {{ isExerciseCorrect
+                                                {{ hasDissertativeQuestion
+                                                    ? 'Seu código foi registrado e será considerado na avaliação da atividade.'
+                                                : (isExerciseCorrect
                                                     ? 'Resultado registrado com sucesso. Continue nesse ritmo!'
-                                                    : 'Não desanime. Revise a resposta correta abaixo e tente novamente.' }}
+                                                    : 'Não desanime. Revise a resposta correta abaixo e tente novamente.')
+                                                }}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div class="mt-4 flex flex-wrap gap-2">
+                                    <div v-if="!hasDissertativeQuestion" class="mt-4 flex flex-wrap gap-2">
                                         <span class="chip">Acertos: {{ props.quizResult.correct }}/{{
                                             props.quizResult.total }}</span>
                                         <span class="chip">Aproveitamento: {{ props.quizResult.accuracy }}%</span>
@@ -125,22 +162,25 @@
                                         class="rounded-xl border border-red-100/80 bg-white px-4 py-3">
                                         <div class="flex items-start justify-between gap-2">
                                             <p class="text-sm text-ink-800">{{ item.statement }}</p>
-                                            <span class="chip"
-                                                :class="item.isCorrect ? 'text-emerald-700' : 'text-red-600'">
-                                                {{ item.isCorrect ? 'Acertou' : 'Errou' }}
+                                            <span class="chip" :class="item.isDissertative
+                                                ? 'text-blue-700'
+                                                : (item.isCorrect ? 'text-emerald-700' : 'text-red-600')">
+                                                {{ item.isDissertative ? 'Respondida' : (item.isCorrect ? 'Acertou' :
+                                                    'Errou') }}
                                             </span>
                                         </div>
                                         <p class="mt-1 text-xs text-ink-500">
                                             Sua resposta: {{ item.selectedOptionLabel }}
                                         </p>
-                                        <p v-if="!item.isCorrect" class="text-xs text-ink-500">
+                                        <p v-if="!item.isDissertative && !item.isCorrect" class="text-xs text-ink-500">
                                             Resposta correta: {{ item.correctOptionLabel }}
                                         </p>
                                     </article>
                                 </div>
 
                                 <div class="mt-6 flex flex-wrap items-center justify-between gap-2">
-                                    <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
+                                    <button type="button"
+                                        class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
                                         @click="backToExercises">
                                         Voltar para exercícios
                                     </button>
@@ -169,6 +209,7 @@
 </template>
 
 <script setup lang="ts">
+import CodeEditor from '~/components/UI/CodeEditor.vue'
 import { useUserStore } from '~/infra/store/userStore';
 
 const { $httpClient } = useNuxtApp();
@@ -184,7 +225,9 @@ type ExerciseCardTask = {
     status: string
     description: string
     termAt?: string
-    source?: unknown
+    source?: {
+        videoUrl?: string | null
+    }
     isCompletedAnswer?: boolean
 }
 
@@ -197,14 +240,15 @@ type DailyTaskSummary = {
     description: string
 }
 
-type QuizQuestion = {
+type TaskQuestion = {
     id: number
     statement: string
     options: string[]
     correctOptionIndex: number
+    typeExercise: number
 }
 
-type QuizResult = {
+type TaskResult = {
     correct: number
     total: number
     accuracy: number
@@ -217,36 +261,96 @@ const props = defineProps<{
     dailyTask: DailyTaskSummary | null
     exercises: ExerciseCardTask[]
     loading: boolean
-    questions: QuizQuestion[]
+    questions: TaskQuestion[]
     selectedAnswers: Record<number, number | null>
+    selectedCodeAnswers: Record<number, string>
     currentQuestionIndex: number
-    quizResult: QuizResult | null
+    quizResult: TaskResult | null
 }>()
 
 const emit = defineEmits<{
     (event: 'close'): void
     (event: 'start-quiz', task: any): void
     (event: 'select-answer', payload: { questionId: number; optionIndex: number }): void
+    (event: 'update-code-answer', payload: { questionId: number; answer: string }): void
     (event: 'back-to-exercises'): void
     (event: 'finish-quiz'): void
 }>()
 
 const currentQuestion = computed(() => props.questions[props.currentQuestionIndex] ?? null)
-const answeredCount = computed(() => {
-    return Object.values(props.selectedAnswers).filter((answer) => answer !== null && answer !== undefined).length
+const referenceVideoUrl = computed(() => {
+    const url = props.task?.source?.videoUrl
+
+    if (!url || typeof url !== 'string') {
+        return ''
+    }
+
+    return url.trim()
 })
+
+function toYoutubeEmbedUrl(url: string) {
+    try {
+        const parsedUrl = new URL(url)
+        const host = parsedUrl.hostname.toLowerCase()
+
+        if (host.includes('youtu.be')) {
+            const videoId = parsedUrl.pathname.replace('/', '').trim()
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+        }
+
+        if (host.includes('youtube.com')) {
+            const videoId = parsedUrl.searchParams.get('v')
+
+            if (videoId) {
+                return `https://www.youtube.com/embed/${videoId}`
+            }
+
+            if (parsedUrl.pathname.startsWith('/embed/')) {
+                return url
+            }
+        }
+
+        return ''
+    } catch {
+        return ''
+    }
+}
+
+const referenceVideoEmbedUrl = computed(() => {
+    if (!referenceVideoUrl.value) {
+        return ''
+    }
+
+    return toYoutubeEmbedUrl(referenceVideoUrl.value)
+})
+const answeredCount = computed(() => {
+    return props.questions.filter((question) => {
+        if (question.typeExercise === 2) {
+            return Boolean((props.selectedCodeAnswers[question.id] ?? '').trim())
+        }
+
+        const answer = props.selectedAnswers[question.id]
+        return answer !== null && answer !== undefined
+    }).length
+})
+
 const allQuestionsAnswered = computed(() => props.questions.length > 0 && answeredCount.value === props.questions.length)
+const hasDissertativeQuestion = computed(() => props.questions.some((question) => question.typeExercise === 2))
+
 const questionReport = computed(() => {
     return props.questions.map((question) => {
+        const isDissertative = question.typeExercise === 2
+        const codeAnswer = (props.selectedCodeAnswers[question.id] ?? '').trim()
         const selectedOptionIndex = props.selectedAnswers[question.id]
         const normalizedSelectedIndex = selectedOptionIndex ?? -1
-        const isCorrect = normalizedSelectedIndex === question.correctOptionIndex
+        const isCorrect = isDissertative ? Boolean(codeAnswer) : normalizedSelectedIndex === question.correctOptionIndex
 
         return {
             id: question.id,
             statement: question.statement,
+            isDissertative,
             isCorrect,
-            selectedOptionLabel: question.options[normalizedSelectedIndex] ?? 'Não respondida',
+            selectedOptionLabel: isDissertative ? (codeAnswer || 'Não respondida') : (question.options[normalizedSelectedIndex] ?? 'Não respondida'),
             correctOptionLabel: question.options[question.correctOptionIndex] ?? '-',
         }
     })
@@ -268,13 +372,17 @@ function selectAnswer(questionId: number, optionIndex: number) {
     emit('select-answer', { questionId, optionIndex })
 }
 
+function updateCodeAnswer(questionId: number, answer: string) {
+    emit('update-code-answer', { questionId, answer })
+}
+
 function backToExercises() {
     emit('back-to-exercises')
 }
 
 function finishQuiz() {
     if (!allQuestionsAnswered.value) {
-        toast.warn('Responda todas as questões', 'Preencha todas as respostas antes de finalizar o exercício.', 3000)
+        toast.warn('Responda a questão', 'Preencha a resposta antes de finalizar o exercício.', 3000)
         return
     }
 
@@ -311,5 +419,12 @@ function finishQuiz() {
 .task-quiz-fade-enter-from,
 .task-quiz-fade-leave-to {
     opacity: 0;
+}
+
+.referencesVideo {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 0.75rem;
 }
 </style>

@@ -6,7 +6,8 @@
                 <img :src="profile?.coverPictureUrl ?? backgroundDefault" alt="Capa do perfil"
                     class="h-full w-full object-cover brightness-75" />
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
-                <div class="absolute left-8 top-4 text-xs font-semibold uppercase tracking-[0.2em] text-loading/90 box-border border-2 border-white/30 px-3 py-1 z-10 bg-loading/10 backdrop-blur-sm">
+                <div
+                    class="absolute left-8 top-4 text-xs font-semibold uppercase tracking-[0.2em] text-loading/90 box-border border-2 border-white/30 px-3 py-1 z-10 bg-loading/10 backdrop-blur-sm">
                     Perfil do aluno
                 </div>
             </div>
@@ -139,8 +140,8 @@
 
             <div class="panel border-red-100/80 p-3">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Senha</label>
-                <input v-model="profile!.passwordHash" :type="showPassword ? 'text' : 'password'" class="input w-full"
-                    placeholder="Digite uma nova senha" />
+                <input v-model="editPassword" :type="showPassword ? 'text' : 'password'" class="input w-full"
+                    placeholder="Digite uma nova senha (opcional)" />
 
                 <button type="button"
                     class="absolute right-4 top-8 text-ink-500 text-xl hover:text-ink-700 hover:scale-110"
@@ -170,9 +171,10 @@
 
     <ExercisesCard :visible="showTaskQuizModal" :task="selectedTask" :daily-task="selectedDailyTask"
         :exercises="availableExercises" :loading="quizLoading" :questions="quizQuestions"
-        :selected-answers="selectedAnswers" :current-question-index="currentQuestionIndex" :quiz-result="taskResult"
-        @close="closeTaskQuiz" @start-quiz="startExerciseQuiz"
-        @select-answer="selectAnswer($event.questionId, $event.optionIndex)" @back-to-exercises="backToExercises"
+        :selected-answers="selectedAnswers" :selected-code-answers="selectedCodeAnswers"
+        :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
+        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
+        @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
         @finish-quiz="finishExercise" />
 </template>
 
@@ -209,6 +211,7 @@ function handleEyePassword() {
 
 //Edit user.
 const showEditAttributes = ref(false)
+const editPassword = ref('')
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
@@ -241,7 +244,7 @@ const stats = computed<Array<{
     return [
         { label: 'Pontuacao Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
         { label: 'Fase atual', value: currentPhase.value?.name ?? 'Indisponível', helper: currentPhase.value?.module?.name ?? 'Modulo Indisponível', status: 'progress' },
-        { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}`, status: 'warning' },
+        { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `${tasks.value.length > 0 ? `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}` : 'Aguardando tarefas disponíveis'}`, status: 'warning' },
     ]
 })
 
@@ -278,6 +281,7 @@ const selectedTask = ref<TaskCardView | null>(null)
 const quizLoading = ref(false)
 const quizQuestions = ref<QuizQuestion[]>([])
 const selectedAnswers = ref<Record<number, number | null>>({})
+const selectedCodeAnswers = ref<Record<number, string>>({})
 const currentQuestionIndex = ref(0)
 const taskResult = ref<{ correct: number; total: number; accuracy: number; gainedPoints: number } | null>(null)
 
@@ -309,7 +313,16 @@ const dailyTasksCards = computed(() => dailyTaskGroups.value)
 const availableExercises = computed(() => selectedDailyTask.value?.exercises ?? [])
 
 const currentQuestion = computed(() => quizQuestions.value[currentQuestionIndex.value] ?? null)
-const answeredCount = computed(() => Object.values(selectedAnswers.value).filter((answer) => answer !== null && answer !== undefined).length)
+const answeredCount = computed(() => {
+    return quizQuestions.value.filter((question) => {
+        if (question.typeExercise === 2) {
+            return Boolean((selectedCodeAnswers.value[question.id] ?? '').trim())
+        }
+
+        const answer = selectedAnswers.value[question.id]
+        return answer !== null && answer !== undefined
+    }).length
+})
 const allQuestionsAnswered = computed(() => quizQuestions.value.length > 0 && answeredCount.value === quizQuestions.value.length)
 const hasAnswerForCurrentQuestion = computed(() => {
     if (!currentQuestion.value) return false
@@ -383,6 +396,7 @@ function mapExerciseToTaskCard(exercise: IDailyExercise): TaskCardView {
             id: exercise.id,
             title: exercise.title,
             description: exercise.description,
+            videoUrl: exercise.videoUrl,
             pointsRedeem: exercise.pointsRedeem,
             typeExercise: exercise.typeExercise,
             difficulty: exercise.difficulty,
@@ -393,9 +407,14 @@ function mapExerciseToTaskCard(exercise: IDailyExercise): TaskCardView {
 function resetQuizState() {
     currentQuestionIndex.value = 0
     selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
 
     for (const question of quizQuestions.value) {
         selectedAnswers.value[question.id] = null
+
+        if (question.typeExercise === 2) {
+            selectedCodeAnswers.value[question.id] = ''
+        }
     }
 
     taskResult.value = null
@@ -409,6 +428,7 @@ function openDailyTask(task: DailyTaskGroupView) {
     quizLoading.value = false
     quizQuestions.value = []
     selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
     taskResult.value = null
     currentQuestionIndex.value = 0
     showTaskQuizModal.value = true
@@ -446,6 +466,7 @@ function backToExercises() {
     quizLoading.value = false
     quizQuestions.value = []
     selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
     currentQuestionIndex.value = 0
     taskResult.value = null
 }
@@ -457,12 +478,17 @@ function closeTaskQuiz() {
     quizLoading.value = false
     quizQuestions.value = []
     selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
     currentQuestionIndex.value = 0
     taskResult.value = null
 }
 
 function selectAnswer(questionId: number, optionIndex: number) {
     selectedAnswers.value[questionId] = optionIndex
+}
+
+function updateCodeAnswer(questionId: number, answer: string) {
+    selectedCodeAnswers.value[questionId] = answer
 }
 
 function markExerciseCompletedLocally(exerciseId: number) {
@@ -505,12 +531,13 @@ async function finishExercise() {
 
     const userId = getUserIdFromSession();
 
-    const correct = quizQuestions.value.reduce((acc, question) => {
+    const objectiveQuestions = quizQuestions.value.filter((question) => question.typeExercise !== 2)
+    const correct = objectiveQuestions.reduce((acc, question) => {
         return acc + (selectedAnswers.value[question.id] === question.correctOptionIndex ? 1 : 0)
     }, 0)
 
-    const total = quizQuestions.value.length
-    const accuracy = Math.round((correct / total) * 100)
+    const total = objectiveQuestions.length
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0
     const gainedPoints = Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100)
     const finishedExerciseId = selectedTask.value.id
 
@@ -526,9 +553,14 @@ async function finishExercise() {
         userId: userId ?? 0,
         questionId: question.id,
         submissionData: {
-            selectedOption: selectedAnswers.value[question.id] ?? -1,
-            isCorrect: selectedAnswers.value[question.id] === question.correctOptionIndex,
-            pointsEarned: selectedAnswers.value[question.id] === question.correctOptionIndex ? Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100) : 0,
+            selectedOption: question.typeExercise === 2 ? -1 : (selectedAnswers.value[question.id] ?? -1),
+            answerText: question.typeExercise === 2 ? (selectedCodeAnswers.value[question.id] ?? '').trim() : undefined,
+            isCorrect: question.typeExercise === 2 ? false : selectedAnswers.value[question.id] === question.correctOptionIndex,
+            pointsEarned: question.typeExercise === 2
+                ? 0
+                : (selectedAnswers.value[question.id] === question.correctOptionIndex
+                    ? Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100)
+                    : 0),
             submittedAt: new Date(),
         },
     }))
@@ -537,13 +569,22 @@ async function finishExercise() {
         var responseAnswer = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise);
 
         if (responseAnswer.success) {
-            var payloadUserPoints = {
-                userId: userId ?? 0,
-                pointsToAdd: gainedPoints,
-                exerciseDate: selectedTask.value.termAt,
-            }
+            toast.info('Exercicio Enviado com Sucesso')
 
-            await $httpClient.point.AddPointsForUser(payloadUserPoints)
+            if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
+                var payloadUserPoints = {
+                    userId: userId ?? 0,
+                    pointsToAdd: gainedPoints,
+                    exerciseDate: selectedTask.value.termAt,
+                }
+
+                var pointsResponse = await $httpClient.point.AddPointsForUser(payloadUserPoints)
+                if (pointsResponse.success) {
+                    toast.success('Parabens!', `Você ganhou ${gainedPoints} pontos com este exercício.`, 3500)
+                    profile.value?.pointsQuantity ? profile.value.pointsQuantity += gainedPoints : null
+                    ranking.value ? ranking.value.points += gainedPoints : null
+                }
+            }
         }
     } catch (error) {
         console.error('Erro ao resgatar pontos do exercício:', error)
@@ -583,10 +624,12 @@ function closeUploadCoverAndPicture() {
 }
 
 function openEditAttributes() {
+    editPassword.value = ''
     showEditAttributes.value = true;
 }
 
 function closeEditAttributes() {
+    editPassword.value = ''
     showEditAttributes.value = false;
 }
 
@@ -609,7 +652,7 @@ async function UpdateUserProfile() {
             name: profile.value?.name ?? '',
             bio: profile.value?.bio ?? '',
             email: profile.value?.email ?? '',
-            password: String(profile.value?.passwordHash ?? ''),
+            password: editPassword.value.trim(),
             role: RoleUpdateUser,
             profilePictureUrl: profile.value?.profilePictureUrl ?? '',
             coverPictureUrl: profile.value?.coverPictureUrl ?? '',
@@ -624,6 +667,7 @@ async function UpdateUserProfile() {
         }
 
         closeEditAttributes();
+        editPassword.value = ''
         toast.success('Perfil atualizado', 'Seus dados do perfil foram atualizados com sucesso.', 3000);
     } catch (error) {
         console.error('Erro ao atualizar perfil do usuário:', error)
