@@ -50,21 +50,23 @@
 
 <script setup lang="ts">
 import SettingToggle from '@/components/SettingToggle.vue'
-import { computed, reactive } from 'vue'
+import { computed, onMounted, reactive, watch } from 'vue'
 import type { IAuthConfigUser, IAuthConfigUserUpdateRequest } from '~/infra/interfaces/services/auth';
-import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
+import { getUserIdFromSession, useLoadingConfigurations } from '~/composables/useLoadingConfigurations';
 
 import { useUserStore } from '~/infra/store/userStore';
 
 const userConfigs = useUserStore();
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
+const { loadConfigurations } = useLoadingConfigurations();
 const toast = useToastService();
 
 type SettingItem = {
     title: string
     description: string
     enabled?: boolean
+    selectedLanguage?: string
     variant?: 'default' | 'theme-lottie' | 'language'
 }
 
@@ -75,6 +77,14 @@ const form = reactive({
     acessibilityMode: userConfigs.getAcessibilityMode,
     preferredLanguage: userConfigs.getPreferredLanguage,
 })
+
+function hydrateFormFromStore() {
+    form.receiveEmailNotifications = userConfigs.getReceiveEmailNotifications
+    form.darkModeEnabled = userConfigs.getDarkModeEnabled
+    form.reportFrequency = userConfigs.getReportFrequency
+    form.acessibilityMode = userConfigs.getAcessibilityMode
+    form.preferredLanguage = userConfigs.getPreferredLanguage
+}
 
 const toggles = computed<SettingItem[]>(() => [
     {
@@ -90,6 +100,7 @@ const toggles = computed<SettingItem[]>(() => [
     {
         title: 'Idioma preferido',
         description: 'Definir o idioma da interface para português, inglês ou espanhol.',
+        selectedLanguage: form.preferredLanguage,
         variant: 'language',
     },
     {
@@ -111,6 +122,28 @@ function onLanguageChange(value: string) {
     userConfigs.setPreferredLanguage(value)
 }
 
+watch(
+    () => userConfigs.getConfigurationsLoaded,
+    (loaded) => {
+        if (!loaded) {
+            return
+        }
+
+        hydrateFormFromStore()
+    },
+    { immediate: true },
+)
+
+onMounted(async () => {
+    if (!userConfigs.getConfigurationsLoaded) {
+        await loadConfigurations()
+    }
+
+    if (userConfigs.getConfigurationsLoaded) {
+        hydrateFormFromStore()
+    }
+})
+
 async function saveConfigurations() {
     loadingPush();
 
@@ -129,6 +162,12 @@ async function saveConfigurations() {
         const responseConfig = await $httpClient.auth.UpdateConfigurations(payloadConfigs)
 
         if (responseConfig.result) {
+            userConfigs.setReceiveEmailNotifications(form.receiveEmailNotifications)
+            userConfigs.setDarkModeEnabled(form.darkModeEnabled)
+            userConfigs.setReportFrequency(form.reportFrequency)
+            userConfigs.setAcessibilityMode(form.acessibilityMode)
+            userConfigs.setPreferredLanguage(form.preferredLanguage)
+            userConfigs.setConfigurationsLoaded(true)
             toast.success('Configurações salvas com sucesso.');
         }
     } catch (error) {

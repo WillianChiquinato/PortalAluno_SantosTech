@@ -1,6 +1,6 @@
 <template>
-    <Toast :key="toastKey" :position="toastPosition" :pt="{
-        root: { class: 'toast-container', style: 'border:0;outline:0;box-shadow:none;background:transparent;' },
+    <Toast :key="toastKey" :position="toastPosition" appendTo="body" :baseZIndex="8000" :pt="{
+        root: { class: 'toast-container', style: 'z-index:14000 !important;border:0;outline:0;box-shadow:none;background:transparent;' },
         message: { class: 'toast-message-wrapper', style: 'border:0;outline:0;box-shadow:none;background:transparent;' },
         messageContent: { style: 'border:0;outline:0;box-shadow:none;background:transparent;padding:0;' },
         closeButton: { style: 'display: none' }
@@ -61,7 +61,7 @@ const iconMap: Record<string, string> = {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .app-toast {
     display: flex;
     gap: 16px;
@@ -98,7 +98,7 @@ const iconMap: Record<string, string> = {
     width: 200%;
     height: 200%;
     pointer-events: none;
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer 2s ease-in-out infinite;
 }
 
 @keyframes toastSlideIn {
@@ -261,28 +261,47 @@ const iconMap: Record<string, string> = {
 }
 
 /* Override PrimeVue default styles */
-:deep(.p-toast) {
+.p-toast {
     --p-toast-message-gap: 16px;
+    z-index: 8000 !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
 }
 
-:deep(.p-toast-message) {
+.p-toast-message {
     --p-toast-message-border-width: 0 !important;
     --p-toast-message-border-color: transparent !important;
     position: relative !important;
-    transform: none !important;
     background: transparent !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
 }
 
-:deep(.p-toast-message-success),
-:deep(.p-toast-message-info),
-:deep(.p-toast-message-warn),
-:deep(.p-toast-message-error) {
+.p-toast-message.toast-message-wrapper {
+    transition: opacity 0.22s ease, transform 0.22s ease !important;
+    transform-origin: top right;
+}
+
+.p-toast-message-enter-from.toast-message-wrapper,
+.p-toast-message-leave-to.toast-message-wrapper {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+}
+
+.p-toast-message-enter-to.toast-message-wrapper,
+.p-toast-message-leave-from.toast-message-wrapper {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.p-toast-message-success,
+.p-toast-message-info,
+.p-toast-message-warn,
+.p-toast-message-error {
     border: none !important;
     border-inline-start: 0 !important;
     outline: none !important;
@@ -290,7 +309,7 @@ const iconMap: Record<string, string> = {
     background: transparent !important;
 }
 
-:deep(.p-toast-message-content) {
+.p-toast-message-content {
     background: transparent !important;
     border: none !important;
     outline: none !important;
@@ -299,36 +318,36 @@ const iconMap: Record<string, string> = {
     margin-bottom: 12px;
 }
 
-:deep(.p-toast-message-text),
-:deep(.p-toast-summary),
-:deep(.p-toast-detail),
-:deep(.p-toast-close-button),
-:deep(.p-toast-close-icon),
-:deep(.toast-container),
-:deep(.toast-message-wrapper) {
+.p-toast-message-text,
+.p-toast-summary,
+.p-toast-detail,
+.p-toast-close-button,
+.p-toast-close-icon,
+.toast-container,
+.toast-message-wrapper {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
 }
 
-:deep(.p-toast-message-icon),
-:deep(.p-toast-message-text) {
+.p-toast-message-icon,
+.p-toast-message-text {
     display: none !important;
 }
 
-:deep(.toast-message-wrapper) {
+.toast-message-wrapper {
     margin-bottom: 16px;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
 }
 
-:deep(.toast-message-wrapper:last-child) {
+.toast-message-wrapper:last-child {
     margin-bottom: 0;
 }
 
 @media (max-width: 640px) {
-    :deep(.p-toast-top-right) {
+    .p-toast-top-right {
         right: 0 !important;
         left: 0 !important;
         top: 12px;
@@ -337,7 +356,7 @@ const iconMap: Record<string, string> = {
         box-sizing: border-box;
     }
 
-    :deep(.p-toast-top-center) {
+    .p-toast-top-center {
         right: 0 !important;
         left: 0 !important;
         top: 12px;

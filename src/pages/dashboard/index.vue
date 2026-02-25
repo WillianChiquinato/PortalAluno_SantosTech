@@ -6,7 +6,7 @@
                 <img :src="profile?.coverPictureUrl ?? backgroundDefault" alt="Capa do perfil"
                     class="h-full w-full object-cover brightness-75" />
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
-                <div class="absolute left-8 top-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
+                <div class="absolute left-8 top-4 text-xs font-semibold uppercase tracking-[0.2em] text-loading/90 box-border border-2 border-white/30 px-3 py-1 z-10 bg-loading/10 backdrop-blur-sm">
                     Perfil do aluno
                 </div>
             </div>
@@ -241,7 +241,7 @@ const stats = computed<Array<{
     return [
         { label: 'Pontuacao Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
         { label: 'Fase atual', value: currentPhase.value?.name ?? 'Indisponível', helper: currentPhase.value?.module?.name ?? 'Modulo Indisponível', status: 'progress' },
-        { label: 'Tarefas Diárias', value: 'Liberado', helper: `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}`, status: 'warning' },
+        { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}`, status: 'warning' },
     ]
 })
 

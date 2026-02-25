@@ -51,6 +51,7 @@ const props = withDefaults(defineProps<{
   title: string
   description: string
   enabled?: boolean
+  selectedLanguage?: string
   variant?: 'default' | 'theme-lottie' | 'language'
 }>(), {
   variant: 'default',
@@ -74,6 +75,10 @@ let themeApplyTimer: ReturnType<typeof setTimeout> | null = null
 const THEME_CLASS_NAME = 'dark'
 const THEME_STORAGE_KEY = 'portal-theme'
 const THEME_APPLY_DELAY_MS = 0
+
+function normalizeEnabled(value: boolean | undefined) {
+  return value ?? false
+}
 
 function clearThemeApplyTimer() {
   if (!themeApplyTimer) {
@@ -105,6 +110,28 @@ function getTargetIdleState(enabled: boolean) {
   return enabled ? 'Night Idle' : 'Day Idle'
 }
 
+function forceThemeIdleState(enabled: boolean) {
+  if (!animation || !isLottieReady.value) {
+    return false
+  }
+
+  const targetIdleState = getTargetIdleState(enabled)
+  animation.stateMachineSetBooleanInput('toggle', enabled)
+  animation.stateMachineOverrideState(targetIdleState, true)
+
+  requestAnimationFrame(() => {
+    if (!animation || !isLottieReady.value) {
+      return
+    }
+
+    animation.stateMachineSetBooleanInput('toggle', enabled)
+    animation.stateMachineOverrideState(targetIdleState, true)
+  })
+
+  scheduleThemeApply(enabled)
+  return true
+}
+
 function applyThemeState(enabled: boolean, animate: boolean) {
   if (!animation || !isLottieReady.value) {
     return false
@@ -119,10 +146,7 @@ function applyThemeState(enabled: boolean, animate: boolean) {
   }
 
   if (!animate) {
-    animation.stateMachineOverrideState(targetIdleState, true)
-    animation.stateMachineSetBooleanInput('toggle', enabled)
-    scheduleThemeApply(enabled)
-    return true
+    return forceThemeIdleState(enabled)
   }
 
   animation.stateMachineFireEvent('transition')
@@ -160,7 +184,7 @@ async function loadThemeAnimation() {
   animation = new DotLottie({
     canvas: themeCanvas.value,
     src: toggleAnimation,
-    autoplay: true,
+    autoplay: false,
     loop: false,
     stateMachineId: 'StateMachine1',
     renderConfig: {
@@ -178,7 +202,9 @@ async function loadThemeAnimation() {
     animation.stateMachineStart()
     isLottieReady.value = true
     isThemeTransitioning.value = false
-    requestThemeSync(isEnabled.value, false)
+    const enabledFromConfig = normalizeEnabled(props.enabled)
+    isEnabled.value = enabledFromConfig
+    requestThemeSync(enabledFromConfig, false)
   })
 
   animation.addEventListener('stateMachineStateEntered', ({ state }) => {
@@ -222,11 +248,13 @@ function toggleEnabled() {
 watch(
   () => props.enabled,
   (newValue) => {
-    if (newValue === isEnabled.value) {
+    const normalized = normalizeEnabled(newValue)
+
+    if (normalized === isEnabled.value) {
       return
     }
 
-    isEnabled.value = newValue
+    isEnabled.value = normalized
     if (props.variant === 'theme-lottie') {
       requestThemeSync(isEnabled.value, true)
     }
@@ -252,10 +280,27 @@ watch(
 )
 
 onMounted(() => {
+  isEnabled.value = normalizeEnabled(props.enabled)
+
+  if (props.variant === 'language' && props.selectedLanguage) {
+    SelectedLanguage.value = props.selectedLanguage
+  }
+
   if (props.variant === 'theme-lottie') {
     void loadThemeAnimation()
   }
 })
+
+watch(
+  () => props.selectedLanguage,
+  (newValue) => {
+    if (props.variant !== 'language' || !newValue || newValue === SelectedLanguage.value) {
+      return
+    }
+
+    SelectedLanguage.value = newValue
+  },
+)
 
 onBeforeUnmount(() => {
   clearThemeApplyTimer()
