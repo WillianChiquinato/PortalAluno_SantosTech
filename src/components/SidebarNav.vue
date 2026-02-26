@@ -44,7 +44,7 @@
         <div class="flex justify-around items-center h-16 relative">
 
             <!-- Principais -->
-            <NuxtLink v-for="item in navItems.slice(0, 4)" :key="item.path" :to="item.path"
+            <NuxtLink v-for="item in navItems.slice(0, 5)" :key="item.path" :to="item.path"
                 class="flex flex-col items-center justify-center gap-1 flex-1 py-2 transition-all duration-200" :class="isActive(item.path)
                     ? 'text-brand-600 scale-105'
                     : 'text-slate-500'">
@@ -71,7 +71,7 @@
                 <div v-if="isMobile && showMobileMenu" class="sidebar-mobile-overlay"
                     @click.self="showMobileMenu = false">
                     <div class="sidebar-mobile-menu animate-slideUp" @click.stop>
-                        <NuxtLink to="/configuracoes" class="block text-base font-medium text-ink-700"
+                        <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-cog text-lg"></i> Configurações
                         </NuxtLink>

@@ -97,4 +97,15 @@ export default class UserService extends ClientService<any> {
       ...config,
     })) as ApiResponse<IUpdateUserProfileRequest>
   }
+
+  SendEmailVerify = async (
+    email: string,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<string>> => {
+    return (await this.fetchInstance(`${this.address}/SendEmailVerify`, {
+      method: 'POST',
+      body: { email },
+      ...config,
+    })) as ApiResponse<string>
+  }
 }

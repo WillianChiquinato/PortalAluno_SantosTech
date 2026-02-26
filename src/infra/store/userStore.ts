@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useUserStore = defineStore('user', {
   state: () => ({
     userId: null as number | null,
+    userEmail: null as string | null,
     configurationsLoaded: false,
     darkModeEnabled: false,
     receiveEmailNotifications: false,
@@ -13,6 +14,7 @@ export const useUserStore = defineStore('user', {
 
   getters: {
     getUserId: (state) => state.userId,
+    getUserEmail: (state) => state.userEmail,
     getConfigurationsLoaded: (state) => state.configurationsLoaded,
     getDarkModeEnabled: (state) => state.darkModeEnabled,
     getReceiveEmailNotifications: (state) => state.receiveEmailNotifications,
@@ -24,6 +26,9 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUserId(id: number | null) {
       this.userId = id
+    },
+    setUserEmail(email: string | null) {
+      this.userEmail = email
     },
     setConfigurationsLoaded(loaded: boolean) {
       this.configurationsLoaded = loaded

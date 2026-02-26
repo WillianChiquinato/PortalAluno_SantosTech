@@ -40,10 +40,12 @@
             <h3 class="text-lg font-semibold">Segurança</h3>
             <p class="text-sm text-ink-500">Atualize dados sensíveis e mantenha sua conta protegida.</p>
             <div class="flex flex-wrap items-center gap-3">
-                <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 text-sm cursor-pointer">Alterar
-                    senha</button>
-                <button class="text-ink-900 btn-primary h-10 px-4 text-sm cursor-pointer">Confirmar email</button>
+                <button class="text-ink-900 btn-primary h-10 px-4 text-sm cursor-pointer"
+                    @click="showModalConfirmedEmail = true">Confirmar email</button>
             </div>
+
+            <SendEmailModal v-model:visible="showModalConfirmedEmail" :name="'Confirme seu e-mail'"
+                @back="showModalConfirmedEmail = false" />
         </section>
     </div>
 </template>
@@ -54,9 +56,55 @@ import { computed, onMounted, reactive, watch } from 'vue'
 import type { IAuthConfigUser, IAuthConfigUserUpdateRequest } from '~/infra/interfaces/services/auth';
 import { getUserIdFromSession, useLoadingConfigurations } from '~/composables/useLoadingConfigurations';
 
+import SendEmailModal from '@/components/Modals/SendEmailModal.vue';
 import { useUserStore } from '~/infra/store/userStore';
 
 const userConfigs = useUserStore();
+const showModalConfirmedEmail = ref(false);
+const codeDigits = ref<string[]>(Array(6).fill(''));
+const codeInputRefs = ref<(HTMLInputElement | null)[]>([]);
+
+function setCodeInputRef(idx: number) {
+    return (el: Element | import('vue').ComponentPublicInstance | null) => {
+        codeInputRefs.value[idx] = el as HTMLInputElement | null;
+    };
+}
+
+function onInput(idx: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    let val = input.value.replace(/\D/g, '');
+    if (val.length > 1) val = val.slice(-1);
+    codeDigits.value[idx] = val;
+    if (val && idx < codeDigits.value.length - 1) {
+        nextTick(() => codeInputRefs.value[idx + 1]?.focus());
+    }
+}
+
+function onBackspace(idx: number, event: KeyboardEvent) {
+    if (!codeDigits.value[idx] && idx > 0) {
+        nextTick(() => codeInputRefs.value[idx - 1]?.focus());
+    }
+}
+
+function onPaste(event: ClipboardEvent) {
+    const paste = event.clipboardData?.getData('text') || '';
+    if (/^\d{6}$/.test(paste)) {
+        for (let i = 0; i < 6; i++) {
+            codeDigits.value[i] = paste[i];
+        }
+        nextTick(() => codeInputRefs.value[5]?.focus());
+        event.preventDefault();
+    }
+}
+
+function confirmCode() {
+    const code = codeDigits.value.join('');
+    // lógica para enviar o código
+}
+
+function resendCode() {
+    // lógica para reenviar o código
+}
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const { loadConfigurations } = useLoadingConfigurations();

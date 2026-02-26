@@ -6,11 +6,11 @@
 
             <div class="absolute inset-x-0 top-0 flex items-center justify-between p-3">
                 <span
-                    class="rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    class="rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-tag-100">
                     {{ visibilityLabel }}
                 </span>
 
-                <span class="rounded-md bg-black/75 px-2 py-1 text-xs font-semibold text-white">
+                <span class="rounded-md bg-black/75 px-2 py-1 text-xs font-semibold text-tag-100">
                     {{ normalizedFileType }}
                 </span>
             </div>

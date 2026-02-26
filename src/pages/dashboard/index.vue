@@ -22,8 +22,8 @@
                         </div>
 
                         <div class="space-y-1 min-w-0">
-                            <h2 class="text-xl font-semibold">{{ profile?.name ?? 'Nome não disponível' }}</h2>
-                            <p class="text-sm text-ink-500">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nivel
+                            <h2 class="text-lg font-semibold sm:text-xl">{{ profile?.name ?? 'Nome não disponível' }}</h2>
+                            <p class="text-sm text-ink-500">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nível
                                 {{
                                     profile?.levelUser ?? 'Nível não disponível' }}</p>
                         </div>

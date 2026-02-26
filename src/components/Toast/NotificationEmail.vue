@@ -24,17 +24,20 @@
             </section>
         </div>
     </transition>
+
+    <SendEmailModal v-model:visible="showModalConfirmedEmail" :name="'Confirme seu e-mail'"
+        @back="showModalConfirmedEmail = false" />
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import SendEmailModal from '../Modals/SendEmailModal.vue';
 
 const props = defineProps<{
     email?: string
 }>()
 
 const isVisible = ref(true)
-
 const emailToShow = computed(() => {
     if (!props.email || !props.email.trim()) {
         return 'seu e-mail'
@@ -43,21 +46,25 @@ const emailToShow = computed(() => {
     return props.email
 })
 
+
+const showModalConfirmedEmail = ref(false);
+
 function dismiss() {
     isVisible.value = false
 }
 
 async function goToEmailConfirmation() {
-    await navigateTo('/configuracoes')
+    showModalConfirmedEmail.value = true;
+    isVisible.value = false
 }
 </script>
 
 <style scoped lang="scss">
 .notification-wrapper {
     position: fixed;
-    top: 82px;
+    top: 20px;
     right: 16px;
-    z-index: 910;
+    z-index: 7000;
     pointer-events: none;
 }
 
@@ -172,7 +179,6 @@ async function goToEmailConfirmation() {
 
 @media (max-width: 640px) {
     .notification-wrapper {
-        top: 70px;
         right: 10px;
         left: 10px;
     }

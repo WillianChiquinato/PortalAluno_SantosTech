@@ -52,7 +52,7 @@ const showNotificationEmail = computed(() => {
         return false
     }
 
-    return userConfigs.getReceiveEmailNotifications === false
+    return userConfigs.getReceiveEmailNotifications === true
 })
 
 const isWhatsappMinimized = ref(false);

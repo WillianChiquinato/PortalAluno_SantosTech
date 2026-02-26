@@ -11,8 +11,8 @@
             </transition>
             <div class="login-header">
                 <div class="flex">
-                    <img :src="logoColorida" alt="Logo Santos tech" class="w-12 mb-1 text-black" />
-                    <span class="w-fit ml-2 mt-2 text-xl font-semibold">Santos Tech</span>
+                    <img :src="logoColorida" alt="Logo Santos tech" class="w-12 mb-1" />
+                    <span class="w-fit ml-2 mt-2 text-xl font-semibold text-black">Santos Tech</span>
                 </div>
                 <h2 class="w-fit text-brand-600">Entrar</h2>
                 <p>Acesso exclusivo para alunos matriculados.</p>
@@ -91,6 +91,7 @@ async function LoadUserData() {
         setToken(loadUser.token);
         setLoggedUser(loadUser.user);
         useUserStore().setUserId(loadUser.user.id);
+        useUserStore().setUserEmail(loadUser.user.email);
 
         toast.success(
             "Bem-vindo!",
@@ -110,7 +111,7 @@ async function LoadUserData() {
 
         setTimeout(() => {
             navigateTo("/dashboard");
-        }, 1000);
+        }, 900);
     } catch (error) {
         const err = error as any;
         if (err && err.error === 'rate_limit_exceeded') {
