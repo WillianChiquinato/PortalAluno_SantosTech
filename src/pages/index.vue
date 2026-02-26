@@ -1,7 +1,7 @@
 <template>
     <div class="login-full">
         <div class="login-bg"></div>
-        <div class="login-panel">
+        <div v-if="!showPasswordPage" class="login-panel">
             <!-- Lottie effect in footer, only when showLottieEffect is true -->
             <transition name="fade">
                 <div v-if="showLottieEffect" class="lottie-footer">
@@ -32,10 +32,56 @@
                     <span v-else>Carregando...</span>
                 </button>
             </form>
-            <p class="login-support">Esqueceu a senha? Fale com o suporte da turma.</p>
+
+            <p class="login-support">Esqueceu a senha? Faça a recuperação <button @click="handlePassword"
+                    class="text-brand-600 cursor-pointer"><u>Aqui</u></button></p>
+
             <div class="login-courses">
                 <CoursesCardResume v-for="course in coursesAvailable" :key="course.id" :course="course" />
             </div>
+        </div>
+        <div v-else class="login-panel">
+            <template v-if="!showSentPage">
+                <div class="login-header">
+                    <h2 class="w-fit text-brand-600">Recuperar senha</h2>
+                    <p>Insira seu email para receber as instruções de recuperação de senha.</p>
+                </div>
+                <form class="login-form mt-7" @submit.prevent="handlePassword">
+                    <label>
+                        <span>Email</span>
+                        <input v-model="emailLogin" type="email" autocomplete="email"
+                            placeholder="aluno@santosgames.com" />
+                    </label>
+                    <button type="submit" :disabled="!emailLogin">
+                        <span>Enviar instruções</span>
+                    </button>
+                    <div class="flex justify-center w-full">
+                        <button @click="showPasswordPage = false" type="button"
+                            class="mx-auto px-6 py-2 rounded-md bg-slate-100 text-brand-600 font-semibold text-base shadow-sm hover:bg-slate-200 transition">
+                            <span>Voltar</span>
+                        </button>
+                    </div>
+                </form>
+            </template>
+            <template v-else>
+                <div class="flex flex-col items-center justify-center min-h-[320px] py-12">
+                    <div class="mb-6">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="40" fill="#22c55e" />
+                            <path d="M28 42L37 51L54 34" stroke="#fff" stroke-width="5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-brand-600 mb-2">E-mail enviado!</h2>
+                    <p class="text-center text-ink-700 mb-6">As instruções para recuperação de senha foram enviadas para
+                        <strong>{{ emailLogin }}</strong>. Verifique sua caixa de entrada.
+                    </p>
+                    <button @click="goHome" type="button"
+                        class="login-back-btn px-6 py-2 rounded-md bg-slate-100 text-brand-600 font-semibold text-base shadow-sm hover:bg-slate-200 transition">
+                        Voltar para Home
+                    </button>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -57,6 +103,9 @@ const route = useRoute();
 const router = useRouter();
 const { loadConfigurations } = useLoadingConfigurations();
 
+const showPasswordPage = ref(false);
+const showSentPage = ref(false);
+
 const isSubmitting = ref(false);
 const coursesAvailable = ref<ICourseAvailable[]>([]);
 
@@ -68,6 +117,20 @@ const isFormInvalid = computed(() => !emailLogin.value || !passwordLogin.value);
 const showLottieEffect = ref(false);
 function onLottieComplete() {
     showLottieEffect.value = false;
+}
+
+function handlePassword() {
+    // Se já está na tela de recuperação, envia instruções e mostra tela de sucesso
+    if (showPasswordPage.value) {
+        showSentPage.value = true;
+    } else {
+        showPasswordPage.value = true;
+    }
+}
+
+function goHome() {
+    showPasswordPage.value = false;
+    showSentPage.value = false;
 }
 
 async function LoadUserData() {
@@ -214,6 +277,7 @@ definePageMeta({
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: #f8fafc;
 }
 
 .login-bg {
@@ -228,7 +292,6 @@ definePageMeta({
     min-width: 320px;
     max-width: 480px;
     height: 100vh;
-    background: rgba(255, 255, 255, 0.98);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -319,6 +382,23 @@ definePageMeta({
     gap: 0.7rem;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     margin-top: 1.7rem;
+}
+
+.login-back-btn {
+    height: 2.7rem;
+    border-radius: 0.8rem;
+    background: linear-gradient(90deg, #f87171 0%, #fbbf24 100%);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s all;
+
+    &:hover {
+        scale: 1.05;
+        box-shadow: 0 4px 12px 0 rgba(252, 165, 165, 0.2);
+    }
 }
 
 @media (max-width: 1250px) {

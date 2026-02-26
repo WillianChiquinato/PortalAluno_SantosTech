@@ -1,5 +1,5 @@
 <template>
-    <article class="rounded-2xl border border-red-100 bg-[#f8fafc]/95 p-4">
+    <article class="rounded-2xl border border-red-100 bg-tag-100/95 p-4">
         <div class="flex items-start justify-between gap-2">
             <p class="text-xs uppercase tracking-wide text-black/50">Turmas premium</p>
             <span class="chip text-black bg-[#f1f5f9]/80">{{ formattedPrice }}</span>
