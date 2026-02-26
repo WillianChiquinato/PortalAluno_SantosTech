@@ -5,13 +5,13 @@
                 class="relative bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 p-5 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
                 <div class="relative z-10 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Player interno</p>
-                        <h2 class="text-2xl font-semibold text-white">{{ video?.title ?? 'Carregando vídeo...' }}</h2>
-                        <p class="mt-1 text-sm text-white/80">Assista sem sair da plataforma.</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Player interno</p>
+                        <h2 class="text-2xl font-semibold text-tag-100">{{ video?.title ?? 'Carregando vídeo...' }}</h2>
+                        <p class="mt-1 text-sm text-tag-100/80">Assista sem sair da plataforma.</p>
                     </div>
 
                     <button
-                        class="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                        class="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold text-tag-100 transition hover:bg-white/20 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                         @click="handleBackToVideos" :disabled="isLoadingBtn">{{ isLoadingBtn ? 'Salvando...' : 'Voltar para Vídeos' }}</button>
                 </div>
             </div>
@@ -21,7 +21,7 @@
             <div class="aspect-video w-full bg-black">
                 <div v-if="canRenderPlayer" ref="playerHost" class="h-full w-full"></div>
 
-                <div v-else class="flex h-full items-center justify-center p-6 text-center text-white/80">
+                <div v-else class="flex h-full items-center justify-center p-6 text-center text-tag-100/80">
                     Não foi possível carregar este vídeo no player interno.
                 </div>
             </div>

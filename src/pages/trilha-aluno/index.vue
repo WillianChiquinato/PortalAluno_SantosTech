@@ -12,30 +12,30 @@
 
                     <div class="relative z-10 lg:items-center">
                         <div class="space-y-2">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Mapa da jornada
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Mapa da jornada
                             </p>
-                            <h2 class="text-2xl font-semibold text-white">Trilha do aluno • Arquipélago de fases</h2>
-                            <p class="max-w-2xl text-sm text-white/85">
+                            <h2 class="text-2xl font-semibold text-tag-100">Trilha do aluno • Arquipélago de fases</h2>
+                            <p class="max-w-2xl text-sm text-tag-100/85">
                                 Cada fase é uma ilha. O aluno avança por blips na trilha, ganha ritmo ao acertar e, se
                                 errar, desce para o <span class="font-semibold">lowerState</span> da rota.
                             </p>
                         </div>
 
                         <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-4">
-                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-white">
-                                <p class="text-[11px] uppercase tracking-[0.18em] text-white/75">Ilhas concluídas</p>
+                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100">
+                                <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Ilhas concluídas</p>
                                 <p class="mt-1 text-xl font-semibold">{{ completedIslands }}/{{ islands.length }}</p>
                             </div>
-                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-white">
-                                <p class="text-[11px] uppercase tracking-[0.18em] text-white/75">Blips concluídos</p>
+                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100">
+                                <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Blips concluídos</p>
                                 <p class="mt-1 text-xl font-semibold">{{ completedBlips }}/{{ totalBlips }}</p>
                             </div>
-                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-white">
-                                <p class="text-[11px] uppercase tracking-[0.18em] text-white/75">Erros recentes</p>
+                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100">
+                                <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Erros recentes</p>
                                 <p class="mt-1 text-xl font-semibold">{{ failedBlips }}</p>
                             </div>
-                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-white">
-                                <p class="text-[11px] uppercase tracking-[0.18em] text-white/75">Taxa de progresso</p>
+                            <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100">
+                                <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Taxa de progresso</p>
                                 <p class="mt-1 text-xl font-semibold">{{ completionRate }}%</p>
                             </div>
                         </div>

@@ -2,7 +2,7 @@
     <div class="space-y-6">
         <section class="panel overflow-hidden p-0">
             <div
-                class="relative h-42 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
+                class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
                 <img :src="profile?.coverPictureUrl ?? backgroundDefault" alt="Capa do perfil"
                     class="h-full w-full object-cover brightness-75" />
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
@@ -13,19 +13,17 @@
             </div>
 
             <div class="space-y-4 p-5 pt-4 z-10 relative">
-                <div class="-mt-10 flex flex-wrap items-end justify-between gap-4">
+                <div class="-mt-14 flex flex-wrap items-end justify-between gap-4">
                     <div class="flex items-end gap-4 min-w-0">
-                        <div class="relative h-20 w-20">
+                        <div class="relative h-25 w-25">
                             <span class="profile-frame"></span>
                             <img :src="profile?.profilePictureUrl ?? profileDefault"
-                                class="relative h-20 w-20 rounded-2xl border-4 border-white object-cover shadow-md bg-white" />
+                                class="relative h-25 w-25 rounded-2xl border-4 border-white object-cover shadow-md bg-white" />
                         </div>
 
                         <div class="space-y-1 min-w-0">
-                            <h2 class="text-lg font-semibold sm:text-xl">{{ profile?.name ?? 'Nome não disponível' }}</h2>
-                            <p class="text-sm text-ink-500">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nível
-                                {{
-                                    profile?.levelUser ?? 'Nível não disponível' }}</p>
+                            <h2 class="text-lg font-semibold sm:text-xl truncate max-w-[180px] sm:max-w-none">{{ profile?.name ?? 'Nome não disponível' }}</h2>
+                            <p class="text-sm text-ink-500 truncate max-w-[180px] sm:max-w-none">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nível {{ profile?.levelUser ?? 'Nível não disponível' }}</p>
                         </div>
                     </div>
 

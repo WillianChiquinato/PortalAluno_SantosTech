@@ -5,13 +5,13 @@
                 class="relative bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 p-5 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
                 <div class="relative z-10 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Biblioteca</p>
-                        <h2 class="text-2xl font-semibold text-white">Vídeos de conhecimento</h2>
-                        <p class="mt-1 text-sm text-white/80">Conteúdos extras produzidos pela Santos Tech.</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Biblioteca</p>
+                        <h2 class="text-2xl font-semibold text-tag-100">Vídeos de conhecimento</h2>
+                        <p class="mt-1 text-sm text-tag-100/80">Conteúdos extras produzidos pela Santos Tech.</p>
                     </div>
 
                     <span
-                        class="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white">
+                        class="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-tag-100">
                         {{ videos.length }} vídeo(s)
                     </span>
                 </div>
