@@ -1,22 +1,3 @@
-<script setup lang="ts">
-const emit = defineEmits<{
-  (event: 'select'): void
-}>()
-
-const props = defineProps<{
-  title: string
-  due: string
-  points: string
-  status: string
-  disabled?: boolean
-}>()
-
-function handleSelect() {
-  if (props.disabled) return
-  emit('select')
-}
-</script>
-
 <template>
   <article class="panel relative overflow-hidden flex items-center justify-between gap-4 p-4 transition"
     :class="props.disabled ? 'cursor-not-allowed border-slate-300 bg-slate-100/90' : 'cursor-pointer hover:-translate-y-0.5'"
@@ -38,9 +19,21 @@ function handleSelect() {
   </article>
 </template>
 
-<!-- Exemplo de lottie -->
-<!-- import { triggerXP } from '@/composables/useGamification'
+<script setup lang="ts">
+const emit = defineEmits<{
+  (event: 'select'): void
+}>()
 
-function completeTask() {
-  triggerXP(120)
-} -->
+const props = defineProps<{
+  title: string
+  due: string
+  points: string
+  status: string
+  disabled?: boolean
+}>()
+
+function handleSelect() {
+  if (props.disabled) return
+  emit('select')
+}
+</script>

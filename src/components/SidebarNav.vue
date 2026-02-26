@@ -40,17 +40,48 @@
             </template>
         </div>
     </aside>
+    <nav v-else class="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-md">
+        <div class="flex justify-around items-center h-16 relative">
 
-    <nav v-else class="fixed bottom-0 left-0 right-0 border-t border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur">
-        <div class="flex items-center justify-between gap-2 text-xs font-medium text-ink-700">
+            <!-- Principais -->
             <NuxtLink v-for="item in navItems.slice(0, 4)" :key="item.path" :to="item.path"
-                class="flex flex-col items-center gap-1" :class="isActive(item.path) ? 'text-ink-900' : 'text-ink-500'">
-                <span class="h-2 w-2 rounded-full"
-                    :class="isActive(item.path) ? 'bg-brand-500' : 'bg-slate-300'"></span>
-                <span>{{ item.label }}</span>
+                class="flex flex-col items-center justify-center gap-1 flex-1 py-2 transition-all duration-200" :class="isActive(item.path)
+                    ? 'text-brand-600 scale-105'
+                    : 'text-slate-500'">
+                <i :class="[item.icon, 'text-lg']"></i>
+                <span class="text-[11px] leading-none">
+                    {{ item.short }}
+                </span>
 
+                <span v-if="isActive(item.path)" class="absolute bottom-0 h-1 w-6 rounded-full bg-brand-500" />
             </NuxtLink>
+
+            <!-- Botão Mais -->
+            <button class="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-slate-500"
+                @click="showMobileMenu = true">
+                <i class="pi pi-ellipsis-h text-lg"></i>
+                <span class="text-[11px] leading-none">
+                    Mais
+                </span>
+            </button>
         </div>
+
+        <Teleport to="body">
+            <transition name="fade">
+                <div v-if="isMobile && showMobileMenu" class="sidebar-mobile-overlay"
+                    @click.self="showMobileMenu = false">
+                    <div class="sidebar-mobile-menu animate-slideUp" @click.stop>
+                        <NuxtLink to="/configuracoes" class="block text-base font-medium text-ink-700"
+                            @click="showMobileMenu = false">
+                            <i class="pi pi-cog text-lg"></i> Configurações
+                        </NuxtLink>
+                        <button class="block w-full text-left text-base font-medium text-red-500" @click="handleLogout">
+                            <i class="pi pi-sign-out text-lg"></i> Sair
+                        </button>
+                    </div>
+                </div>
+            </transition>
+        </Teleport>
     </nav>
 </template>
 
@@ -66,13 +97,14 @@ const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
 const route = useRoute()
 
 const isMobile = computed(() => props.mode === 'mobile')
+const showMobileMenu = ref(false)
 
 const navItems = [
-    { label: 'Dashboard', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios' },
-    { label: 'Trilha do aluno', path: '/trilha-aluno', note: 'Fluxo e Exercicios' },
-    { label: 'Trilha de cursos', path: '/trilha-cursos', note: 'Cursos Pagos e Personalizados' },
-    { label: 'Material adicional', path: '/materiais', note: 'Documentos para Atribuições' },
-    { label: 'Videos', path: '/videos', note: 'Videos Gerais' },
+    { label: 'Dashboard', short: 'Home', icon: 'pi pi-home', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios' },
+    { label: 'Trilha do aluno', short: 'Trilha', icon: 'pi pi-compass', path: '/trilha-aluno', note: 'Fluxo e Exercicios' },
+    { label: 'Trilha de cursos', short: 'Cursos', icon: 'pi pi-book', path: '/trilha-cursos', note: 'Cursos Pagos e Personalizados' },
+    { label: 'Material adicional', short: 'Materiais', icon: 'pi pi-folder', path: '/materiais', note: 'Documentos para Atribuições' },
+    { label: 'Videos', short: 'Vídeos', icon: 'pi pi-video', path: '/videos', note: 'Videos Gerais' },
 ]
 
 const footerItems = [
@@ -91,11 +123,65 @@ const isActive = (path: string) => {
 const logout = async () => {
     localStorage.removeItem('token')
     localStorage.removeItem('loggedUser')
-
     console.log("Logout User");
-
     return navigateTo('/')
+}
+
+const handleLogout = async () => {
+    showMobileMenu.value = false;
+    await logout();
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+/* Overlay escuro cobrindo toda a tela e menu mobile animado */
+.sidebar-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0, 0, 0, 0.40);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sidebar-mobile-menu {
+    width: 100vw;
+    background: #fff;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+    padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+    box-shadow: 0 -2px 16px 0 rgba(0, 0, 0, 0.08);
+    cursor: auto;
+    pointer-events: auto;
+    min-height: 120px;
+    max-width: 480px;
+    gap: 1rem;
+    margin: 0 auto;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.25s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.animate-slideUp {
+    animation: slideUp 0.25s ease-out;
+}
+</style>

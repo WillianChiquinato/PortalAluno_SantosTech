@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-8">
+    <div class="space-y-6">
         <section class="panel overflow-hidden p-0">
             <div
                 class="relative h-42 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
@@ -15,8 +15,12 @@
             <div class="space-y-4 p-5 pt-4 z-10 relative">
                 <div class="-mt-10 flex flex-wrap items-end justify-between gap-4">
                     <div class="flex items-end gap-4 min-w-0">
-                        <img :src="profile?.profilePictureUrl ?? profileDefault" alt="Foto de perfil"
-                            class="h-20 w-20 rounded-2xl border-4 border-white object-cover shadow-md bg-white/80" />
+                        <div class="relative h-20 w-20">
+                            <span class="profile-frame"></span>
+                            <img :src="profile?.profilePictureUrl ?? profileDefault"
+                                class="relative h-20 w-20 rounded-2xl border-4 border-white object-cover shadow-md bg-white" />
+                        </div>
+
                         <div class="space-y-1 min-w-0">
                             <h2 class="text-xl font-semibold">{{ profile?.name ?? 'Nome não disponível' }}</h2>
                             <p class="text-sm text-ink-500">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nivel
@@ -49,10 +53,15 @@
 
                     <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
                         <div v-for="(badge, index) in badgeSlots" :key="badge.name"
-                            class="rounded-xl border p-2 text-center text-xs cursor-pointer" :class="[
+                            class="rounded-xl border p-1 text-center text-xs cursor-pointer" :class="[
                                 badge.unlocked ? 'border-brand-200 bg-red-50 text-brand-600 medal-idle' : 'border-slate-200 bg-slate-50 text-ink-500',
                             ]" :style="badge.unlocked ? { animationDelay: `${(index % 6) * 0.22}s` } : undefined">
-                            <p class="text-base leading-none">{{ badge.unlocked ? '🏅' : '🔒' }}</p>
+                            <div class="w-full flex justify-center items-center h-9">
+                                <BaseLottie v-if="badge.unlocked" :animation-data="BadgeUnlocked" :loop="true"
+                                    :autoplay="true" class="w-9 h-9" />
+                                <BaseLottie v-else :animation-data="Locked" :loop="true" :autoplay="true"
+                                    class="w-9 h-9" />
+                            </div>
                             <p class="mt-1 truncate">{{ badge.name }}</p>
                         </div>
                     </div>
@@ -61,12 +70,23 @@
         </section>
 
         <section class="grid gap-6 lg:grid-cols-[2fr_1fr]">
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold">Tarefas diarias</h3>
-                    <span class="chip">{{ dailyTasksCards.length }} pendentes</span>
+            <div class="space-y-1">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                        <h3 class="text-xl font-semibold leading-none">
+                            Tarefas diarias
+                        </h3>
+
+                        <div class="w-20 h-20">
+                            <BaseLottie :animation-data="TaskList" :loop="true" :autoplay="true" class="w-16 h-16" />
+                        </div>
+                    </div>
+
+                    <span class="chip self-center">
+                        {{ dailyTasksCards.length }} pendentes
+                    </span>
                 </div>
-                <div v-if="dailyTaskGroups.length" class="space-y-4">
+                <div v-if="dailyTaskGroups.length" class="space-y-3">
                     <TaskCard v-for="task in dailyTasksCards" :key="task.id" :title="task.title" :due="task.due"
                         :points="task.points" :status="task.status" :disabled="task.disabled"
                         @select="openDailyTask(task)" />
@@ -183,6 +203,9 @@ import BaseLottie from '@/components/BaseLottie.vue'
 import StatCard from '@/components/StatCard.vue'
 import TaskCard from '@/components/TaskCard.vue'
 import warningStatus from '@/assets/lottie/Warning Status.json'
+import TaskList from '~/assets/lottie/TaskList.json'
+import BadgeUnlocked from '~/assets/lottie/Badges.json'
+import Locked from '~/assets/lottie/lockBadge.json'
 
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
@@ -882,6 +905,38 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+.profile-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 1rem;
+    padding: 3px;
+    background: conic-gradient(from 0deg, #facc15, #d5428c, #7e55dc, #facc15 100%);
+    background-size: 200% 200%;
+    animation: gradient-move 4s linear infinite;
+    display: block;
+    pointer-events: none;
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    box-sizing: border-box;
+}
+
+@keyframes gradient-move {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 120% 80%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .medal-idle {
     animation: medalFloat 1.6s ease-in-out infinite;
     will-change: transform;

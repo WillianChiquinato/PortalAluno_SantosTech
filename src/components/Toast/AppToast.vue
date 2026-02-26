@@ -347,39 +347,40 @@ const iconMap: Record<string, string> = {
 }
 
 @media (max-width: 640px) {
-    .p-toast-top-right {
-        right: 0 !important;
-        left: 0 !important;
-        top: 12px;
-        width: 100%;
-        padding: 0 12px;
-        box-sizing: border-box;
-    }
 
-    .p-toast-top-center {
-        right: 0 !important;
-        left: 0 !important;
-        top: 12px;
-        width: 100%;
-        padding: 0 0.7rem;
-        margin: auto 1rem;
-        box-sizing: border-box;
-    }
+  .p-toast {
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    padding: 0 12px;
+  }
 
-    .app-toast {
-        max-width: 100%;
-    }
+  .p-toast-top-right,
+  .p-toast-top-center {
+    top: 16px !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    display: flex;
+    justify-content: center;
+  }
 
-    @keyframes toastSlideIn {
-        from {
-            transform: translateY(-20px) scale(0.95);
-            opacity: 0;
-        }
+  .app-toast {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    gap: 12px;
+  }
 
-        to {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-        }
-    }
+  .content {
+    min-width: 0;
+  }
+
+  .toast-title,
+  .toast-message {
+    word-break: break-word;
+  }
 }
 </style>
