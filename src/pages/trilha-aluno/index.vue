@@ -179,7 +179,7 @@
                     </div>
 
                     <div
-                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-red-100/80 bg-sand-100 p-4 sm:p-5">
+                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-red-100/80 bg-accent-300 p-4 sm:p-5">
                         <div
                             class="pointer-events-none absolute bottom-8 left-1/2 top-8 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-brand-500/80 via-brand-200/70 to-slate-300">
                         </div>
