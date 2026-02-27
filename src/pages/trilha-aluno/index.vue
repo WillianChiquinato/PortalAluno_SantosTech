@@ -71,15 +71,23 @@
                                 islandIndex % 2 === 0 ? 'lg:mr-24' : 'lg:ml-24',
                                 islandCardClass(island.status),
                             ]">
-                            <div v-if="island.status === 'locked'"
+                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
                                 class="pointer-events-none absolute inset-0 rounded-2xl border border-slate-200/80 bg-slate-100/45 backdrop-blur-[1px]">
                             </div>
 
-                            <div v-if="island.status === 'locked'" class="absolute right-4 top-4 z-20">
+                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" class="absolute right-4 top-4 z-20">
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink-700">
                                     <span class="leading-none">🔒</span>
                                     <span>Aguardando liberação</span>
+                                </span>
+                            </div>
+
+                            <div v-if="island.status === 'Concluído'" class="absolute right-4 top-4 z-20">
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-red-50 px-3 py-2 text-[13px] font-semibold text-brand-600">
+                                    <span class="leading-none">✓</span>
+                                    <span>Ilha concluída</span>
                                 </span>
                             </div>
 
@@ -93,9 +101,10 @@
 
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="chip" :class="[
-                                        island.status === 'completed' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
-                                        island.status === 'current' ? '!border-ink-900 !text-ink-900' : '',
-                                        island.status === 'locked' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                        island.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
+                                        island.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
+                                        island.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                        island.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
                                     ]">
                                         {{ statusLabel(island.status) }}
                                     </span>
@@ -113,19 +122,21 @@
 
                             <div class="flex items-center justify-between gap-3">
                                 <p class="text-xs"
-                                    :class="island.status === 'locked' ? 'text-ink-700 font-medium' : 'text-ink-500'">
+                                    :class="island.status === 'Não Iniciado' ? 'text-ink-700 font-medium' : 'text-ink-500'">
                                     {{ island.blips.length }} exercícios nesta ilha
                                 </p>
 
-                                <button class="h-10 px-4 text-ink-900" :class="island.status === 'locked'
-                                    ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
-                                    : 'btn-primary cursor-pointer'" :disabled="island.status === 'locked'"
-                                    @click="enterIsland(island)">
-                                    {{ island.status === 'locked' ? 'Ilha bloqueada' : 'Entrar na ilha' }}
+                                <button class="h-10 px-4 text-ink-900"
+                                    :class="island.status === 'Não Iniciado' || island.status === 'Desconhecido'
+                                        ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
+                                        : island.status === 'Concluído' ? 'btn-primary cursor-pointer' : 'btn-primary cursor-pointer'"
+                                    :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" @click="enterIsland(island)">
+                                    {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status ===
+                                        'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
                                 </button>
                             </div>
 
-                            <p v-if="island.status === 'locked'" class="mt-3 text-xs text-ink-700">
+                            <p v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" class="mt-3 text-xs text-ink-700">
                                 Conclua a ilha anterior para desbloquear este conteúdo.
                             </p>
                         </article>
@@ -143,9 +154,10 @@
 
                         <div class="flex items-center gap-2">
                             <span class="chip" :class="[
-                                selectedIsland.status === 'completed' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
-                                selectedIsland.status === 'current' ? '!border-ink-900 !text-ink-900' : '',
-                                selectedIsland.status === 'locked' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                selectedIsland.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
+                                selectedIsland.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
+                                selectedIsland.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                selectedIsland.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
                             ]">
                                 {{ statusLabel(selectedIsland.status) }}
                             </span>
@@ -153,7 +165,8 @@
                                 class="chip !border-brand-200 !bg-red-50 !text-brand-600">
                                 Lower fixa • +30%
                             </span>
-                            <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer" @click="leaveIsland">Voltar para ilhas</button>
+                            <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer"
+                                @click="leaveIsland">Voltar para ilhas</button>
                         </div>
                     </div>
 
@@ -185,31 +198,59 @@
                         </div>
 
                         <div class="space-y-6 sm:space-y-7">
-                            <div v-for="(blip, blipIndex) in activeIslandBlips" :key="blip.id" class="relative"
+                            <div v-for="(blip, blipIndex) in activeIslandBlips" :key="blip.exercise.id" class="relative"
                                 :class="blipRowClass(blipIndex)">
                                 <div class="flex w-1/2"
                                     :class="blipIndex % 2 === 0 ? 'justify-end pr-3 sm:pr-5' : 'justify-start pl-3 sm:pl-5'">
-                                    <div class="flex flex-col items-center gap-2">
+                                    <div class="relative flex flex-col items-center gap-2">
                                         <button
                                             class="relative inline-flex h-16 w-18 items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200"
-                                            :class="blipClass(blip.status)" :disabled="blip.status === 'locked'"
-                                            :aria-label="`${blip.title} - ${blipStateLabel(blip.status)}`">
-                                            <span class="relative z-10">{{ blipIcon(blip.status) }}</span>
-
-                                            <span v-if="blip.status === 'current'"
-                                                class="absolute -top-7 rounded-xl border border-ink-900 bg-ink-900 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                                                Começar
+                                            :class="blipClass(blip.state)" :disabled="blip.state === 'Não iniciado'"
+                                            @click="toggleBlip(blip.exercise.id)">
+                                            <span class="relative z-10">
+                                                {{ blipIcon(blip.state) }}
                                             </span>
                                         </button>
 
-                                        <div class="max-w-28 text-center">
-                                            <p class="text-xs font-semibold text-ink-700">{{ blip.title }}</p>
-                                            <p class="text-[10px] font-semibold" :class="blipLabelClass(blip.status)">
-                                                {{ blipStateLabel(blip.status) }}
+                                        <BlipPopover v-if="blip.state === 'Errou' || blip.state === 'Correto'"
+                                            :show="activeBlipId === blip.exercise.id">
+                                            <h4 class="font-bold mb-1">
+                                                {{ blip.exercise.title }} • {{ blipStateLabel(blip.state) }}
+                                            </h4>
+
+                                            <button
+                                                class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                @click="toggleBlip(blip.exercise.id)">
+                                                Voltar para detalhes
+                                            </button>
+                                        </BlipPopover>
+
+                                        <BlipPopover v-else :show="activeBlipId === blip.exercise.id">
+                                            <h4 class="font-bold mb-1">
+                                                {{ blip.exercise.title }}
+                                            </h4>
+
+                                            <p class="text-sm opacity-90 mb-4">
+                                                {{ blip.exercise.description }}
                                             </p>
-                                            <p v-if="blip.isLowerExtra"
-                                                class="text-[10px] font-semibold text-brand-600">
-                                                exercício extra (lower)
+
+                                            <div class="flex flex-col gap-2">
+                                                <button
+                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                    @click="enterExercise(blip)">
+                                                    Missão +{{ blip.exercise.pointsRedeem }} Pts
+                                                </button>
+                                                <button
+                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-1 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                    @click="toggleBlip(blip.exercise.id)">
+                                                    Voltar para detalhes
+                                                </button>
+                                            </div>
+                                        </BlipPopover>
+
+                                        <div class="max-w-28 text-center">
+                                            <p class="text-xs font-semibold text-ink-700">
+                                                {{ blip.exercise.title }}
                                             </p>
                                         </div>
                                     </div>
@@ -245,101 +286,64 @@
                 </div>
 
                 <span class="chip !border-slate-300 !bg-white/80 !text-ink-700">Em breve</span>
-
-                <p class="max-w-lg text-sm text-ink-500">
-                    O desafio mestre está sendo preparado e será liberado em uma próxima atualização.
-                </p>
             </div>
+
+            <p class="max-w-lg text-sm text-ink-500">
+                O desafio mestre está sendo preparado e será liberado em uma próxima atualização.
+            </p>
         </section>
     </div>
 </template>
 
 <script setup lang="ts">
-type BlipStatus = 'completed' | 'current' | 'locked' | 'failed'
-type IslandStatus = 'completed' | 'current' | 'locked'
+import { ref, nextTick } from 'vue'
+import BlipPopover from '~/components/UI/BlipPopover.vue'
+import type { Blip, BlipStatus, Island, IslandStatus } from '~/infra/interfaces/services/class'
 
-type Blip = {
-    id: string
-    title: string
-    status: BlipStatus
-    isLowerExtra?: boolean
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
+const toast = useToastService();
+
+const showBlipOverlay = ref(false)
+const selectedBlip = ref<Blip | null>(null)
+const activeBlipId = ref<number | null>(null)
+
+function toggleBlip(id: number) {
+    const blip = islands.value.flatMap(island => island.blips).find(blip => blip.exercise.id === id);
+    if (!blip || blip.state === 'Não iniciado') return;
+    
+    activeBlipId.value =
+        activeBlipId.value === id ? null : id
 }
 
-type Island = {
-    id: string
-    order: number
-    title: string
-    helper: string
-    status: IslandStatus
-    lowerState: number
-    progress: number
-    blips: Blip[]
+function closeBlipOverlay() {
+    showBlipOverlay.value = false
+    selectedBlip.value = null
 }
 
-const islands: Island[] = [
-    {
-        id: 'island-1',
-        order: 1,
-        title: 'Ilha da Base HTML',
-        helper: 'Fundamentos e estrutura semântica de páginas',
-        status: 'completed',
-        lowerState: 0,
-        progress: 100,
-        blips: [
-            { id: 'b-1-1', title: 'Estrutura', status: 'completed' },
-            { id: 'b-1-2', title: 'Formulários', status: 'completed' },
-            { id: 'b-1-3', title: 'Mini boss', status: 'completed' },
-        ],
-    },
-    {
-        id: 'island-2',
-        order: 2,
-        title: 'Ilha do CSS Essencial',
-        helper: 'Box model, layout e responsividade inicial',
-        status: 'current',
-        lowerState: 1,
-        progress: 55,
-        blips: [
-            { id: 'b-2-1', title: 'Seletores', status: 'completed' },
-            { id: 'b-2-2', title: 'Flexbox', status: 'failed' },
-            { id: 'b-2-3', title: 'Layout', status: 'current' },
-            { id: 'b-2-4', title: 'Desafio', status: 'locked' },
-        ],
-    },
-    {
-        id: 'island-3',
-        order: 3,
-        title: 'Ilha da Responsividade',
-        helper: 'Grid, breakpoints e performance mobile',
-        status: 'locked',
-        lowerState: 0,
-        progress: 0,
-        blips: [
-            { id: 'b-3-1', title: 'Media queries', status: 'locked' },
-            { id: 'b-3-2', title: 'Grid fluido', status: 'locked' },
-            { id: 'b-3-3', title: 'Projeto da ilha', status: 'locked' },
-        ],
-    },
-]
+function enterExercise(blip: Blip) {
+    closeBlipOverlay()
+}
 
+const islands = ref<Island[]>([]);
 const selectedIslandId = ref<string | null>(null)
 
 const selectedIsland = computed(() => {
     if (!selectedIslandId.value) return null
-    return islands.find((island) => island.id === selectedIslandId.value) ?? null
+    return islands.value.find((island) => island.id === selectedIslandId.value) ?? null
 })
 
-const totalBlips = computed(() => islands.reduce((acc, island) => acc + island.blips.length, 0))
+const totalBlips = computed(() => islands.value.reduce((acc, island) => acc + island.blips.length, 0))
 
-const completedBlips = computed(() => islands.reduce((acc, island) => {
-    return acc + island.blips.filter((blip) => blip.status === 'completed').length
+const completedBlips = computed(() => islands.value.reduce((acc, island) => {
+    return acc + island.blips.filter((blip) => blip.state === 'Correto').length
 }, 0))
 
-const failedBlips = computed(() => islands.reduce((acc, island) => {
-    return acc + island.blips.filter((blip) => blip.status === 'failed').length
+const failedBlips = computed(() => islands.value.reduce((acc, island) => {
+    return acc + island.blips.filter((blip) => blip.state === 'Errou').length
 }, 0))
 
-const completedIslands = computed(() => islands.filter((island) => island.status === 'completed').length)
+const completedIslands = computed(() => islands.value.filter((island) => island.status === 'Concluído').length)
 
 const completionRate = computed(() => {
     if (totalBlips.value === 0) return 0
@@ -354,25 +358,17 @@ const activeIslandBlips = computed<Blip[]>(() => {
     const baseBlips = selectedIsland.value.blips
     if (selectedIsland.value.lowerState <= 0) return baseBlips
 
-    const extraCount = lowerExtraCount(selectedIsland.value)
-    const extraBlips: Blip[] = Array.from({ length: extraCount }, (_, index) => ({
-        id: `lower-extra-${selectedIsland.value?.id}-${index + 1}`,
-        title: `Extra ${index + 1}`,
-        status: 'locked',
-        isLowerExtra: true,
-    }))
-
-    return [...baseBlips, ...extraBlips]
+    return [...baseBlips]
 })
 
 function statusLabel(status: IslandStatus) {
-    if (status === 'completed') return 'Concluída'
-    if (status === 'current') return 'Atual'
+    if (status === 'Concluído') return 'Concluída'
+    if (status === 'Em Progresso') return 'Atual'
     return 'Bloqueada'
 }
 
 function islandCardClass(status: IslandStatus) {
-    if (status === 'locked') {
+    if (status === 'Não Iniciado') {
         return 'border-slate-200 bg-slate-50/80'
     }
 
@@ -380,29 +376,29 @@ function islandCardClass(status: IslandStatus) {
 }
 
 function blipStateLabel(status: BlipStatus) {
-    if (status === 'completed') return 'Concluído'
-    if (status === 'current') return 'Disponível'
-    if (status === 'failed') return 'Erro • caiu lowerState'
+    if (status === 'Correto') return 'Concluído'
+    if (status === 'Atual') return 'Disponível'
+    if (status === 'Errou') return 'Erro • caiu lowerState'
     return 'Bloqueado'
 }
 
 function blipIcon(status: BlipStatus) {
-    if (status === 'completed') return '✓'
-    if (status === 'current') return '▶'
-    if (status === 'failed') return '↓'
+    if (status === 'Correto') return '✓'
+    if (status === 'Atual') return '▶'
+    if (status === 'Errou') return '↓'
     return '🔒'
 }
 
 function blipClass(status: BlipStatus) {
-    if (status === 'completed') {
+    if (status === 'Correto') {
         return 'cursor-pointer border-brand-500 bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_10px_0_0_rgba(185,28,28,0.85)] hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(185,28,28,0.8)]'
     }
 
-    if (status === 'current') {
+    if (status === 'Atual') {
         return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-white shadow-[0_10px_0_0_rgba(239,68,68,0.55)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.45)]'
     }
 
-    if (status === 'failed') {
+    if (status === 'Errou') {
         return 'cursor-pointer border-brand-200 bg-red-50 text-brand-600 shadow-[0_8px_0_0_rgba(254,202,202,0.95)]'
     }
 
@@ -410,9 +406,9 @@ function blipClass(status: BlipStatus) {
 }
 
 function blipLabelClass(status: BlipStatus) {
-    if (status === 'completed') return 'text-brand-600'
-    if (status === 'current') return 'text-ink-900'
-    if (status === 'failed') return 'text-brand-600'
+    if (status === 'Correto') return 'text-brand-600'
+    if (status === 'Atual') return 'text-ink-900'
+    if (status === 'Errou') return 'text-brand-600'
     return 'text-ink-500'
 }
 
@@ -425,11 +421,56 @@ function lowerExtraCount(island: Island) {
 }
 
 function enterIsland(island: Island) {
-    if (island.status === 'locked') return
+    if (island.status === 'Não Iniciado') return
     selectedIslandId.value = island.id
 }
 
 function leaveIsland() {
     selectedIslandId.value = null
 }
+
+async function fetchIslandByUserAndCurrentModule() {
+    loadingPush();
+
+    try {
+        const userId = getUserIdFromSession()
+
+        if (!userId) {
+            return
+        }
+
+        const responsePhase = await $httpClient.phase.GetCurrentPhaseUser(userId);
+
+        if (responsePhase.result != null)
+        {
+            await fetchCurrentModuleIslands(userId, responsePhase.result.id);
+        }
+
+        toast.success('Progresso das ilhas carregado com sucesso!');
+    } catch (error) {
+        console.error('Erro ao buscar progresso do aluno nas ilhas:', error);
+        toast.error('Não foi possível carregar o progresso das ilhas. Tente novamente mais tarde.');
+    } finally {
+        loadingPop();
+    }
+}
+
+async function fetchCurrentModuleIslands(userId: number, phaseId: number) {
+    try {
+        const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(userId, phaseId);
+
+        if (response.result) {
+            islands.value = response.result;
+        } else {
+            toast.error('Não foi possível carregar as ilhas para o módulo atual.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar ilhas do módulo atual:', error);
+        toast.error('Ocorreu um erro ao carregar as ilhas. Tente novamente mais tarde.');
+    }
+}
+
+onMounted(async () => {
+    await fetchIslandByUserAndCurrentModule();
+})
 </script>
