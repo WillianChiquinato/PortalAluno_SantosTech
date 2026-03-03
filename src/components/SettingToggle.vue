@@ -144,6 +144,7 @@ function applyThemeState(enabled: boolean, animate: boolean) {
 
   if (currentState === targetIdleState) {
     animation.stateMachineSetBooleanInput('toggle', enabled)
+    scheduleThemeApply(enabled)
     return true
   }
 
