@@ -25,6 +25,8 @@ export interface Blip {
   exercise: Exercise
   state: BlipStatus
   origin: number
+  phaseId: number
+  userExerciseFlowId: number
 }
 
 export interface Exercise {

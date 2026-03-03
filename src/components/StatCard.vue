@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<{
 const statusMap: Record<StatStatus, { label: string; classes: string }> = {
   success: {
     label: 'Otimo',
-    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    classes: 'border-success-200 bg-success-200/20 text-success-600',
   },
   progress: {
     label: 'Evoluindo',

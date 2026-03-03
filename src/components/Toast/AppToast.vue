@@ -127,9 +127,9 @@ const iconMap: Record<string, string> = {
 }
 
 .app-toast.success {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-success-500) 95%, transparent) 0%, color-mix(in srgb, var(--color-success-600) 95%, transparent) 100%);
     color: #ffffff;
-    border-color: rgba(167, 243, 208, 0.55);
+    border-color: color-mix(in srgb, var(--color-success-200) 65%, transparent);
 }
 
 .app-toast.error {
@@ -348,39 +348,39 @@ const iconMap: Record<string, string> = {
 
 @media (max-width: 640px) {
 
-  .p-toast {
-    width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    transform: none !important;
-    padding: 0 12px;
-  }
+    .p-toast {
+        width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        padding: 0 12px;
+    }
 
-  .p-toast-top-right,
-  .p-toast-top-center {
-    top: 16px !important;
-    left: 0 !important;
-    right: 0 !important;
-    transform: none !important;
-    display: flex;
-    justify-content: center;
-  }
+    .p-toast-top-right,
+    .p-toast-top-center {
+        top: 16px !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        display: flex;
+        justify-content: center;
+    }
 
-  .app-toast {
-    width: 100%;
-    max-width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    gap: 12px;
-  }
+    .app-toast {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        gap: 12px;
+    }
 
-  .content {
-    min-width: 0;
-  }
+    .content {
+        min-width: 0;
+    }
 
-  .toast-title,
-  .toast-message {
-    word-break: break-word;
-  }
+    .toast-title,
+    .toast-message {
+        word-break: break-word;
+    }
 }
 </style>

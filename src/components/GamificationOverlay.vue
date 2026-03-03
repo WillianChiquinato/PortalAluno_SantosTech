@@ -5,7 +5,7 @@
         <transition name="fade-scale">
             <div v-if="showXPAnimation" class="absolute bottom-8 right-8 flex flex-col items-center">
                 <BaseLottie :animationData="xpBurstAnimation" :loop="false" :autoplay="true" class="w-28 h-28" />
-                <span class="mt-1 text-lg font-bold text-green-500">
+                <span class="mt-1 text-lg font-bold text-success-500">
                     +{{ xpGained }} XP
                 </span>
             </div>

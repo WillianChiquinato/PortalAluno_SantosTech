@@ -30,7 +30,7 @@ const RandomNames = [
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .fade-enter-active,
 .fade-appear-active,
 .fade-leave-active {
@@ -89,6 +89,10 @@ const RandomNames = [
     box-shadow:
         0 16px 36px color-mix(in srgb, var(--color-ink-900) 45%, transparent),
         inset 0 1px 0 color-mix(in srgb, var(--color-sand-100) 22%, transparent);
+
+    @media (max-width: 450px) {
+        width: min(77vw, 300px);
+    }
 }
 
 .loading-card::before {

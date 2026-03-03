@@ -21,7 +21,7 @@
                             </p>
                         </div>
 
-                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-4">
+                        <div class="grid gap-2 grid-cols-2 sm:grid-cols-2 xl:grid-cols-4">
                             <div class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100">
                                 <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Ilhas concluídas</p>
                                 <p class="mt-1 text-xl font-semibold">{{ completedIslands }}/{{ islands.length }}</p>
@@ -75,7 +75,8 @@
                                 class="pointer-events-none absolute inset-0 rounded-2xl border border-slate-200/80 bg-slate-100/45 backdrop-blur-[1px]">
                             </div>
 
-                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" class="absolute right-4 top-4 z-20">
+                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                class="absolute right-4 top-4 z-20">
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink-700">
                                     <span class="leading-none">🔒</span>
@@ -120,23 +121,25 @@
                                     :style="{ width: `${island.progress}%` }"></div>
                             </div>
 
-                            <div class="flex items-center justify-between gap-3">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <p class="text-xs"
                                     :class="island.status === 'Não Iniciado' ? 'text-ink-700 font-medium' : 'text-ink-500'">
                                     {{ island.blips.length }} exercícios nesta ilha
                                 </p>
 
-                                <button class="h-10 px-4 text-ink-900"
+                                <button class="h-10 px-5 text-ink-900"
                                     :class="island.status === 'Não Iniciado' || island.status === 'Desconhecido'
                                         ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
                                         : island.status === 'Concluído' ? 'btn-primary cursor-pointer' : 'btn-primary cursor-pointer'"
-                                    :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" @click="enterIsland(island)">
+                                    :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                    @click="enterIsland(island)">
                                     {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status ===
-                                        'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
+                                    'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
                                 </button>
                             </div>
 
-                            <p v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'" class="mt-3 text-xs text-ink-700">
+                            <p v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                class="mt-3 text-xs text-ink-700">
                                 Conclua a ilha anterior para desbloquear este conteúdo.
                             </p>
                         </article>
@@ -219,7 +222,7 @@
                                             </h4>
 
                                             <button
-                                                class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
                                                 @click="toggleBlip(blip.exercise.id)">
                                                 Voltar para detalhes
                                             </button>
@@ -234,14 +237,14 @@
                                                 {{ blip.exercise.description }}
                                             </p>
 
-                                            <div class="flex flex-col gap-2">
+                                            <div class="flex flex-col justify-center gap-2">
                                                 <button
-                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
                                                     @click="enterExercise(blip)">
                                                     Missão +{{ blip.exercise.pointsRedeem }} Pts
                                                 </button>
                                                 <button
-                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-1 font-bold text-emerald-600 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 hover:scale-102 transition-transform"
+                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-1 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
                                                     @click="toggleBlip(blip.exercise.id)">
                                                     Voltar para detalhes
                                                 </button>
@@ -293,16 +296,50 @@
             </p>
         </section>
     </div>
+
+    <ExercisesCard :visible="showTaskQuizModal" :task="selectedTask" :daily-task="selectedDailyTask"
+        :exercises="availableExercises" :loading="quizLoading" :questions="quizQuestions"
+        :selected-answers="selectedAnswers" :selected-code-answers="selectedCodeAnswers"
+        :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
+        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
+        @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
+        @finish-quiz="finishExercise" />
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref } from 'vue'
+import ExercisesCard from '~/components/ExercisesCard.vue';
 import BlipPopover from '~/components/UI/BlipPopover.vue'
 import type { Blip, BlipStatus, Island, IslandStatus } from '~/infra/interfaces/services/class'
+import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
+import type { ExerciseCardTask, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
+import { formatDate } from '~/utils/Format'
+import { getLoggedUser } from '~/composables/useAuth'
+import { useUserStore } from '~/infra/store/userStore'
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
+const userData = useUserStore()
+
+type DailyTaskSummary = {
+    id: number | string
+    title: string
+    due: string
+    points: string
+    status: string
+    description: string
+}
+
+const showTaskQuizModal = ref(false)
+const selectedDailyTask = ref<DailyTaskSummary | null>(null)
+const selectedTask = ref<ExerciseCardTask | null>(null)
+const quizLoading = ref(false)
+const quizQuestions = ref<QuizQuestion[]>([])
+const selectedAnswers = ref<Record<number, number | null>>({})
+const selectedCodeAnswers = ref<Record<number, string>>({})
+const currentQuestionIndex = ref(0)
+const taskResult = ref<{ correct: number; total: number; accuracy: number; gainedPoints: number } | null>(null)
 
 const showBlipOverlay = ref(false)
 const selectedBlip = ref<Blip | null>(null)
@@ -311,7 +348,7 @@ const activeBlipId = ref<number | null>(null)
 function toggleBlip(id: number) {
     const blip = islands.value.flatMap(island => island.blips).find(blip => blip.exercise.id === id);
     if (!blip || blip.state === 'Não iniciado') return;
-    
+
     activeBlipId.value =
         activeBlipId.value === id ? null : id
 }
@@ -323,6 +360,17 @@ function closeBlipOverlay() {
 
 function enterExercise(blip: Blip) {
     closeBlipOverlay()
+
+    if (!selectedIsland.value || blip.state === 'Não iniciado') {
+        return
+    }
+
+    selectedDailyTask.value = buildIslandSummary(selectedIsland.value)
+    const mappedTask = mapExerciseToTaskCard(blip.exercise)
+    selectedTask.value = mappedTask
+    showTaskQuizModal.value = true
+
+    startExerciseQuiz(mappedTask)
 }
 
 const islands = ref<Island[]>([]);
@@ -360,6 +408,252 @@ const activeIslandBlips = computed<Blip[]>(() => {
 
     return [...baseBlips]
 })
+
+const availableExercises = computed<ExerciseCardTask[]>(() => {
+    if (!selectedIsland.value) return []
+
+    return [...selectedIsland.value.blips]
+        .sort((firstBlip, secondBlip) => firstBlip.exercise.indexOrder - secondBlip.exercise.indexOrder)
+        .map((blip) => mapExerciseToTaskCard(blip.exercise))
+})
+
+function mapExerciseToTaskCard(exercise: Blip['exercise']): ExerciseCardTask {
+    const termAt = new Date(exercise.termAt).toISOString()
+
+    return {
+        id: exercise.id,
+        title: exercise.title,
+        due: formatDate(termAt, 'pt-BR', { dateStyle: 'short' }),
+        points: String(exercise.pointsRedeem),
+        status: exercise.isCompletedAnswer ? 'Concluída' : 'Em aberto',
+        description: exercise.description,
+        termAt,
+        source: {
+            id: exercise.id,
+            title: exercise.title,
+            description: exercise.description,
+            videoUrl: exercise.videoUrl,
+            pointsRedeem: exercise.pointsRedeem,
+            typeExercise: exercise.typeExercise,
+            difficulty: exercise.difficulty,
+        },
+        isCompletedAnswer: exercise.isCompletedAnswer,
+    }
+}
+
+function buildIslandSummary(island: Island): DailyTaskSummary {
+    const sortedBlips = [...island.blips].sort((firstBlip, secondBlip) => firstBlip.exercise.indexOrder - secondBlip.exercise.indexOrder)
+    const nearestTermAt = sortedBlips.length
+        ? sortedBlips.reduce((nearestDate, currentBlip) => {
+            const currentDate = new Date(currentBlip.exercise.termAt).getTime()
+            return currentDate < nearestDate ? currentDate : nearestDate
+        }, new Date(sortedBlips[0].exercise.termAt).getTime())
+        : Date.now()
+
+    const totalPoints = island.blips.reduce((accumulator, currentBlip) => accumulator + currentBlip.exercise.pointsRedeem, 0)
+
+    return {
+        id: island.id,
+        title: island.title,
+        due: formatDate(new Date(nearestTermAt).toISOString(), 'pt-BR', { dateStyle: 'short' }),
+        points: String(totalPoints),
+        status: statusLabel(island.status),
+        description: `${island.blips.length} exercício(s) disponíveis nesta ilha.`,
+    }
+}
+
+function resetQuizState() {
+    currentQuestionIndex.value = 0
+    selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
+
+    for (const question of quizQuestions.value) {
+        selectedAnswers.value[question.id] = null
+
+        if (question.typeExercise === 2) {
+            selectedCodeAnswers.value[question.id] = ''
+        }
+    }
+
+    taskResult.value = null
+}
+
+function getUserIdFromSession(): number | null {
+    if (userData.userId && userData.userId > 0) {
+        return userData.userId
+    }
+
+    const loggedUser = getLoggedUser()
+    const recoveredUserId = Number(loggedUser?.id)
+
+    if (!Number.isFinite(recoveredUserId) || recoveredUserId <= 0) {
+        return null
+    }
+
+    userData.setUserId(recoveredUserId)
+    return recoveredUserId
+}
+
+async function startExerciseQuiz(task: ExerciseCardTask) {
+    if (task.isCompletedAnswer) {
+        return
+    }
+
+    selectedTask.value = task
+    quizLoading.value = true
+
+    try {
+        const response = await $httpClient.exercise.GetQuizQuestionsForExercise(Number(task.id))
+        const options = (response.result ?? []) as IQuizQuestionOption[]
+
+        if (response.success && options.length) {
+            quizQuestions.value = buildTaskQuestionsFromOptions(task.source, options)
+        } else {
+            quizQuestions.value = buildTaskQuestions(task.source)
+        }
+
+        resetQuizState()
+    } catch (error) {
+        console.error('Erro ao carregar questões do exercício da ilha:', error)
+        toast.error('Erro', 'Não foi possível carregar as questões deste exercício.', 3500)
+        quizQuestions.value = buildTaskQuestions(task.source)
+        resetQuizState()
+    } finally {
+        quizLoading.value = false
+    }
+}
+
+function closeTaskQuiz() {
+    showTaskQuizModal.value = false
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
+    currentQuestionIndex.value = 0
+    taskResult.value = null
+}
+
+function backToExercises() {
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
+    currentQuestionIndex.value = 0
+    taskResult.value = null
+
+    showTaskQuizModal.value = false
+}
+
+function selectAnswer(questionId: number, optionIndex: number) {
+    selectedAnswers.value[questionId] = optionIndex
+}
+
+function updateCodeAnswer(questionId: number, answer: string) {
+    selectedCodeAnswers.value[questionId] = answer
+}
+
+function updateIslandProgressLocally(island: Island) {
+    if (!island.blips.length) {
+        island.progress = 0
+        island.status = 'Não Iniciado'
+        return
+    }
+
+    const completedCount = island.blips.filter((blip) => blip.state === 'Correto').length
+    island.progress = Math.round((completedCount / island.blips.length) * 100)
+
+    if (completedCount === island.blips.length) {
+        island.status = 'Concluído'
+    } else if (completedCount > 0) {
+        island.status = 'Em Progresso'
+    }
+}
+
+function markExerciseResultLocally(exerciseId: number, nextState: BlipStatus) {
+    for (const island of islands.value) {
+        const foundBlip = island.blips.find((blip) => blip.exercise.id === exerciseId)
+
+        if (!foundBlip) {
+            continue
+        }
+
+        foundBlip.exercise.isCompletedAnswer = true
+        foundBlip.state = nextState
+        updateIslandProgressLocally(island)
+        break
+    }
+
+    if (selectedTask.value && Number(selectedTask.value.id) === exerciseId) {
+        selectedTask.value.isCompletedAnswer = true
+        selectedTask.value.status = nextState === 'Correto' ? 'Concluída' : 'Errou'
+    }
+}
+
+async function finishExercise() {
+    if (!selectedTask.value) {
+        return
+    }
+
+    const userId = getUserIdFromSession()
+
+    if (!userId) {
+        toast.error('Sessão inválida', 'Faça login novamente para enviar o exercício.', 3500)
+        return
+    }
+
+    const objectiveQuestions = quizQuestions.value.filter((question) => question.typeExercise !== 2)
+    const hasDissertativeQuestion = quizQuestions.value.some((question) => question.typeExercise === 2)
+
+    const correctAnswers = objectiveQuestions.reduce((accumulator, question) => {
+        return accumulator + (selectedAnswers.value[question.id] === question.correctOptionIndex ? 1 : 0)
+    }, 0)
+
+    const totalObjectiveQuestions = objectiveQuestions.length
+    const accuracy = totalObjectiveQuestions > 0 ? Math.round((correctAnswers / totalObjectiveQuestions) * 100) : 100
+    const gainedPoints = Math.round((selectedTask.value.source.pointsRedeem * accuracy) / 100)
+
+    taskResult.value = {
+        correct: correctAnswers,
+        total: totalObjectiveQuestions,
+        accuracy,
+        gainedPoints,
+    }
+
+    const payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
+        exerciseId: selectedTask.value!.source.id,
+        userId,
+        questionId: question.id,
+        phaseId: islands.value.find(island => island.blips.some(blip => blip.exercise.id === Number(selectedTask.value!.id)))?.blips.find(blip => blip.exercise.id === Number(selectedTask.value!.id))?.phaseId ?? 0,
+        userExerciseFlowId: islands.value.find(island => island.blips.some(blip => blip.exercise.id === Number(selectedTask.value!.id)))?.blips.find(blip => blip.exercise.id === Number(selectedTask.value!.id))?.userExerciseFlowId ?? 0,
+        submissionData: {
+            selectedOption: question.typeExercise === 2 ? -1 : (selectedAnswers.value[question.id] ?? -1),
+            answerText: question.typeExercise === 2 ? (selectedCodeAnswers.value[question.id] ?? '').trim() : undefined,
+            isCorrect: question.typeExercise === 2
+                ? false
+                : selectedAnswers.value[question.id] === question.correctOptionIndex,
+            pointsEarned: question.typeExercise === 2
+                ? 0
+                : (selectedAnswers.value[question.id] === question.correctOptionIndex ? gainedPoints : 0),
+            submittedAt: new Date(),
+        },
+    }))
+
+    try {
+        const submitResponse = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise)
+
+        if (submitResponse.success) {
+            toast.success('Exercício enviado', 'Sua resposta foi registrada com sucesso.', 3000)
+        }
+    } catch (error) {
+        console.error('Erro ao enviar respostas do exercício da ilha:', error)
+        toast.error('Erro', 'Não foi possível enviar as respostas do exercício.', 3500)
+    } finally {
+        const nextState: BlipStatus = hasDissertativeQuestion || accuracy === 100 ? 'Correto' : 'Errou'
+        markExerciseResultLocally(Number(selectedTask.value.id), nextState)
+    }
+}
 
 function statusLabel(status: IslandStatus) {
     if (status === 'Concluído') return 'Concluída'
@@ -441,8 +735,7 @@ async function fetchIslandByUserAndCurrentModule() {
 
         const responsePhase = await $httpClient.phase.GetCurrentPhaseUser(userId);
 
-        if (responsePhase.result != null)
-        {
+        if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(userId, responsePhase.result.id);
         }
 

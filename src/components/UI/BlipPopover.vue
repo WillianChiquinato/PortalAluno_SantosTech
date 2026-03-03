@@ -10,10 +10,10 @@
                 <div class="w-0 h-0
                  border-l-[8px] border-l-transparent
                  border-r-[8px] border-r-transparent
-                 border-b-[8px] border-b-emerald-500" />
+                 border-b-[8px] border-b-success-500" />
             </div>
 
-            <div class="rounded-2xl bg-emerald-500 p-4 shadow-xl text-loading">
+            <div class="rounded-2xl bg-success-500 p-4 shadow-xl text-loading">
                 <slot />
             </div>
         </div>

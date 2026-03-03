@@ -6,27 +6,28 @@
                     <div class="flex items-center justify-between border-b border-red-100/80 px-5 py-4 sm:px-6">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Task diária</p>
-                            <h3 class="text-lg font-semibold text-ink-900">{{ props.task?.title ??
+                            <h3 class="text-md sm:text-lg font-semibold text-ink-900">{{ props.task?.title ??
                                 props.dailyTask?.title }}</h3>
                         </div>
 
-                        <button type="button" class="chip h-8 w-8 justify-center p-0 cursor-pointer"
+                        <button type="button" class="chip h-8 w-8 min-w-4 justify-center p-0 cursor-pointer"
                             @click="closeTaskQuiz" aria-label="Fechar modal de tarefa">
                             <i class="pi pi-times text-sm"></i>
                         </button>
                     </div>
 
-                    <div class="grid flex-1 gap-4 overflow-y-auto p-4 sm:grid-cols-[2fr_1fr] sm:p-6">
+                    <div class="hide-scrollbar grid flex-1 gap-4 overflow-y-auto p-4 sm:grid-cols-[2fr_1fr] sm:p-6">
                         <section class="panel border-red-100/80 p-4 sm:p-5">
                             <template v-if="!props.task">
-                                <h4 class="text-xl font-semibold">Exercícios disponíveis</h4>
+                                <h4 class="text-lg sm:text-xl font-semibold">Exercícios disponíveis</h4>
                                 <p class="mt-2 text-sm text-ink-500">Escolha um exercício para iniciar o quiz.</p>
 
                                 <div v-if="props.loading" class="mt-4">
                                     <p class="text-sm text-ink-500">Carregando questões do exercício...</p>
                                 </div>
 
-                                <div v-else class="mt-4 space-y-3">
+                                <div v-else
+                                    class="hide-scrollbar mt-4 max-h-[52vh] space-y-3 overflow-y-auto pr-1 sm:max-h-[58vh]">
                                     <button v-for="exercise in props.exercises" :key="exercise.id" type="button"
                                         class="relative w-full overflow-hidden rounded-xl border p-4 text-left transition"
                                         :class="exercise.isCompletedAnswer
@@ -77,7 +78,8 @@
                                 </div>
 
                                 <div v-else-if="currentQuestion.typeExercise === 2" class="mt-4 space-y-3">
-                                    <p class="text-sm text-ink-500">Dica: Se quiser, faça o exercício em uma IDE, após o término, cole sua resposta no campo abaixo e envie para avaliação.</p>
+                                    <p class="text-sm text-ink-500">Dica: Se quiser, faça o exercício em uma IDE, após o
+                                        término, cole sua resposta no campo abaixo e envie para avaliação.</p>
                                     <CodeEditor :model-value="props.selectedCodeAnswers[currentQuestion.id] ?? ''"
                                         placeholder="Digite seu código aqui..."
                                         @update:model-value="updateCodeAnswer(currentQuestion.id, $event)" />
@@ -164,7 +166,7 @@
                                             <p class="text-sm text-ink-800">{{ item.statement }}</p>
                                             <span class="chip" :class="item.isDissertative
                                                 ? 'text-blue-700'
-                                                : (item.isCorrect ? 'text-emerald-700' : 'text-red-600')">
+                                                : (item.isCorrect ? 'text-success-600' : 'text-red-600')">
                                                 {{ item.isDissertative ? 'Respondida' : (item.isCorrect ? 'Acertou' :
                                                     'Errou') }}
                                             </span>
@@ -426,5 +428,16 @@ function finishQuiz() {
     aspect-ratio: 16 / 9;
     border: none;
     border-radius: 0.75rem;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 </style>

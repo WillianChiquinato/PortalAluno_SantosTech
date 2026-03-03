@@ -52,6 +52,8 @@ export interface ISubmitExerciseAnswer {
   exerciseId: number
   userId: number
   questionId: number
+  phaseId?: number
+  userExerciseFlowId?: number
   submissionData: IAnswer
 }
 
@@ -61,6 +63,31 @@ export interface IAnswer {
   pointsEarned: number
   answerText?: string
   submittedAt: Date
+}
+
+export interface ExerciseCardTask {
+  id: number
+  title: string
+  due: string
+  points: string
+  status: string
+  description: string
+  termAt: string
+  isCompletedAnswer: boolean
+  source: ExerciseQuestionSource
+}
+
+export interface DailyTaskGroupView {
+  id: string
+  name: string
+  title: string
+  due: string
+  points: string
+  status: string
+  description: string
+  termAt: string
+  disabled: boolean
+  exercises: ExerciseCardTask[]
 }
 
 export default class ExerciseService extends ClientService<any> {

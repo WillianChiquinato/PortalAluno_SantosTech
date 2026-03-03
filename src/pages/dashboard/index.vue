@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-6">
+    <div class="space-y-6 overflow-x-hidden">
         <section class="panel overflow-hidden p-0">
             <div
                 class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
@@ -7,49 +7,54 @@
                     class="h-full w-full object-cover brightness-75" />
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
                 <div
-                    class="absolute left-8 top-4 text-xs font-semibold uppercase tracking-[0.2em] text-loading/90 box-border border-2 border-white/30 px-3 py-1 z-10 bg-loading/10 backdrop-blur-sm">
+                    class="absolute left-4 top-3 z-10 box-border border-2 border-white/30 bg-loading/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-loading/90 backdrop-blur-sm sm:left-8 sm:top-4 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
                     Perfil do aluno
                 </div>
             </div>
 
-            <div class="space-y-4 p-5 pt-4 z-10 relative">
-                <div class="-mt-14 flex flex-wrap items-end justify-between gap-4">
-                    <div class="flex items-end gap-4 min-w-0">
-                        <div class="relative h-25 w-25">
+            <div class="relative z-10 space-y-4 p-3 pt-4 sm:p-5">
+                <div class="-mt-14 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="flex min-w-0 items-end gap-3 sm:gap-4">
+                        <div class="relative h-20 w-20 sm:h-25 sm:w-25">
                             <span class="profile-frame"></span>
                             <img :src="profile?.profilePictureUrl ?? profileDefault"
-                                class="relative h-25 w-25 rounded-2xl border-4 border-white object-cover shadow-md bg-white" />
+                                class="relative h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow-md sm:h-25 sm:w-25" />
                         </div>
 
-                        <div class="space-y-1 min-w-0">
-                            <h2 class="text-lg font-semibold sm:text-xl truncate max-w-[180px] sm:max-w-none">{{ profile?.name ?? 'Nome não disponível' }}</h2>
-                            <p class="text-sm text-ink-500 truncate max-w-[180px] sm:max-w-none">{{ profile?.class?.name ?? 'Turma não disponível' }} • Nível {{ profile?.levelUser ?? 'Nível não disponível' }}</p>
+                        <div class="min-w-0 space-y-1">
+                            <h2 class="max-w-[150px] truncate text-base font-semibold sm:max-w-none sm:text-xl">{{
+                                profile?.name ?? 'Nome não disponível' }}</h2>
+                            <p class="max-w-[150px] truncate text-xs text-ink-500 sm:max-w-none sm:text-sm">{{
+                                profile?.class?.name ?? 'Turma não disponível' }} • Nível {{ profile?.levelUser ??
+                                    'Nível não disponível' }}</p>
                         </div>
                     </div>
 
-                    <div class="flex flex-row gap-2">
-                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600"
+                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
+                        <button
+                            class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
                             @click="openUploadCoverAndPicture">Editar
                             Fotos</button>
-                        <button class="bg-red-50 btn-outline h-9 px-4 text-xs cursor-pointer text-brand-600"
+                        <button
+                            class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
                             @click="openEditAttributes">Editar
                             Perfil</button>
                     </div>
                 </div>
 
-                <p class="text-sm text-ink-700">{{ profile?.bio ?? 'Bio não disponível' }}</p>
+                <p class="text-xs text-ink-700 sm:text-sm">{{ profile?.bio ?? 'Bio não disponível' }}</p>
 
-                <section class="grid gap-3 lg:grid-cols-3">
+                <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     <StatCard v-for="stat in stats" :key="stat.label" v-bind="stat" />
                 </section>
 
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Medalhas</p>
-                        <span class="chip">{{ unlockedMedals ?? 0 }} desbloqueadas</span>
+                        <span class="chip shrink-0">{{ unlockedMedals ?? 0 }} desbloqueadas</span>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                         <div v-for="(badge, index) in badgeSlots" :key="badge.name"
                             class="rounded-xl border p-1 text-center text-xs cursor-pointer" :class="[
                                 badge.unlocked ? 'border-brand-200 bg-red-50 text-brand-600 medal-idle' : 'border-slate-200 bg-slate-50 text-ink-500',
@@ -67,20 +72,21 @@
             </div>
         </section>
 
-        <section class="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <section class="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
             <div class="space-y-1">
-                <div class="flex items-start justify-between">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex items-center">
-                        <h3 class="text-xl font-semibold leading-none">
+                        <h3 class="text-lg font-semibold leading-none sm:text-xl">
                             Tarefas diarias
                         </h3>
 
-                        <div class="w-20 h-20">
-                            <BaseLottie :animation-data="TaskList" :loop="true" :autoplay="true" class="w-16 h-16" />
+                        <div class="h-14 w-14 sm:h-20 sm:w-20">
+                            <BaseLottie :animation-data="TaskList" :loop="true" :autoplay="true"
+                                class="h-12 w-12 sm:h-16 sm:w-16" />
                         </div>
                     </div>
 
-                    <span class="chip self-center">
+                    <span class="chip self-start sm:self-center">
                         {{ dailyTasksCards.length }} pendentes
                     </span>
                 </div>
@@ -96,11 +102,10 @@
                 </div>
             </div>
 
-            <div class="panel flex flex-col gap-4 p-5">
+            <div class="panel flex flex-col gap-4 p-4 sm:p-5">
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
 
-                        <!-- Warning Status Lottie -->
                         <div class="w-10 h-10">
                             <BaseLottie :animation-data="warningStatus" :loop="true" :autoplay="true"
                                 class="w-12 h-12" />
@@ -117,18 +122,19 @@
                 </div>
 
                 <div class="space-y-4">
-                    <div v-for="item in highlights" :key="item.label" class="flex items-center justify-between">
-                        <div>
+                    <div v-for="item in highlights" :key="item.label" class="flex items-center justify-between gap-3">
+                        <div class="min-w-0">
                             <p class="text-sm font-semibold">{{ item.label }}</p>
                             <p class="text-xs text-ink-500">{{ item.helper }}</p>
                         </div>
-                        <span class="text-lg font-semibold">{{ item.value }}</span>
+                        <span class="shrink-0 text-right text-lg font-semibold">{{ item.value }}</span>
                     </div>
                 </div>
                 <div class="panel mt-2 flex flex-col gap-2 bg-red-50 p-4">
                     <p class="text-sm font-semibold">Desafio semanal</p>
                     <p class="text-xs text-ink-500">Estilizar carrossel central usando classes e IDs.</p>
-                    <button class="btn-primary mt-2 h-9 px-4 text-xs text-ink-900">Ver briefing</button>
+                    <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto">Ver
+                        briefing</button>
                 </div>
             </div>
         </section>
@@ -217,7 +223,7 @@ import CreatedEditModal from '~/components/Modals/CreatedEditModal.vue'
 import ExercisesCard from '~/components/ExercisesCard.vue'
 
 import { isEmailValid } from '#imports'
-import type { IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
+import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask } from '~/infra/interfaces/services/exercise'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 
@@ -271,34 +277,9 @@ const stats = computed<Array<{
 
 const tasks = ref<IDailyTaskGroup[]>([]);
 
-type TaskCardView = {
-    id: number
-    title: string
-    due: string
-    points: string
-    status: string
-    description: string
-    termAt: string
-    isCompletedAnswer: boolean
-    source: ExerciseQuestionSource
-}
-
-type DailyTaskGroupView = {
-    id: string
-    name: string
-    title: string
-    due: string
-    points: string
-    status: string
-    description: string
-    termAt: string
-    disabled: boolean
-    exercises: TaskCardView[]
-}
-
 const showTaskQuizModal = ref(false)
 const selectedDailyTask = ref<DailyTaskGroupView | null>(null)
-const selectedTask = ref<TaskCardView | null>(null)
+const selectedTask = ref<ExerciseCardTask | null>(null)
 const quizLoading = ref(false)
 const quizQuestions = ref<QuizQuestion[]>([])
 const selectedAnswers = ref<Record<number, number | null>>({})
@@ -403,7 +384,7 @@ function getGroupStatus(exercises: IDailyExercise[]): string {
     return 'Em aberto'
 }
 
-function mapExerciseToTaskCard(exercise: IDailyExercise): TaskCardView {
+function mapExerciseToTaskCard(exercise: IDailyExercise): ExerciseCardTask {
     return {
         id: exercise.id,
         title: exercise.title,
@@ -455,7 +436,7 @@ function openDailyTask(task: DailyTaskGroupView) {
     showTaskQuizModal.value = true
 }
 
-async function startExerciseQuiz(task: TaskCardView) {
+async function startExerciseQuiz(task: ExerciseCardTask) {
     if (task.isCompletedAnswer) return
 
     selectedTask.value = task
