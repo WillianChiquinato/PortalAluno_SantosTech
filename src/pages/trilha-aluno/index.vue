@@ -195,17 +195,23 @@
                     </div>
 
                     <div
-                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-red-100/80 bg-accent-300 p-4 sm:p-5">
+                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-red-100/80 bg-accent-300 p-4 sm:p-5 lg:max-w-5xl lg:px-10 lg:py-8">
                         <div
-                            class="pointer-events-none absolute bottom-8 left-1/2 top-8 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-brand-500/80 via-brand-200/70 to-slate-300">
+                            class="pointer-events-none absolute bottom-8 left-1/2 top-8 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-brand-600 via-brand-500/80 to-brand-300/60 lg:hidden">
                         </div>
 
-                        <div class="space-y-6 sm:space-y-7">
+                        <div class="space-y-6 sm:space-y-7 lg:space-y-0">
                             <div v-for="(blip, blipIndex) in activeIslandBlips" :key="blip.exercise.id" class="relative"
-                                :class="blipRowClass(blipIndex)">
-                                <div class="flex w-1/2"
-                                    :class="blipIndex % 2 === 0 ? 'justify-end pr-3 sm:pr-5' : 'justify-start pl-3 sm:pl-5'">
-                                    <div class="relative flex flex-col items-center gap-2">
+                                :class="[blipRowClass(blipIndex), activeBlipId === blip.exercise.id ? 'z-40' : 'z-10']">
+                                <div v-if="blipIndex < activeIslandBlips.length - 1"
+                                    class="pointer-events-none absolute hidden lg:block border-t-[5px] border-dashed border-brand-500/75"
+                                    :style="blipConnectorStyle(blipIndex)">
+                                </div>
+
+                                <div class="flex w-1/2" :class="blipNodeContainerClass(blipIndex)"
+                                    :style="blipNodeStyle(blipIndex)">
+                                    <div class="relative flex flex-col items-center gap-2"
+                                        :class="activeBlipId === blip.exercise.id ? 'z-[60]' : 'z-[60]'">
                                         <button
                                             class="relative inline-flex h-16 w-18 items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200"
                                             :class="blipClass(blip.state)" :disabled="blip.state === 'Não iniciado'"
@@ -252,7 +258,7 @@
                                         </BlipPopover>
 
                                         <div class="max-w-28 text-center">
-                                            <p class="text-xs font-semibold text-ink-700">
+                                            <p class="text-sm font-bold text-ink-700">
                                                 {{ blip.exercise.title }}
                                             </p>
                                         </div>
@@ -260,7 +266,7 @@
                                 </div>
 
                                 <div
-                                    class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-100 bg-white">
+                                    class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-100 bg-white lg:hidden">
                                 </div>
                             </div>
                         </div>
@@ -399,6 +405,11 @@ const completionRate = computed(() => {
 })
 
 const LOWER_EXTRA_RATIO = 0.3
+const BLIP_CURVE_AMPLITUDE = 140
+const BLIP_CURVE_PHASE_STEP = 0.9
+const BLIP_MAX_SAFE_OFFSET = 120
+const BLIP_DESKTOP_ROW_HEIGHT = 168
+const BLIP_CONNECTOR_START_Y = 34
 
 const activeIslandBlips = computed<Blip[]>(() => {
     if (!selectedIsland.value) return []
@@ -689,7 +700,7 @@ function blipClass(status: BlipStatus) {
     }
 
     if (status === 'Atual') {
-        return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-white shadow-[0_10px_0_0_rgba(239,68,68,0.55)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.45)]'
+        return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-ink-900 shadow-[0_10px_0_0_rgba(239,68,68,0.65)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.55)]'
     }
 
     if (status === 'Errou') {
@@ -707,7 +718,41 @@ function blipLabelClass(status: BlipStatus) {
 }
 
 function blipRowClass(index: number) {
-    return index % 2 === 0 ? 'flex justify-start' : 'flex justify-end'
+    return `${index % 2 === 0 ? 'flex justify-start' : 'flex justify-end'} lg:flex lg:justify-center lg:items-start lg:min-h-[168px]`
+}
+
+function blipNodeContainerClass(index: number) {
+    return `${index % 2 === 0 ? 'justify-end pr-3 sm:pr-5' : 'justify-start pl-3 sm:pl-5'} lg:w-full lg:justify-center lg:pr-0 lg:pl-0 lg:translate-x-[var(--blip-offset)]`
+}
+
+function blipOffset(index: number) {
+    const rawOffset = Math.sin(index * BLIP_CURVE_PHASE_STEP) * BLIP_CURVE_AMPLITUDE
+    return Math.max(-BLIP_MAX_SAFE_OFFSET, Math.min(BLIP_MAX_SAFE_OFFSET, rawOffset))
+}
+
+function blipNodeStyle(index: number) {
+    const offset = blipOffset(index)
+
+    return {
+        '--blip-offset': `${offset.toFixed(0)}px`
+    }
+}
+
+function blipConnectorStyle(index: number) {
+    const currentOffset = blipOffset(index)
+    const nextOffset = blipOffset(index + 1)
+    const deltaX = nextOffset - currentOffset
+    const deltaY = BLIP_DESKTOP_ROW_HEIGHT
+    const length = Math.sqrt((deltaX ** 2) + (deltaY ** 2))
+    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+
+    return {
+        left: `calc(50% + ${currentOffset.toFixed(0)}px)`,
+        top: `${BLIP_CONNECTOR_START_Y}px`,
+        width: `${length.toFixed(1)}px`,
+        transform: `rotate(${angle.toFixed(2)}deg)`,
+        transformOrigin: 'left center',
+    }
 }
 
 function lowerExtraCount(island: Island) {
