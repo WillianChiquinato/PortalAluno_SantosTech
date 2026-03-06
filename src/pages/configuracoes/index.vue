@@ -7,7 +7,8 @@
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Preferências</p>
                         <h2 class="text-2xl font-semibold text-tag-100">Configurações</h2>
-                        <p class="mt-1 text-sm text-tag-100/80">Personalize notificações e experiência na plataforma.</p>
+                        <p class="mt-1 text-sm text-tag-100/80">Personalize notificações e experiência na plataforma.
+                        </p>
                     </div>
 
                     <span
@@ -40,8 +41,10 @@
             <h3 class="text-lg font-semibold">Segurança</h3>
             <p class="text-sm text-ink-500">Atualize dados sensíveis e mantenha sua conta protegida.</p>
             <div class="flex flex-wrap items-center gap-3">
-                <button class="text-ink-900 btn-primary h-10 px-4 text-sm cursor-pointer"
-                    @click="showModalConfirmedEmail = true">Confirmar email</button>
+                <button
+                    class="text-ink-900 btn-primary h-10 px-4 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="showModalConfirmedEmail = true" :disabled="!userConfigs.receiveEmailNotifications">Confirmar
+                    email</button>
             </div>
 
             <SendEmailModal v-model:visible="showModalConfirmedEmail" :name="'Confirme seu e-mail'"

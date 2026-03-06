@@ -66,82 +66,90 @@
                             class="pointer-events-none absolute inset-y-4 left-1/2 hidden -translate-x-1/2 border-l-2 border-dashed border-red-200 lg:block">
                         </div>
 
-                        <article v-for="(island, islandIndex) in islands" :key="island.id"
-                            class="relative panel p-4 sm:p-5" :class="[
-                                islandIndex % 2 === 0 ? 'lg:mr-24' : 'lg:ml-24',
-                                islandCardClass(island.status),
-                            ]">
-                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
-                                class="pointer-events-none absolute inset-0 rounded-2xl border border-slate-200/80 bg-slate-100/45 backdrop-blur-[1px]">
-                            </div>
-
-                            <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
-                                class="absolute right-4 top-4 z-20">
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink-700">
-                                    <span class="leading-none">🔒</span>
-                                    <span>Aguardando liberação</span>
-                                </span>
-                            </div>
-
-                            <div v-if="island.status === 'Concluído'" class="absolute right-4 top-4 z-20">
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-red-50 px-3 py-2 text-[13px] font-semibold text-brand-600">
-                                    <span class="leading-none">✓</span>
-                                    <span>Ilha concluída</span>
-                                </span>
-                            </div>
-
-                            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-ink-500">Ilha {{
-                                        island.order }}</p>
-                                    <h4 class="text-lg font-semibold">Ilha {{ island.title }}</h4>
-                                    <p class="text-xs text-ink-500">{{ island.helper }}</p>
+                        <template v-if="hasIslands">
+                            <article v-for="(island, islandIndex) in islands" :key="island.id"
+                                class="relative panel p-4 sm:p-5" :class="[
+                                    islandIndex % 2 === 0 ? 'lg:mr-24' : 'lg:ml-24',
+                                    islandCardClass(island.status),
+                                ]">
+                                <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                    class="pointer-events-none absolute inset-0 rounded-2xl border border-slate-200/80 bg-slate-100/45 backdrop-blur-[1px]">
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="chip" :class="[
-                                        island.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
-                                        island.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
-                                        island.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
-                                        island.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
-                                    ]">
-                                        {{ statusLabel(island.status) }}
-                                    </span>
-                                    <span v-if="island.lowerState > 0"
-                                        class="chip !border-red-200 !bg-red-50 !text-brand-600">
-                                        lowerState {{ island.lowerState }}
+                                <div v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                    class="absolute right-4 top-4 z-20">
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink-700">
+                                        <span class="leading-none">🔒</span>
+                                        <span>Aguardando liberação</span>
                                     </span>
                                 </div>
-                            </div>
 
-                            <div class="mb-4 h-2 w-full overflow-hidden rounded-full bg-red-50">
-                                <div class="h-full rounded-full bg-gradient-to-r from-brand-600 to-accent-500"
-                                    :style="{ width: `${island.progress}%` }"></div>
-                            </div>
+                                <div v-if="island.status === 'Concluído'" class="absolute right-4 top-4 z-20">
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-red-50 px-3 py-2 text-[13px] font-semibold text-brand-600">
+                                        <span class="leading-none">✓</span>
+                                        <span>Ilha concluída</span>
+                                    </span>
+                                </div>
 
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <p class="text-xs"
-                                    :class="island.status === 'Não Iniciado' ? 'text-ink-700 font-medium' : 'text-ink-500'">
-                                    {{ island.blips.length }} exercícios nesta ilha
+                                <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-ink-500">Ilha
+                                            {{
+                                                island.order }}</p>
+                                        <h4 class="text-lg font-semibold">Ilha {{ island.title }}</h4>
+                                        <p class="text-xs text-ink-500">{{ island.helper }}</p>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="chip" :class="[
+                                            island.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
+                                            island.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
+                                            island.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                            island.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
+                                        ]">
+                                            {{ statusLabel(island.status) }}
+                                        </span>
+                                        <span v-if="island.lowerState > 0"
+                                            class="chip !border-red-200 !bg-red-50 !text-brand-600">
+                                            lowerState {{ island.lowerState }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4 h-2 w-full overflow-hidden rounded-full bg-red-50">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-brand-600 to-accent-500"
+                                        :style="{ width: `${island.progress}%` }"></div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <p class="text-xs"
+                                        :class="island.status === 'Não Iniciado' ? 'text-ink-700 font-medium' : 'text-ink-500'">
+                                        {{ island.blips.length }} exercícios nesta ilha
+                                    </p>
+
+                                    <button class="h-10 px-5 text-ink-900"
+                                        :class="island.status === 'Não Iniciado' || island.status === 'Desconhecido'
+                                            ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
+                                            : island.status === 'Concluído' ? 'btn-primary cursor-pointer' : 'btn-primary cursor-pointer'"
+                                        :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                        @click="enterIsland(island)">
+                                        {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status ===
+                                        'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
+                                    </button>
+                                </div>
+
+                                <p v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
+                                    class="mt-3 text-xs text-ink-700">
+                                    Conclua a ilha anterior para desbloquear este conteúdo.
                                 </p>
-
-                                <button class="h-10 px-5 text-ink-900"
-                                    :class="island.status === 'Não Iniciado' || island.status === 'Desconhecido'
-                                        ? 'btn-outline cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500'
-                                        : island.status === 'Concluído' ? 'btn-primary cursor-pointer' : 'btn-primary cursor-pointer'"
-                                    :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
-                                    @click="enterIsland(island)">
-                                    {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status ===
-                                    'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
-                                </button>
-                            </div>
-
-                            <p v-if="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
-                                class="mt-3 text-xs text-ink-700">
-                                Conclua a ilha anterior para desbloquear este conteúdo.
-                            </p>
+                            </article>
+                        </template>
+                        <article v-else class="panel border-slate-200 bg-slate-50/70 p-5 text-center">
+                            <p class="text-base font-semibold text-ink-700">Nenhuma ilha disponível</p>
+                            <p class="mt-1 text-sm text-ink-500">Assim que novas ilhas forem liberadas, elas aparecerão
+                                aqui.</p>
                         </article>
                     </div>
                 </div>
@@ -169,7 +177,8 @@
                                 Lower fixa • +30%
                             </span>
                             <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer"
-                                @click="leaveIsland">Voltar para ilhas</button>
+                                @click="leaveIsland">Voltar para
+                                ilhas</button>
                         </div>
                     </div>
 
@@ -387,6 +396,8 @@ const selectedIsland = computed(() => {
     return islands.value.find((island) => island.id === selectedIslandId.value) ?? null
 })
 
+const hasIslands = computed(() => islands.value.length > 0)
+
 const totalBlips = computed(() => islands.value.reduce((acc, island) => acc + island.blips.length, 0))
 
 const completedBlips = computed(() => islands.value.reduce((acc, island) => {
@@ -405,9 +416,9 @@ const completionRate = computed(() => {
 })
 
 const LOWER_EXTRA_RATIO = 0.3
-const BLIP_CURVE_AMPLITUDE = 140
+const BLIP_CURVE_AMPLITUDE = 125
 const BLIP_CURVE_PHASE_STEP = 0.9
-const BLIP_MAX_SAFE_OFFSET = 120
+const BLIP_MAX_SAFE_OFFSET = 105
 const BLIP_DESKTOP_ROW_HEIGHT = 168
 const BLIP_CONNECTOR_START_Y = 34
 
@@ -783,8 +794,6 @@ async function fetchIslandByUserAndCurrentModule() {
         if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(userId, responsePhase.result.id);
         }
-
-        toast.success('Progresso das ilhas carregado com sucesso!');
     } catch (error) {
         console.error('Erro ao buscar progresso do aluno nas ilhas:', error);
         toast.error('Não foi possível carregar o progresso das ilhas. Tente novamente mais tarde.');
@@ -799,6 +808,7 @@ async function fetchCurrentModuleIslands(userId: number, phaseId: number) {
 
         if (response.result) {
             islands.value = response.result;
+            toast.success('Progresso carregado', 'As ilhas do módulo atual foram carregadas com sucesso.', 3000)
         } else {
             toast.error('Não foi possível carregar as ilhas para o módulo atual.');
         }

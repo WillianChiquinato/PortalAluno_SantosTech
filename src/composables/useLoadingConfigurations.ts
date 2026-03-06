@@ -41,6 +41,7 @@ export function useLoadingConfigurations() {
       const responseConfig = await $httpClient.auth.GetConfigsByUserId(userId ?? 0)
 
       if (!responseConfig.success) {
+        await $httpClient.auth.CreateNewConfig(userId ?? 0);
         return
       }
 

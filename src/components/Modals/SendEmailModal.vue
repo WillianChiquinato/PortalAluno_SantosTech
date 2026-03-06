@@ -11,13 +11,15 @@
                         </button>
                     </div>
 
-                    <div class="space-y-4 bg-gradient-to-b from-white to-red-50/30 px-6 py-5">
+                    <div class="space-y-2 bg-gradient-to-b from-white to-red-50/30 px-6 py-5">
                         <p class="text-sm text-ink-700">
-                            Enviamos um e-mail para <strong>{{ userData.userEmail }}</strong> com código de
+                            Enviamos um e-mail para <strong>{{ userEmail }}</strong> com código de
                             confirmação. Por
                             favor, insira o código abaixo para confirmar seu endereço de e-mail.
                         </p>
-                        <div class="flex flex-col items-center gap-4 mt-6">
+                        <p class="flex w-full justify-center text-sm text-ink-700 font-bold">Verifique sua caixa de SPAM
+                        </p>
+                        <div class="flex flex-col items-center gap-4">
                             <div class="flex gap-2 justify-center">
                                 <input v-for="(digit, idx) in codeDigits" :key="idx" :ref="setCodeInputRef(idx)"
                                     v-model="codeDigits[idx]" type="text" inputmode="numeric" maxlength="1"
@@ -26,11 +28,17 @@
                                     @input="onInput(idx, $event)" @keydown.backspace="onBackspace(idx, $event)"
                                     @paste="onPaste($event)" />
                             </div>
-                            <div class="flex flex-col gap-2 w-full mt-2">
+                            <div v-if="!EmailSendState" class="flex flex-col gap-2 w-full mt-2">
+                                <button class="btn btn-primary flex-1 cursor-pointer" @click="sendCode">
+                                    Enviar Código
+                                </button>
+                            </div>
+                            <div v-else class="flex flex-col gap-2 w-full mt-2">
                                 <button class="btn btn-primary flex-1 cursor-pointer" @click="confirmCode">
                                     Confirmar código
                                 </button>
-                                <button class="btn btn-secondary cursor-pointer hover:scale-103 transition-transform" @click="resendCode">
+                                <button class="btn btn-secondary cursor-pointer hover:scale-103 transition-transform"
+                                    @click="resendCode">
                                     Reenviar código
                                 </button>
                             </div>
@@ -43,7 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
+import { getLoggedUser } from '~/composables/useAuth';
 import { useUserStore } from '~/infra/store/userStore';
 
 const emit = defineEmits<{
@@ -55,7 +64,10 @@ const model = defineModel<boolean>('visible', { default: false })
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
-const userData = useUserStore()
+const userData = useUserStore();
+const userEmail = computed(() => userData.userEmail || getLoggedUser()?.email || '');
+
+const EmailSendState = ref(false);
 
 const props = withDefaults(defineProps<{
     name: string
@@ -108,17 +120,63 @@ function onPaste(event: ClipboardEvent) {
     }
 }
 
-function confirmCode() {
+async function sendCode() {
+    if (!userEmail.value) {
+        toast.error('Email nao encontrado', 'Nao foi possivel identificar seu email. Faça login novamente e tente de novo.', 3500);
+        return;
+    }
+
+    loadingPush()
+
+    try {
+        const response = await $httpClient.user.SendEmailVerify(userEmail.value);
+
+        if (response.success) {
+            toast.success('Código enviado', 'O código de confirmação foi enviado para seu e-mail.', 3000);
+            EmailSendState.value = true;
+        }
+    } catch (error) {
+        toast.error('Erro ao enviar código', 'Ocorreu um erro ao enviar o código. Por favor, tente novamente.', 3000);
+    } finally {
+        loading.value = false
+        loadingPop()
+    }
+}
+
+async function confirmCode() {
     const code = codeDigits.value.join('');
+
+    if (!userEmail.value) {
+        toast.error('Email nao encontrado', 'Nao foi possivel identificar seu email. Faça login novamente e tente de novo.', 3500);
+        return;
+    }
 
     if (code.length !== 6) {
         toast.error('Código inválido', 'Por favor, insira o código de 6 dígitos enviado para seu e-mail.', 3000);
         return;
     }
+
+    loadingPush();
+
+    try {
+        const resultCorreclyCode = await $httpClient.user.ConfirmEmailVerify(userEmail.value, code);
+        if (!resultCorreclyCode) {
+            toast.error('Código inválido', 'O código inserido é inválido. Por favor, tente novamente.', 3000);
+            return;
+        }
+
+        toast.success('E-mail confirmado', 'Seu endereço de e-mail foi confirmado com sucesso.', 3000);
+        handleBack();
+    } catch (error) {
+        toast.error('Código inválido', 'O código inserido é inválido. Por favor, tente novamente.', 3000);
+    } finally {
+        loadingPop();
+    }
 }
 
 function resendCode() {
-    // lógica para reenviar o código
+    codeDigits.value = Array(6).fill('');
+    sendCode();
 }
 </script>
 

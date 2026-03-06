@@ -108,4 +108,16 @@ export default class UserService extends ClientService<any> {
       ...config,
     })) as ApiResponse<string>
   }
+
+  ConfirmEmailVerify = async (
+    email: string,
+    code: string,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<string>> => {
+    return (await this.fetchInstance(`${this.address}/ConfirmEmailVerify`, {
+      method: 'POST',
+      body: { email, code },
+      ...config,
+    })) as ApiResponse<string>
+  }
 }

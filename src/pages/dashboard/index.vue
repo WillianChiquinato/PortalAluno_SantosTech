@@ -3,7 +3,7 @@
         <section class="panel overflow-hidden p-0">
             <div
                 class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
-                <img :src="profile?.coverPictureUrl ?? backgroundDefault" alt="Capa do perfil"
+                <img :src="profile?.coverPictureUrl !== null && profile?.coverPictureUrl !== '' ? profile?.coverPictureUrl : backgroundDefault" alt="Capa do perfil"
                     class="h-full w-full object-cover brightness-75" />
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
                 <div
@@ -17,7 +17,7 @@
                     <div class="flex min-w-0 items-end gap-3 sm:gap-4">
                         <div class="relative h-20 w-20 sm:h-25 sm:w-25">
                             <span class="profile-frame"></span>
-                            <img :src="profile?.profilePictureUrl ?? profileDefault"
+                            <img :src="profile?.profilePictureUrl !== null && profile?.profilePictureUrl !== '' ? profile?.profilePictureUrl : profileDefault"
                                 class="relative h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow-md sm:h-25 sm:w-25" />
                         </div>
 

@@ -18,7 +18,7 @@ export default class PhaseService extends ClientService<any> {
     userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<ICurrentPhaseUser>> => {
-    let urlParams = `/GetCurrentPhaseUser/?userId=${userId}`
+    let urlParams = `/GetCurrentPhaseUser?userId=${userId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

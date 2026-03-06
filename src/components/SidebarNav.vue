@@ -15,7 +15,7 @@
 
         <div class="flex-1 space-y-4">
             <NuxtLink v-for="item in navItems" :key="item.path" :to="item.path"
-                :class="['nav-link', isActive(item.path) && 'nav-link-active', isActive(item.path) ? 'text-ink-900 scale-107' : 'text-ink-500']"
+                :class="['nav-link', isActive(item.path) && 'nav-link-active', isActive(item.path) ? 'text-ink-900 scale-107' : 'text-ink-500', item.isActive ? '' : 'pointer-events-none opacity-50']"
                 class="hover:scale-104 transition-transform">
                 <span class="h-2 w-2 rounded-full"
                     :class="isActive(item.path) ? 'bg-accent-200' : 'bg-slate-300'"></span>
@@ -100,11 +100,11 @@ const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
 
 const navItems = [
-    { label: 'Dashboard', short: 'Home', icon: 'pi pi-home', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios' },
-    { label: 'Trilha do aluno', short: 'Trilha', icon: 'pi pi-compass', path: '/trilha-aluno', note: 'Fluxo e Exercicios' },
-    { label: 'Trilha de cursos', short: 'Cursos', icon: 'pi pi-book', path: '/trilha-cursos', note: 'Cursos Pagos e Personalizados' },
-    { label: 'Material adicional', short: 'Materiais', icon: 'pi pi-folder', path: '/materiais', note: 'Documentos para Atribuições' },
-    { label: 'Videos', short: 'Vídeos', icon: 'pi pi-video', path: '/videos', note: 'Videos Gerais' },
+    { label: 'Dashboard', short: 'Home', icon: 'pi pi-home', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios', isActive: true },
+    { label: 'Trilha do aluno', short: 'Trilha', icon: 'pi pi-compass', path: '/trilha-aluno', note: 'Fluxo e Exercicios', isActive: true },
+    { label: 'Trilha de cursos', short: 'Cursos', icon: 'pi pi-book', path: '/trilha-cursos', note: 'Cursos Pagos e muito mais', isActive: false },
+    { label: 'Material adicional', short: 'Materiais', icon: 'pi pi-folder', path: '/materiais', note: 'Documentos para Atribuições', isActive: true },
+    { label: 'Videos', short: 'Vídeos', icon: 'pi pi-video', path: '/videos', note: 'Videos Gerais', isActive: true },
 ]
 
 const footerItems = [
