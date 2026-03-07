@@ -39,3 +39,12 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 .env
+
+.output
+.nuxt
+.nuxt-storybook
+.nuxt/types
+.storybook-static
+storybook-static
+storybook-static-ssr
+storybook-static-ssr-*

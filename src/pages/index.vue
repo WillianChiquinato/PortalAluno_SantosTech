@@ -119,10 +119,9 @@ function onLottieComplete() {
     showLottieEffect.value = false;
 }
 
-function handlePassword() {
-    // Se já está na tela de recuperação, envia instruções e mostra tela de sucesso
+async function handlePassword() {
     if (showPasswordPage.value) {
-        showSentPage.value = true;
+        await sendPasswordRecoveryEmail();
     } else {
         showPasswordPage.value = true;
     }
@@ -131,6 +130,31 @@ function handlePassword() {
 function goHome() {
     showPasswordPage.value = false;
     showSentPage.value = false;
+}
+
+async function sendPasswordRecoveryEmail() {
+    if (!emailLogin.value) {
+        toast.error("Email obrigatório", "Por favor, insira seu email para recuperação de senha.", 3000);
+        return;
+    }
+
+    loadingPush();
+
+    try {
+        const response = await $httpClient.user.SendPasswordRecoveryEmail(emailLogin.value);
+
+        if (response.success) {
+            toast.success("Email enviado", "As instruções de recuperação de senha foram enviadas para seu email.", 3000);
+            showSentPage.value = true;
+        } else {
+            toast.error("Erro ao enviar email", "Não foi possível enviar o email de recuperação. Tente novamente mais tarde.", 3000);
+        }
+    } catch (error) {
+        console.error("Erro ao enviar email de recuperação:", error);
+        toast.error("Erro no servidor", "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.", 3000);
+    } finally {
+        loadingPop();
+    }
 }
 
 async function LoadUserData() {

@@ -88,6 +88,15 @@ type YoutubeNamespace = {
     PlayerState: YoutubePlayerState
 }
 
+type UserAnswerItem = {
+    id: number
+    question: string
+    answer: string
+    status: 'Correta' | 'Incorreta' | 'Pendente'
+    answeredAt: string
+    score?: number
+}
+
 declare global {
     interface Window {
         YT?: YoutubeNamespace
@@ -111,6 +120,11 @@ const progressSyncTimer = ref<ReturnType<typeof setInterval> | null>(null)
 const currentWatchSeconds = ref(0)
 const lastSavedWatchSeconds = ref(0)
 const hasCompletedVideo = ref(false)
+const lastObservedPlayerSecond = ref<number | null>(null)
+
+const PROGRESS_TICK_MS = 1000
+const MAX_ALLOWED_PROGRESS_DELTA_SECONDS = 3
+const COMPLETION_MIN_RATIO = 0.9
 
 const videoId = computed(() => {
     const parsedId = Number(route.params.id)
@@ -221,6 +235,22 @@ function extractYoutubeVideoId(url: string): string | null {
     }
 }
 
+function getVideoDurationSeconds(): number {
+    if (!video.value) {
+        return 0
+    }
+
+    return Math.max(0, Number(video.value.durationSeconds) || Math.floor(player.value?.getDuration() ?? 0))
+}
+
+function getCompletionThreshold(durationSeconds: number): number {
+    if (durationSeconds <= 0) {
+        return Number.POSITIVE_INFINITY
+    }
+
+    return Math.max(1, Math.floor(durationSeconds * COMPLETION_MIN_RATIO))
+}
+
 async function fetchVideoData() {
     loadingPush()
 
@@ -261,6 +291,7 @@ async function fetchVideoData() {
             currentWatchSeconds.value = Math.max(0, Number(userProgress.value?.watchSeconds) || 0)
             lastSavedWatchSeconds.value = currentWatchSeconds.value
             hasCompletedVideo.value = Boolean(userProgress.value?.isCompleted)
+            lastObservedPlayerSecond.value = null
         }
     } catch (error) {
         console.error('Erro ao carregar player de vídeo:', error)
@@ -275,15 +306,27 @@ function readPlayerTime() {
         return
     }
 
-    const currentSecond = Math.floor(player.value.getCurrentTime())
-    if (currentSecond > currentWatchSeconds.value) {
-        currentWatchSeconds.value = currentSecond
+    const currentSecond = Math.max(0, Math.floor(player.value.getCurrentTime()))
+    if (lastObservedPlayerSecond.value === null) {
+        lastObservedPlayerSecond.value = currentSecond
+        return
     }
 
-    const duration = Math.max(0, Number(video.value?.durationSeconds) || Math.floor(player.value.getDuration()))
-    if (duration > 0 && currentWatchSeconds.value >= duration - 1) {
+    const delta = currentSecond - lastObservedPlayerSecond.value
+    if (delta > 0 && delta <= MAX_ALLOWED_PROGRESS_DELTA_SECONDS) {
+        currentWatchSeconds.value += delta
+    }
+
+    const duration = getVideoDurationSeconds()
+    if (duration > 0) {
+        currentWatchSeconds.value = Math.min(currentWatchSeconds.value, duration)
+    }
+
+    if (duration > 0 && currentWatchSeconds.value >= getCompletionThreshold(duration)) {
         hasCompletedVideo.value = true
     }
+
+    lastObservedPlayerSecond.value = currentSecond
 }
 
 function startProgressSyncTimer() {
@@ -294,7 +337,7 @@ function startProgressSyncTimer() {
     progressSyncTimer.value = setInterval(async () => {
         readPlayerTime()
         await saveVideoProgress({ force: false })
-    }, 10000)
+    }, PROGRESS_TICK_MS)
 }
 
 function stopProgressSyncTimer() {
@@ -304,6 +347,7 @@ function stopProgressSyncTimer() {
 
     clearInterval(progressSyncTimer.value)
     progressSyncTimer.value = null
+    lastObservedPlayerSecond.value = null
 }
 
 async function saveVideoProgress({ force }: { force: boolean }) {
@@ -323,8 +367,10 @@ async function saveVideoProgress({ force }: { force: boolean }) {
         }
 
         const watchSeconds = Math.max(0, Math.floor(currentWatchSeconds.value))
-        const duration = Math.max(0, Number(video.value.durationSeconds) || 0)
-        const isCompleted = duration > 0 ? watchSeconds >= duration - 1 : hasCompletedVideo.value
+        const duration = getVideoDurationSeconds()
+        const isCompleted = duration > 0
+            ? watchSeconds >= getCompletionThreshold(duration)
+            : hasCompletedVideo.value
         const secondsSinceLastSave = Math.abs(watchSeconds - lastSavedWatchSeconds.value)
 
         if (!force && secondsSinceLastSave < 10 && !isCompleted) {
@@ -410,9 +456,10 @@ async function initializePlayer() {
             onReady: (event) => {
                 if (resumeAtSeconds.value > 0) {
                     event.target.seekTo(resumeAtSeconds.value, true)
-                    currentWatchSeconds.value = resumeAtSeconds.value
-                    lastSavedWatchSeconds.value = resumeAtSeconds.value
                 }
+
+                // Snapshot current player position so the first tick does not count as watched time.
+                lastObservedPlayerSecond.value = Math.max(0, Math.floor(event.target.getCurrentTime()))
             },
             onStateChange: async (event) => {
                 const playerState = window.YT?.PlayerState
@@ -421,6 +468,7 @@ async function initializePlayer() {
                 }
 
                 if (event.data === playerState.PLAYING) {
+                    lastObservedPlayerSecond.value = Math.max(0, Math.floor(event.target.getCurrentTime()))
                     startProgressSyncTimer()
                     return
                 }
@@ -429,7 +477,10 @@ async function initializePlayer() {
                 stopProgressSyncTimer()
 
                 if (event.data === playerState.ENDED) {
-                    hasCompletedVideo.value = true
+                    const duration = getVideoDurationSeconds()
+                    hasCompletedVideo.value = duration > 0
+                        ? currentWatchSeconds.value >= getCompletionThreshold(duration)
+                        : hasCompletedVideo.value
                     await saveVideoProgress({ force: true })
                     return
                 }

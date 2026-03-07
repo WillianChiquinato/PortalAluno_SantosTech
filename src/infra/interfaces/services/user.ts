@@ -120,4 +120,15 @@ export default class UserService extends ClientService<any> {
       ...config,
     })) as ApiResponse<string>
   }
+
+  SendPasswordRecoveryEmail = async (
+    email: string,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<string>> => {
+    return (await this.fetchInstance(`${this.address}/SendPasswordRecoveryEmail`, {
+      method: 'POST',
+      body: { email },
+      ...config,
+    })) as ApiResponse<string>
+  }
 }

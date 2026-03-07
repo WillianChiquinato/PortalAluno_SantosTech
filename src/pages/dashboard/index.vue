@@ -3,8 +3,12 @@
         <section class="panel overflow-hidden p-0">
             <div
                 class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
-                <img :src="profile?.coverPictureUrl !== null && profile?.coverPictureUrl !== '' ? profile?.coverPictureUrl : backgroundDefault" alt="Capa do perfil"
-                    class="h-full w-full object-cover brightness-75" />
+                <img :src="profile?.coverPictureUrl !== null && profile?.coverPictureUrl !== '' ? profile?.coverPictureUrl : backgroundDefault"
+                    alt="Capa do perfil" class="h-full w-full object-cover brightness-75" />
+                <button type="button" class="preview-btn preview-btn-cover" @click="openImagePreview('cover')">
+                    <i class="pi pi-images"></i>
+                    <span>Ver capa</span>
+                </button>
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
                 <div
                     class="absolute left-4 top-3 z-10 box-border border-2 border-white/30 bg-loading/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-loading/90 backdrop-blur-sm sm:left-8 sm:top-4 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
@@ -19,6 +23,10 @@
                             <span class="profile-frame"></span>
                             <img :src="profile?.profilePictureUrl !== null && profile?.profilePictureUrl !== '' ? profile?.profilePictureUrl : profileDefault"
                                 class="relative h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow-md sm:h-25 sm:w-25" />
+                            <button type="button" class="preview-btn preview-btn-profile"
+                                @click="openImagePreview('profile')" aria-label="Abrir foto de perfil">
+                                <i class="pi pi-search"></i>
+                            </button>
                         </div>
 
                         <div class="min-w-0 space-y-1">
@@ -138,6 +146,39 @@
                 </div>
             </div>
         </section>
+
+        <section class="space-y-3">
+            <div class="panel p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Area do aluno</p>
+                        <h3 class="text-lg font-semibold">Respostas do usuario</h3>
+                        <p class="mt-1 text-xs text-ink-500">Painel rapido para acompanhar respostas sem sair do
+                            dashboard.</p>
+                    </div>
+
+                    <button type="button" class="relative btn-primary h-10 px-4 text-xs text-ink-900 cursor-pointer"
+                        @click="toggleAnswersPanel">
+                        {{ showAnswersPanel ? 'Fechar respostas' : 'Abrir respostas' }}
+                        <span v-if="newAnswersCount > 0"
+                            class="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full border border-white bg-brand-600 px-1 text-[10px] font-semibold text-white">
+                            {{ newAnswersCount }}
+                        </span>
+                    </button>
+                </div>
+
+                <p v-if="newAnswersCount > 0" class="mt-3 text-xs font-semibold text-brand-600">
+                    Voce possui {{ newAnswersCount }} resposta(s) nova(s).
+                </p>
+            </div>
+
+            <Transition enter-active-class="duration-300 ease-out transition-all"
+                enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="duration-200 ease-in transition-all" leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-2">
+                <UserAnswersPanel v-if="showAnswersPanel" title="Respostas do usuario" :answers="userAnswersPreview" />
+            </Transition>
+        </section>
     </div>
 
     <NewUploadCover @back="closeUploadCoverAndPicture" @save="saveCoverAndProfile"
@@ -200,6 +241,22 @@
         @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
         @finish-quiz="finishExercise" />
+
+    <Transition name="image-viewer-fade">
+        <div v-if="showImageViewer" class="image-viewer-overlay" @click.self="closeImagePreview">
+            <div class="image-viewer-content">
+                <div class="image-viewer-header">
+                    <p class="image-viewer-title">{{ imageViewerTitle }}</p>
+                    <button type="button" class="image-viewer-close" @click="closeImagePreview"
+                        aria-label="Fechar visualizador de imagem">
+                        <i class="pi pi-times"></i>
+                    </button>
+                </div>
+
+                <img :src="imageViewerSrc" :alt="imageViewerTitle" class="image-viewer-image" />
+            </div>
+        </div>
+    </Transition>
 </template>
 
 <script setup lang="ts">
@@ -221,6 +278,7 @@ import type { ICurrentPhaseUser } from '~/infra/interfaces/services/phase'
 import NewUploadCover from '~/components/Modals/newUploadCover.vue'
 import CreatedEditModal from '~/components/Modals/CreatedEditModal.vue'
 import ExercisesCard from '~/components/ExercisesCard.vue'
+import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersPanel.vue'
 
 import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask } from '~/infra/interfaces/services/exercise'
@@ -228,6 +286,9 @@ import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 
 const showUploadCoverAndPicture = ref(false)
+const showImageViewer = ref(false)
+const imageViewerSrc = ref('')
+const imageViewerTitle = ref('Visualizar imagem')
 
 //Password.
 const showPassword = ref(false)
@@ -336,6 +397,51 @@ const highlights = [
     { label: 'Ranking diario', value: '#4', helper: 'Subiu 2 posicoes hoje' },
     { label: 'Medalhas novas', value: '2', helper: 'CSS Sprint + UI Forge' },
 ]
+
+const showAnswersPanel = ref(false)
+const newAnswersCount = ref(2)
+const userAnswersPreview = ref<UserAnswerItem[]>([
+    {
+        id: 1,
+        question: 'Qual e o objetivo do estado reativo no Vue?',
+        answer: 'Atualizar a interface automaticamente quando os dados mudam.',
+        status: 'Correta',
+        answeredAt: '2026-03-07T09:40:00.000Z',
+        score: 10,
+    },
+    {
+        id: 2,
+        question: 'Quando usar computed em vez de metodo comum?',
+        answer: 'Quando preciso de cache com base em dependencias reativas.',
+        status: 'Correta',
+        answeredAt: '2026-03-07T09:44:00.000Z',
+        score: 9,
+    },
+    {
+        id: 3,
+        question: 'Qual a diferenca entre composable e componente?',
+        answer: 'Ainda estou revisando esse ponto.',
+        status: 'Pendente',
+        answeredAt: '2026-03-07T09:46:00.000Z',
+    },
+    {
+        id: 4,
+        question: 'O que e importante ao tratar erro de API?',
+        answer: 'Apenas fazer console.log ja resolve tudo.',
+        status: 'Incorreta',
+        answeredAt: '2026-03-07T09:47:00.000Z',
+        score: 2,
+    },
+])
+
+function toggleAnswersPanel() {
+    showAnswersPanel.value = !showAnswersPanel.value
+
+    // Quando o usuario abre o painel, consideramos que visualizou novas respostas.
+    if (showAnswersPanel.value) {
+        newAnswersCount.value = 0
+    }
+}
 
 const unlockedMedals = computed(() => badgeSlots.value.filter((badge) => badge.unlocked).length);
 
@@ -621,6 +727,25 @@ function openUploadCoverAndPicture() {
     showUploadCoverAndPicture.value = true;
 }
 
+function openImagePreview(type: 'cover' | 'profile') {
+    const coverUrl = profile.value?.coverPictureUrl?.trim()
+    const profileUrl = profile.value?.profilePictureUrl?.trim()
+
+    if (type === 'cover') {
+        imageViewerSrc.value = coverUrl ? coverUrl : backgroundDefault
+        imageViewerTitle.value = 'Capa do perfil'
+    } else {
+        imageViewerSrc.value = profileUrl ? profileUrl : profileDefault
+        imageViewerTitle.value = 'Foto de perfil'
+    }
+
+    showImageViewer.value = true
+}
+
+function closeImagePreview() {
+    showImageViewer.value = false
+}
+
 function closeUploadCoverAndPicture() {
     showUploadCoverAndPicture.value = false;
 }
@@ -897,9 +1022,116 @@ onMounted(async () => {
     pointer-events: none;
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     box-sizing: border-box;
+}
+
+.preview-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.45);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.42rem 0.72rem;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    z-index: 11;
+}
+
+.preview-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(15, 23, 42, 0.65);
+}
+
+.preview-btn-cover {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+}
+
+.preview-btn-profile {
+    position: absolute;
+    right: -0.35rem;
+    bottom: -0.35rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+}
+
+.image-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.72);
+    backdrop-filter: blur(6px);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 1200;
+}
+
+.image-viewer-content {
+    width: min(920px, 100%);
+    max-height: calc(100vh - 2rem);
+    border-radius: 1rem;
+    background: #fff;
+    border: 1px solid #fee2e2;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.image-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #fee2e2;
+    background: linear-gradient(90deg, #fff7f7 0%, #fff 70%);
+}
+
+.image-viewer-title {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.image-viewer-close {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    background: #fff;
+    color: #be123c;
+    cursor: pointer;
+}
+
+.image-viewer-image {
+    width: 100%;
+    max-height: calc(100vh - 8rem);
+    object-fit: contain;
+    background: radial-gradient(circle at top, #fff8f1, #fff 55%);
+}
+
+.image-viewer-fade-enter-active,
+.image-viewer-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.image-viewer-fade-enter-from,
+.image-viewer-fade-leave-to {
+    opacity: 0;
 }
 
 @keyframes gradient-move {
