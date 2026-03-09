@@ -8,7 +8,7 @@
                 <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-600">Santos Tech</p>
                 <h1
                     class="bg-gradient-to-r from-brand-600 via-brand-500 to-ink-900 bg-clip-text text-2xl font-semibold text-transparent">
-                    Portal do Aluno</h1>
+                    {{ t('sidebarTitle') }}</h1>
                 <div class="h-1 w-20 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 mb-2"></div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                 @click="showMobileMenu = true">
                 <i class="pi pi-ellipsis-h text-lg"></i>
                 <span class="text-[11px] leading-none">
-                    Mais
+                    {{ t('mobileMore') }}
                 </span>
             </button>
         </div>
@@ -73,10 +73,10 @@
                     <div class="sidebar-mobile-menu animate-slideUp" @click.stop>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
-                            <i class="pi pi-cog text-lg"></i> Configurações
+                            <i class="pi pi-cog text-lg"></i> {{ t('navSettings') }}
                         </NuxtLink>
                         <button class="block w-full text-left text-base font-medium text-red-500" @click="handleLogout">
-                            <i class="pi pi-sign-out text-lg"></i> Sair
+                            <i class="pi pi-sign-out text-lg"></i> {{ t('navLogout') }}
                         </button>
                     </div>
                 </div>
@@ -89,28 +89,30 @@
 import { useRoute } from 'nuxt/app';
 import { computed } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
+import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
     mode: 'sidebar',
 })
 
 const route = useRoute()
+const { t } = usePortalI18n()
 
 const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
 
-const navItems = [
-    { label: 'Dashboard', short: 'Home', icon: 'pi pi-home', path: '/dashboard', note: 'Perfil, Medalhas e Relatorios', isActive: true },
-    { label: 'Trilha do aluno', short: 'Trilha', icon: 'pi pi-compass', path: '/trilha-aluno', note: 'Fluxo e Exercicios', isActive: true },
-    { label: 'Trilha de cursos', short: 'Cursos', icon: 'pi pi-book', path: '/trilha-cursos', note: 'Cursos Pagos e muito mais', isActive: false },
-    { label: 'Material adicional', short: 'Materiais', icon: 'pi pi-folder', path: '/materiais', note: 'Documentos para Atribuições', isActive: true },
-    { label: 'Videos', short: 'Vídeos', icon: 'pi pi-video', path: '/videos', note: 'Videos Gerais', isActive: true },
-]
+const navItems = computed(() => [
+    { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
+    { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
+    { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
+    { label: t('navMaterial'), short: t('navMaterialShort'), icon: 'pi pi-folder', path: '/materiais', note: t('navMaterialNote'), isActive: true },
+    { label: t('navVideos'), short: t('navVideosShort'), icon: 'pi pi-video', path: '/videos', note: t('navVideosNote'), isActive: true },
+])
 
-const footerItems = [
-    { label: 'Configuracoes', path: '/configuracoes', type: 'link' },
-    { label: 'Sair', type: 'action' },
-] as const
+const footerItems = computed(() => [
+    { label: t('navSettings'), path: '/configuracoes', type: 'link' },
+    { label: t('navLogout'), type: 'action' },
+] as const)
 
 const isActive = (path: string) => {
     if (path === '/') {

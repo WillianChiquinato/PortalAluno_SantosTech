@@ -33,13 +33,13 @@
     <p v-if="variant !== 'language'"
       class="mt-2 text-[11px] font-semibold uppercase tracking-wide setting-toggle-status"
       :class="isEnabled ? 'text-brand-600' : 'text-ink-500'">
-      {{ isEnabled ? 'Ativado' : 'Desativado' }}
+      {{ isEnabled ? enabledLabel : disabledLabel }}
     </p>
   </button>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { DotLottie } from '@lottiefiles/dotlottie-web'
 import toggleAnimation from '@/assets/lottie/Toogle.lottie'
 
@@ -55,9 +55,16 @@ const props = withDefaults(defineProps<{
   enabled?: boolean
   selectedLanguage?: string
   variant?: 'default' | 'theme-lottie' | 'language'
+  enabledLabel?: string
+  disabledLabel?: string
 }>(), {
   variant: 'default',
+  enabledLabel: 'Ativado',
+  disabledLabel: 'Desativado',
 })
+
+const enabledLabel = computed(() => props.enabledLabel)
+const disabledLabel = computed(() => props.disabledLabel)
 
 const emit = defineEmits<{
   (event: 'change', value: boolean): void

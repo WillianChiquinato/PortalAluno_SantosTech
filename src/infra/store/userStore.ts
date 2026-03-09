@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { normalizePreferredLanguage } from '~/composables/usePortalI18n'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -9,7 +10,7 @@ export const useUserStore = defineStore('user', {
     receiveEmailNotifications: false,
     reportFrequency: false,
     acessibilityMode: false,
-    preferredLanguage: 'English',
+    preferredLanguage: 'en-US',
   }),
 
   getters: {
@@ -46,7 +47,7 @@ export const useUserStore = defineStore('user', {
       this.acessibilityMode = enabled
     },
     setPreferredLanguage(language: string) {
-      this.preferredLanguage = language
+      this.preferredLanguage = normalizePreferredLanguage(language)
     },
     clearUserId() {
       this.userId = null
