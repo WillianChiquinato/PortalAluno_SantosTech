@@ -10,10 +10,10 @@
                 <div class="w-0 h-0
                  border-l-[8px] border-l-transparent
                  border-r-[8px] border-r-transparent
-                 border-b-[8px] border-b-success-500" />
+                 border-b-[8px]" :class="typeExercise === 3 ? 'border-b-warning-500' : 'border-b-success-500'" />
             </div>
 
-            <div class="rounded-2xl bg-success-500 p-4 shadow-xl text-loading">
+            <div :class="['rounded-2xl p-4 shadow-xl', typeExercise === 3 ? 'bg-warning-500 text-loading' : 'bg-success-500 text-loading']">
                 <slot />
             </div>
         </div>
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 defineProps<{
-    show: boolean
+    show: boolean,
+    typeExercise: number
 }>()
 </script>

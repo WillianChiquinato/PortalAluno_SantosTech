@@ -222,16 +222,18 @@
                                     <div class="relative flex flex-col items-center gap-2"
                                         :class="activeBlipId === blip.exercise.id ? 'z-[60]' : 'z-[60]'">
                                         <button
-                                            class="relative inline-flex h-16 w-18 items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200"
-                                            :class="blipClass(blip.state)" :disabled="blip.state === 'Não iniciado'"
+                                            :class="['relative inline-flex items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200', blip.exercise.typeExercise === 3 ? 'h-20 w-22 sm:h-26 sm:w-28' : 'h-16 w-18', blipClass(blip.state)]"
+                                            :disabled="blip.state === 'Não iniciado'"
                                             @click="toggleBlip(blip.exercise.id)">
-                                            <span class="relative z-10">
+                                            <span
+                                                :class="['relative z-100', blip.exercise.typeExercise === 3 ? 'text-4xl' : 'text-xl']">
                                                 {{ blipIcon(blip.state) }}
                                             </span>
                                         </button>
 
                                         <BlipPopover v-if="blip.state === 'Errou' || blip.state === 'Correto'"
-                                            :show="activeBlipId === blip.exercise.id">
+                                            :show="activeBlipId === blip.exercise.id"
+                                            :type-exercise="blip.exercise.typeExercise">
                                             <h4 class="font-bold mb-1">
                                                 {{ blip.exercise.title }} • {{ blipStateLabel(blip.state) }}
                                             </h4>
@@ -243,7 +245,8 @@
                                             </button>
                                         </BlipPopover>
 
-                                        <BlipPopover v-else :show="activeBlipId === blip.exercise.id">
+                                        <BlipPopover v-else :show="activeBlipId === blip.exercise.id"
+                                            :type-exercise="blip.exercise.typeExercise">
                                             <h4 class="font-bold mb-1">
                                                 {{ blip.exercise.title }}
                                             </h4>
@@ -253,7 +256,16 @@
                                             </p>
 
                                             <div class="flex flex-col justify-center gap-2">
-                                                <button
+                                                <button v-if="blip.exercise.typeExercise === 3" :class="[
+                                                    'w-full text-sm sm:text-base rounded-xl py-2 font-bold cursor-pointer border border-transparent hover:scale-105 transition-all',
+                                                    blip.exercise.typeExercise === 3
+                                                        ? 'bg-purple-600 text-white hover:bg-purple-500'
+                                                        : 'bg-loading text-success-600 hover:bg-success-200/20 hover:text-loading hover:border-white'
+                                                ]" @click="enterExercise(blip)">
+                                                    Realizar prova prática
+                                                </button>
+
+                                                <button v-else
                                                     class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
                                                     @click="enterExercise(blip)">
                                                     Missão +{{ blip.exercise.pointsRedeem }} Pts
@@ -266,8 +278,9 @@
                                             </div>
                                         </BlipPopover>
 
-                                        <div class="max-w-28 text-center">
-                                            <p class="text-sm font-bold text-ink-700">
+                                        <div class="max-w-30 text-center">
+                                            <p
+                                                :class="['font-bold text-ink-700', blip.exercise.typeExercise === 3 ? 'text-sm sm:text-dm' : 'text-sm']">
                                                 {{ blip.exercise.title }}
                                             </p>
                                         </div>
