@@ -49,6 +49,9 @@ export interface BlipContainer {
   }
   stateContainer: BlipStatus
   phaseId: number
+  isLocked: boolean
+  unlockDate: Date | null
+  daysRemaining: number | null
 }
 
 export interface IslandApi {

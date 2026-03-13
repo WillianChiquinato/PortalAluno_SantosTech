@@ -224,20 +224,25 @@
                                     <div class="relative flex flex-col items-center gap-2"
                                         :class="activeBlipId === blip.containerExercise.id ? 'z-[60]' : 'z-[60]'">
                                         <button
-                                            :class="['relative inline-flex items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200', containerHasPracticalExercise(blip) ? 'h-20 w-22 sm:h-26 sm:w-28' : 'h-16 w-18', blipClass(blip.stateContainer)]"
-                                            :disabled="blip.stateContainer === 'Não iniciado'"
+                                            :class="['relative inline-flex items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200', containerHasPracticalExercise(blip) ? 'h-20 w-22 sm:h-26 sm:w-28' : 'h-16 w-18', blipClass(blip)]"
+                                            :disabled="blip.stateContainer === 'Não iniciado' || isContainerLocked(blip)"
                                             @click="toggleBlip(blip.containerExercise.id)">
                                             <span
                                                 :class="['relative z-100', containerHasPracticalExercise(blip) ? 'text-4xl' : 'text-xl']">
-                                                {{ blipIcon(blip.stateContainer) }}
+                                                {{ blipIcon(blip) }}
                                             </span>
                                         </button>
+
+                                        <span v-if="isContainerLocked(blip)"
+                                            class="chip !border-warning-600 !bg-warning-500 !text-loading">
+                                            {{ containerRemainingChipLabel(blip) }}
+                                        </span>
 
                                         <BlipPopover :show="activeBlipId === blip.containerExercise.id"
                                             :type-exercise="containerPrimaryExerciseType(blip)">
                                             <h4 class="font-bold mb-1">
                                                 {{ blip.containerExercise.title }} • {{
-                                                    blipStateLabel(blip.stateContainer) }}
+                                                    blipStateLabel(blip) }}
                                             </h4>
 
                                             <p class="text-sm opacity-90 mb-4">
@@ -245,14 +250,23 @@
                                                 neste container.
                                             </p>
 
+                                            <div v-if="isContainerLocked(blip)"
+                                                class="mb-4 rounded-xl border border-warning-600/80 bg-loading/70 p-3 text-sm">
+                                                <p class="font-semibold">BLIP temporariamente bloqueado</p>
+                                                <p class="mt-1 opacity-95">{{ containerUnlockLabel(blip) }}</p>
+                                                <p class="mt-1 text-xs opacity-85">Você poderá avançar automaticamente
+                                                    quando o prazo
+                                                    terminar.</p>
+                                            </div>
+
                                             <div class="flex flex-col justify-center gap-2">
                                                 <button v-for="exerciseFlow in sortedContainerExercises(blip)"
                                                     :key="exerciseFlow.exercise.id" :class="[
                                                         'w-full rounded-xl border px-3 py-3 text-left transition-all',
-                                                        canStartExercise(exerciseFlow)
+                                                        canStartExercise(blip, exerciseFlow)
                                                             ? 'cursor-pointer border-red-100/80 bg-loading hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-[1.02]'
                                                             : 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-80'
-                                                    ]" :disabled="!canStartExercise(exerciseFlow)"
+                                                    ]" :disabled="!canStartExercise(blip, exerciseFlow)"
                                                     @click="enterExercise(blip, exerciseFlow)">
                                                     <div class="flex items-start justify-between gap-2">
                                                         <div>
@@ -377,6 +391,11 @@ function toggleBlip(id: number) {
     const blip = islands.value.flatMap(island => island.blips).find(blip => blip.containerExercise.id === id);
     if (!blip || blip.stateContainer === 'Não iniciado') return;
 
+    if (isContainerLocked(blip)) {
+        toast.warn('BLIP bloqueado', containerUnlockLabel(blip), 3500)
+        return
+    }
+
     activeBlipId.value =
         activeBlipId.value === id ? null : id
 }
@@ -388,7 +407,11 @@ function closeBlipOverlay() {
 function enterExercise(container: BlipContainer, exerciseFlow: ContainerExerciseFlow) {
     closeBlipOverlay()
 
-    if (!selectedIsland.value || !canStartExercise(exerciseFlow)) {
+    if (!selectedIsland.value || !canStartExercise(container, exerciseFlow)) {
+        if (isContainerLocked(container)) {
+            toast.warn('BLIP bloqueado', containerUnlockLabel(container), 3500)
+        }
+
         return
     }
 
@@ -534,13 +557,64 @@ function buildContainerSummary(container: BlipContainer): DailyTaskSummary {
         title: container.containerExercise.title,
         due: formatDate(new Date(nearestTermAt).toISOString(), 'pt-BR', { dateStyle: 'short' }),
         points: String(totalPoints),
-        status: blipStateLabel(container.stateContainer),
+        status: blipStateLabel(container),
         description: `${container.containerExercise.exercises.length} exercício(s) disponíveis neste container.`,
     }
 }
 
-function canStartExercise(exerciseFlow: ContainerExerciseFlow) {
-    return exerciseFlow.stateExercise !== 'Não iniciado'
+function canStartExercise(container: BlipContainer, exerciseFlow: ContainerExerciseFlow) {
+    return !isContainerLocked(container) && exerciseFlow.stateExercise !== 'Não iniciado'
+}
+
+function isContainerLocked(container: BlipContainer) {
+    return container.isLocked
+}
+
+function normalizedUnlockDate(container: BlipContainer): Date | null {
+    if (!container.unlockDate) {
+        return null
+    }
+
+    const parsedDate = new Date(container.unlockDate)
+    if (Number.isNaN(parsedDate.getTime())) {
+        return null
+    }
+
+    return parsedDate
+}
+
+function containerUnlockLabel(container: BlipContainer) {
+    const daysRemaining = container.daysRemaining
+    if (typeof daysRemaining === 'number' && daysRemaining > 0) {
+        return daysRemaining === 1
+            ? 'Disponível em 1 dia.'
+            : `Disponível em ${daysRemaining} dias.`
+    }
+
+    const unlockDate = normalizedUnlockDate(container)
+    if (unlockDate) {
+        return `Libera em ${formatDate(unlockDate.toISOString(), 'pt-BR', { dateStyle: 'medium' })}.`
+    }
+
+    return 'Este BLIP ainda não está liberado para você.'
+}
+
+function containerRemainingChipLabel(container: BlipContainer) {
+    if (!isContainerLocked(container)) {
+        return ''
+    }
+
+    const daysRemaining = container.daysRemaining
+    if (typeof daysRemaining === 'number' && daysRemaining > 0) {
+        return daysRemaining === 1 ? 'Falta 1 dia' : `Faltam ${daysRemaining} dias`
+    }
+
+    const unlockDate = normalizedUnlockDate(container)
+    if (unlockDate) {
+        return `Até ${formatDate(unlockDate.toISOString(), 'pt-BR', { dateStyle: 'short' })}`
+    }
+
+    return 'Aguardando liberação'
 }
 
 function exerciseStatusLabel(exerciseFlow: ContainerExerciseFlow) {
@@ -883,24 +957,30 @@ function islandCardClass(status: IslandStatus) {
     return ''
 }
 
-function blipStateLabel(status: BlipStatus) {
-    if (status === 'Concluído') return 'Concluído'
-    if (status === 'Atual') return 'Disponível'
+function blipStateLabel(container: BlipContainer) {
+    if (isContainerLocked(container)) return 'Bloqueado por tempo'
+    if (container.stateContainer === 'Concluído') return 'Concluído'
+    if (container.stateContainer === 'Atual') return 'Disponível'
     return 'Bloqueado'
 }
 
-function blipIcon(status: BlipStatus) {
-    if (status === 'Concluído') return '✓'
-    if (status === 'Atual') return '▶'
+function blipIcon(container: BlipContainer) {
+    if (isContainerLocked(container)) return '⏳'
+    if (container.stateContainer === 'Concluído') return '✓'
+    if (container.stateContainer === 'Atual') return '▶'
     return '🔒'
 }
 
-function blipClass(status: BlipStatus) {
-    if (status === 'Concluído') {
+function blipClass(container: BlipContainer) {
+    if (isContainerLocked(container)) {
+        return 'cursor-not-allowed border-warning-600 bg-gradient-to-b from-warning-500 to-warning-600 text-loading shadow-[0_8px_0_0_rgba(146,64,14,0.75)]'
+    }
+
+    if (container.stateContainer === 'Concluído') {
         return 'cursor-pointer border-brand-500 bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_10px_0_0_rgba(185,28,28,0.85)] hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(185,28,28,0.8)]'
     }
 
-    if (status === 'Atual') {
+    if (container.stateContainer === 'Atual') {
         return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-ink-900 shadow-[0_10px_0_0_rgba(239,68,68,0.65)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.55)]'
     }
 

@@ -24,6 +24,7 @@
     --color-slate-100: #bdbdbd;
     --color-tag-100: #f0f0f0;
     --color-warning-500: #f59e0b;
+    --color-warning-600: #eecba4ee;
     --font-sans: "Space Grotesk", "Segoe UI", sans-serif;
     --font-display: "Unbounded", "Space Grotesk", sans-serif;
 }
@@ -44,6 +45,7 @@
     --color-success-500: #11b7a1;
     --color-success-600: #14b8a6;
     --color-warning-500: #f59e0b;
+    --color-warning-600: #ffd5a5ee;
     --color-white: #060620;
     --color-red-50: #380404;
     --color-accent-300: #1a1a1a;
