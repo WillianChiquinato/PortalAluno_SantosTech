@@ -7,11 +7,12 @@ export interface IClass {
   name: string
 }
 
-export type BlipStatus = 'Correto' | 'Errou' | 'Atual' | 'Não iniciado'
+export type BlipStatus = 'Concluído' | 'Atual' | 'Não iniciado'
 export type IslandStatus = 'Concluído' | 'Em Progresso' | 'Não Iniciado' | 'Desconhecido'
+export type BlipStatusExercise = 'Correto' | 'Errou' | 'Atual' | 'Não iniciado'
 
 export interface Island {
-  id: string
+  id: number
   order: number
   title: string
   helper: string
@@ -27,6 +28,38 @@ export interface Blip {
   origin: number
   phaseId: number
   userExerciseFlowId: number
+  userContainerExerciseFlowId?: number
+  containerExerciseId?: number
+  containerTitle?: string
+}
+
+export interface ContainerExerciseFlow {
+  exercise: Exercise
+  origin: number
+  stateExercise: BlipStatusExercise
+  userContainerExerciseFlowId: number
+}
+
+export interface BlipContainer {
+  containerExercise: {
+    id: number
+    title: string
+    containerDateTarget: number | null
+    exercises: ContainerExerciseFlow[]
+  }
+  stateContainer: BlipStatus
+  phaseId: number
+}
+
+export interface IslandApi {
+  id: number
+  order: number
+  title: string
+  helper: string
+  status: IslandStatus
+  lowerState: number
+  progress: number
+  blips: BlipContainer[]
 }
 
 export interface Exercise {
@@ -54,12 +87,12 @@ export default class ClassService extends ClientService<any> {
     userId: number,
     phaseId: number,
     config: FetchOptions = {},
-  ): Promise<ApiResponse<Island[]>> => {
+  ): Promise<ApiResponse<IslandApi[]>> => {
     let urlParams = `/GetIslandsByUserIdAndCurrentModule?userId=${userId}&phaseId=${phaseId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
       ...config,
-    })) as ApiResponse<Island[]>
+    })) as ApiResponse<IslandApi[]>
   }
 }

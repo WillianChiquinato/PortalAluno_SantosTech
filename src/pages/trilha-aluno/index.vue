@@ -126,7 +126,8 @@
                                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                                     <p class="text-xs"
                                         :class="island.status === 'Não Iniciado' ? 'text-ink-700 font-medium' : 'text-ink-500'">
-                                        {{ island.blips.length }} exercícios nesta ilha
+                                        {{ islandContainerCount(island) }} container(es) • {{
+                                            islandExerciseCount(island) }} exercício(s) nesta ilha
                                     </p>
 
                                     <button class="h-10 px-5 text-ink-900"
@@ -210,8 +211,9 @@
                         </div>
 
                         <div class="space-y-6 sm:space-y-7 lg:space-y-0">
-                            <div v-for="(blip, blipIndex) in activeIslandBlips" :key="blip.exercise.id" class="relative"
-                                :class="[blipRowClass(blipIndex), activeBlipId === blip.exercise.id ? 'z-40' : 'z-10']">
+                            <div v-for="(blip, blipIndex) in activeIslandBlips" :key="blip.containerExercise.id"
+                                class="relative"
+                                :class="[blipRowClass(blipIndex), activeBlipId === blip.containerExercise.id ? 'z-40' : 'z-10']">
                                 <div v-if="blipIndex < activeIslandBlips.length - 1"
                                     class="pointer-events-none absolute hidden lg:block border-t-[5px] border-dashed border-brand-500/75"
                                     :style="blipConnectorStyle(blipIndex)">
@@ -220,68 +222,68 @@
                                 <div class="flex w-1/2" :class="blipNodeContainerClass(blipIndex)"
                                     :style="blipNodeStyle(blipIndex)">
                                     <div class="relative flex flex-col items-center gap-2"
-                                        :class="activeBlipId === blip.exercise.id ? 'z-[60]' : 'z-[60]'">
+                                        :class="activeBlipId === blip.containerExercise.id ? 'z-[60]' : 'z-[60]'">
                                         <button
-                                            :class="['relative inline-flex items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200', blip.exercise.typeExercise === 3 ? 'h-20 w-22 sm:h-26 sm:w-28' : 'h-16 w-18', blipClass(blip.state)]"
-                                            :disabled="blip.state === 'Não iniciado'"
-                                            @click="toggleBlip(blip.exercise.id)">
+                                            :class="['relative inline-flex items-center justify-center rounded-full border-2 text-lg font-semibold transition duration-200', containerHasPracticalExercise(blip) ? 'h-20 w-22 sm:h-26 sm:w-28' : 'h-16 w-18', blipClass(blip.stateContainer)]"
+                                            :disabled="blip.stateContainer === 'Não iniciado'"
+                                            @click="toggleBlip(blip.containerExercise.id)">
                                             <span
-                                                :class="['relative z-100', blip.exercise.typeExercise === 3 ? 'text-4xl' : 'text-xl']">
-                                                {{ blipIcon(blip.state) }}
+                                                :class="['relative z-100', containerHasPracticalExercise(blip) ? 'text-4xl' : 'text-xl']">
+                                                {{ blipIcon(blip.stateContainer) }}
                                             </span>
                                         </button>
 
-                                        <BlipPopover v-if="blip.state === 'Errou' || blip.state === 'Correto'"
-                                            :show="activeBlipId === blip.exercise.id"
-                                            :type-exercise="blip.exercise.typeExercise">
+                                        <BlipPopover :show="activeBlipId === blip.containerExercise.id"
+                                            :type-exercise="containerPrimaryExerciseType(blip)">
                                             <h4 class="font-bold mb-1">
-                                                {{ blip.exercise.title }} • {{ blipStateLabel(blip.state) }}
-                                            </h4>
-
-                                            <button
-                                                class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
-                                                @click="toggleBlip(blip.exercise.id)">
-                                                Voltar para detalhes
-                                            </button>
-                                        </BlipPopover>
-
-                                        <BlipPopover v-else :show="activeBlipId === blip.exercise.id"
-                                            :type-exercise="blip.exercise.typeExercise">
-                                            <h4 class="font-bold mb-1">
-                                                {{ blip.exercise.title }}
+                                                {{ blip.containerExercise.title }} • {{
+                                                    blipStateLabel(blip.stateContainer) }}
                                             </h4>
 
                                             <p class="text-sm opacity-90 mb-4">
-                                                {{ blip.exercise.description }}
+                                                {{ blip.containerExercise.exercises.length }} exercício(s) disponíveis
+                                                neste container.
                                             </p>
 
                                             <div class="flex flex-col justify-center gap-2">
-                                                <button v-if="blip.exercise.typeExercise === 3" :class="[
-                                                    'w-full text-sm sm:text-base rounded-xl py-2 font-bold cursor-pointer border border-transparent hover:scale-105 transition-all',
-                                                    blip.exercise.typeExercise === 3
-                                                        ? 'bg-purple-600 text-white hover:bg-purple-500'
-                                                        : 'bg-loading text-success-600 hover:bg-success-200/20 hover:text-loading hover:border-white'
-                                                ]" @click="enterExercise(blip)">
-                                                    Realizar prova prática
+                                                <button v-for="exerciseFlow in sortedContainerExercises(blip)"
+                                                    :key="exerciseFlow.exercise.id" :class="[
+                                                        'w-full rounded-xl border px-3 py-3 text-left transition-all',
+                                                        canStartExercise(exerciseFlow)
+                                                            ? 'cursor-pointer border-red-100/80 bg-loading hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-[1.02]'
+                                                            : 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-80'
+                                                    ]" :disabled="!canStartExercise(exerciseFlow)"
+                                                    @click="enterExercise(blip, exerciseFlow)">
+                                                    <div class="flex items-start justify-between gap-2">
+                                                        <div>
+                                                            <p class="text-sm font-bold text-ink-900">
+                                                                {{ exerciseFlow.exercise.title }}
+                                                            </p>
+                                                            <p class="mt-1 text-xs text-ink-500">
+                                                                {{ exerciseActionLabel(exerciseFlow) }}
+                                                            </p>
+                                                        </div>
+                                                        <span class="chip" :class="exerciseStatusClass(exerciseFlow)">
+                                                            {{ exerciseStatusLabel(exerciseFlow) }}
+                                                        </span>
+                                                    </div>
                                                 </button>
 
-                                                <button v-else
-                                                    class="w-full text-sm sm:text-base rounded-xl bg-loading py-2 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
-                                                    @click="enterExercise(blip)">
-                                                    Missão +{{ blip.exercise.pointsRedeem }} Pts
-                                                </button>
                                                 <button
                                                     class="w-full text-sm sm:text-base rounded-xl bg-loading py-1 font-bold text-success-600 cursor-pointer border border-transparent hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-105 transition-all"
-                                                    @click="toggleBlip(blip.exercise.id)">
+                                                    @click="toggleBlip(blip.containerExercise.id)">
                                                     Voltar para detalhes
                                                 </button>
                                             </div>
                                         </BlipPopover>
 
-                                        <div class="max-w-30 text-center">
+                                        <div class="max-w-36 text-center">
                                             <p
-                                                :class="['font-bold text-ink-700', blip.exercise.typeExercise === 3 ? 'text-sm sm:text-dm' : 'text-sm']">
-                                                {{ blip.exercise.title }}
+                                                :class="['font-bold text-ink-700', containerHasPracticalExercise(blip) ? 'text-sm sm:text-dm' : 'text-sm']">
+                                                {{ blip.containerExercise.title }}
+                                            </p>
+                                            <p class="mt-1 text-[11px] font-medium text-ink-500">
+                                                {{ blip.containerExercise.exercises.length }} exercício(s)
                                             </p>
                                         </div>
                                     </div>
@@ -331,14 +333,14 @@
         :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
         @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
-        @finish-quiz="finishExercise" />
+        @back-to-exercises-and-refresh="backToExercisesAndRefresh" @finish-quiz="finishExercise" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import ExercisesCard from '~/components/ExercisesCard.vue';
 import BlipPopover from '~/components/UI/BlipPopover.vue'
-import type { Blip, BlipStatus, Island, IslandStatus } from '~/infra/interfaces/services/class'
+import type { BlipContainer, BlipStatus, BlipStatusExercise, ContainerExerciseFlow, IslandApi, IslandStatus } from '~/infra/interfaces/services/class'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { ExerciseCardTask, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
 import { formatDate } from '~/utils/Format'
@@ -369,44 +371,46 @@ const selectedCodeAnswers = ref<Record<number, string>>({})
 const currentQuestionIndex = ref(0)
 const taskResult = ref<{ correct: number; total: number; accuracy: number; gainedPoints: number } | null>(null)
 
-const showBlipOverlay = ref(false)
-const selectedBlip = ref<Blip | null>(null)
 const activeBlipId = ref<number | null>(null)
 
 function toggleBlip(id: number) {
-    const blip = islands.value.flatMap(island => island.blips).find(blip => blip.exercise.id === id);
-    if (!blip || blip.state === 'Não iniciado') return;
+    const blip = islands.value.flatMap(island => island.blips).find(blip => blip.containerExercise.id === id);
+    if (!blip || blip.stateContainer === 'Não iniciado') return;
 
     activeBlipId.value =
         activeBlipId.value === id ? null : id
 }
 
 function closeBlipOverlay() {
-    showBlipOverlay.value = false
-    selectedBlip.value = null
+    activeBlipId.value = null
 }
 
-function enterExercise(blip: Blip) {
+function enterExercise(container: BlipContainer, exerciseFlow: ContainerExerciseFlow) {
     closeBlipOverlay()
 
-    if (!selectedIsland.value || blip.state === 'Não iniciado') {
+    if (!selectedIsland.value || !canStartExercise(exerciseFlow)) {
         return
     }
 
-    selectedDailyTask.value = buildIslandSummary(selectedIsland.value)
-    const mappedTask = mapExerciseToTaskCard(blip.exercise)
+    selectedDailyTask.value = buildContainerSummary(container)
+    const mappedTask = mapExerciseToTaskCard(exerciseFlow)
     selectedTask.value = mappedTask
     showTaskQuizModal.value = true
 
     startExerciseQuiz(mappedTask)
 }
 
-const islands = ref<Island[]>([]);
-const selectedIslandId = ref<string | null>(null)
+const islands = ref<IslandApi[]>([]);
+const selectedIslandId = ref<number | null>(null)
 
 const selectedIsland = computed(() => {
     if (!selectedIslandId.value) return null
     return islands.value.find((island) => island.id === selectedIslandId.value) ?? null
+})
+
+const selectedContainer = computed(() => {
+    if (!selectedIsland.value || !activeBlipId.value) return null
+    return activeIslandBlips.value.find((blip) => blip.containerExercise.id === activeBlipId.value) ?? null
 })
 
 const hasIslands = computed(() => islands.value.length > 0)
@@ -414,11 +418,13 @@ const hasIslands = computed(() => islands.value.length > 0)
 const totalBlips = computed(() => islands.value.reduce((acc, island) => acc + island.blips.length, 0))
 
 const completedBlips = computed(() => islands.value.reduce((acc, island) => {
-    return acc + island.blips.filter((blip) => blip.state === 'Correto').length
+    return acc + island.blips.filter((blip) => blip.stateContainer === 'Concluído').length
 }, 0))
 
 const failedBlips = computed(() => islands.value.reduce((acc, island) => {
-    return acc + island.blips.filter((blip) => blip.state === 'Errou').length
+    return acc + island.blips.reduce((containerAcc, blip) => {
+        return containerAcc + blip.containerExercise.exercises.filter((exerciseFlow) => exerciseFlow.stateExercise === 'Errou').length
+    }, 0)
 }, 0))
 
 const completedIslands = computed(() => islands.value.filter((island) => island.status === 'Concluído').length)
@@ -435,7 +441,7 @@ const BLIP_MAX_SAFE_OFFSET = 105
 const BLIP_DESKTOP_ROW_HEIGHT = 168
 const BLIP_CONNECTOR_START_Y = 34
 
-const activeIslandBlips = computed<Blip[]>(() => {
+const activeIslandBlips = computed<BlipContainer[]>(() => {
     if (!selectedIsland.value) return []
 
     const baseBlips = selectedIsland.value.blips
@@ -445,14 +451,42 @@ const activeIslandBlips = computed<Blip[]>(() => {
 })
 
 const availableExercises = computed<ExerciseCardTask[]>(() => {
-    if (!selectedIsland.value) return []
+    if (!selectedContainer.value) return []
 
-    return [...selectedIsland.value.blips]
-        .sort((firstBlip, secondBlip) => firstBlip.exercise.indexOrder - secondBlip.exercise.indexOrder)
-        .map((blip) => mapExerciseToTaskCard(blip.exercise))
+    return sortedContainerExercises(selectedContainer.value)
+        .map((exerciseFlow) => mapExerciseToTaskCard(exerciseFlow))
 })
 
-function mapExerciseToTaskCard(exercise: Blip['exercise']): ExerciseCardTask {
+function sortedContainerExercises(container: BlipContainer) {
+    return [...container.containerExercise.exercises].sort((firstExercise, secondExercise) => {
+        return firstExercise.userContainerExerciseFlowId - secondExercise.userContainerExerciseFlowId
+    })
+}
+
+function containerPrimaryExerciseType(container: BlipContainer) {
+    if (container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.typeExercise === 3)) {
+        return 3
+    }
+
+    return container.containerExercise.exercises[0]?.exercise.typeExercise ?? 1
+}
+
+function containerHasPracticalExercise(container: BlipContainer) {
+    return container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.typeExercise === 3)
+}
+
+function islandExerciseCount(island: IslandApi) {
+    return island.blips.reduce((accumulator, currentBlip) => {
+        return accumulator + currentBlip.containerExercise.exercises.length
+    }, 0)
+}
+
+function islandContainerCount(island: IslandApi) {
+    return island.blips.length
+}
+
+function mapExerciseToTaskCard(exerciseFlow: ContainerExerciseFlow): ExerciseCardTask {
+    const { exercise } = exerciseFlow
     const termAt = new Date(exercise.termAt).toISOString()
 
     return {
@@ -460,7 +494,13 @@ function mapExerciseToTaskCard(exercise: Blip['exercise']): ExerciseCardTask {
         title: exercise.title,
         due: formatDate(termAt, 'pt-BR', { dateStyle: 'short' }),
         points: String(exercise.pointsRedeem),
-        status: exercise.isCompletedAnswer ? 'Concluída' : 'Em aberto',
+        status: exercise.isCompletedAnswer || exerciseFlow.stateExercise === 'Correto'
+            ? 'Concluída'
+            : exerciseFlow.stateExercise === 'Errou'
+                ? 'Tentar denovo'
+                : exerciseFlow.stateExercise === 'Atual'
+                    ? 'Disponível'
+                    : 'Bloqueada',
         description: exercise.description,
         termAt,
         source: {
@@ -476,25 +516,77 @@ function mapExerciseToTaskCard(exercise: Blip['exercise']): ExerciseCardTask {
     }
 }
 
-function buildIslandSummary(island: Island): DailyTaskSummary {
-    const sortedBlips = [...island.blips].sort((firstBlip, secondBlip) => firstBlip.exercise.indexOrder - secondBlip.exercise.indexOrder)
-    const nearestTermAt = sortedBlips.length
-        ? sortedBlips.reduce((nearestDate, currentBlip) => {
-            const currentDate = new Date(currentBlip.exercise.termAt).getTime()
+function buildContainerSummary(container: BlipContainer): DailyTaskSummary {
+    const sortedExercises = sortedContainerExercises(container)
+    const nearestTermAt = sortedExercises.length
+        ? sortedExercises.reduce((nearestDate, currentExercise) => {
+            const currentDate = new Date(currentExercise.exercise.termAt).getTime()
             return currentDate < nearestDate ? currentDate : nearestDate
-        }, new Date(sortedBlips[0].exercise.termAt).getTime())
+        }, new Date(sortedExercises[0].exercise.termAt).getTime())
         : Date.now()
 
-    const totalPoints = island.blips.reduce((accumulator, currentBlip) => accumulator + currentBlip.exercise.pointsRedeem, 0)
+    const totalPoints = container.containerExercise.exercises.reduce((accumulator, currentExercise) => {
+        return accumulator + currentExercise.exercise.pointsRedeem
+    }, 0)
 
     return {
-        id: island.id,
-        title: island.title,
+        id: container.containerExercise.id,
+        title: container.containerExercise.title,
         due: formatDate(new Date(nearestTermAt).toISOString(), 'pt-BR', { dateStyle: 'short' }),
         points: String(totalPoints),
-        status: statusLabel(island.status),
-        description: `${island.blips.length} exercício(s) disponíveis nesta ilha.`,
+        status: blipStateLabel(container.stateContainer),
+        description: `${container.containerExercise.exercises.length} exercício(s) disponíveis neste container.`,
     }
+}
+
+function canStartExercise(exerciseFlow: ContainerExerciseFlow) {
+    return exerciseFlow.stateExercise !== 'Não iniciado'
+}
+
+function exerciseStatusLabel(exerciseFlow: ContainerExerciseFlow) {
+    if (exerciseFlow.exercise.isCompletedAnswer || exerciseFlow.stateExercise === 'Correto' || exerciseFlow.stateExercise === 'Errou') {
+        return 'Tentar denovo'
+    }
+
+    if (exerciseFlow.stateExercise === 'Atual') {
+        return exerciseFlow.exercise.typeExercise === 3 ? 'Prova prática' : 'Disponível'
+    }
+
+    if (exerciseFlow.stateExercise == 'Não iniciado') {
+        return 'Bloqueada'
+    }
+
+    return 'Tentar denovo'
+}
+
+function exerciseStatusClass(exerciseFlow: ContainerExerciseFlow) {
+    if (exerciseFlow.exercise.isCompletedAnswer || exerciseFlow.stateExercise === 'Correto') {
+        return '!border-brand-200 !bg-red-50 !text-brand-600'
+    }
+
+    if (exerciseFlow.stateExercise === 'Errou') {
+        return '!border-red-200 !bg-red-50 !text-brand-600'
+    }
+
+    if (exerciseFlow.stateExercise === 'Atual') {
+        return '!border-ink-900 !text-ink-900'
+    }
+
+    return '!border-slate-200 !bg-slate-50 !text-ink-500'
+}
+
+function exerciseActionLabel(exerciseFlow: ContainerExerciseFlow) {
+    if (exerciseFlow.exercise.isCompletedAnswer || exerciseFlow.stateExercise === 'Correto' || exerciseFlow.stateExercise === 'Errou') {
+        return 'Refazer exercício'
+    }
+
+    if (exerciseFlow.stateExercise === 'Atual') {
+        return 'Iniciar exercício'
+    }
+
+    return exerciseFlow.exercise.typeExercise === 3
+        ? `Realizar prova prática • +${exerciseFlow.exercise.pointsRedeem} pts`
+        : `Missão disponível • +${exerciseFlow.exercise.pointsRedeem} pts`
 }
 
 function resetQuizState() {
@@ -581,6 +673,19 @@ function backToExercises() {
     showTaskQuizModal.value = false
 }
 
+async function backToExercisesAndRefresh() {
+    selectedTask.value = null
+    quizLoading.value = false
+    quizQuestions.value = []
+    selectedAnswers.value = {}
+    selectedCodeAnswers.value = {}
+    currentQuestionIndex.value = 0
+    taskResult.value = null
+
+    showTaskQuizModal.value = false
+    await fetchIslandByUserAndCurrentModule()
+}
+
 function selectAnswer(questionId: number, optionIndex: number) {
     selectedAnswers.value[questionId] = optionIndex
 }
@@ -589,41 +694,95 @@ function updateCodeAnswer(questionId: number, answer: string) {
     selectedCodeAnswers.value[questionId] = answer
 }
 
-function updateIslandProgressLocally(island: Island) {
+function resolveContainerState(container: BlipContainer): BlipStatus {
+    const states = container.containerExercise.exercises.map((exerciseFlow) => exerciseFlow.stateExercise)
+
+    if (!states.length) {
+        return 'Não iniciado'
+    }
+
+    if (states.every((state) => state === 'Correto')) {
+        return 'Concluído'
+    }
+
+    if (states.some((state) => state === 'Atual')) {
+        return 'Atual'
+    }
+
+    if (states.every((state) => state === 'Não iniciado')) {
+        return 'Não iniciado'
+    }
+
+    return 'Atual'
+}
+
+function updateIslandProgressLocally(island: IslandApi) {
     if (!island.blips.length) {
         island.progress = 0
         island.status = 'Não Iniciado'
         return
     }
 
-    const completedCount = island.blips.filter((blip) => blip.state === 'Correto').length
+    island.blips.forEach((blip) => {
+        blip.stateContainer = resolveContainerState(blip)
+    })
+
+    const completedCount = island.blips.filter((blip) => blip.stateContainer === 'Concluído').length
     island.progress = Math.round((completedCount / island.blips.length) * 100)
 
     if (completedCount === island.blips.length) {
         island.status = 'Concluído'
-    } else if (completedCount > 0) {
+    } else if (island.blips.some((blip) => blip.stateContainer !== 'Não iniciado')) {
         island.status = 'Em Progresso'
+    } else {
+        island.status = 'Não Iniciado'
     }
 }
 
-function markExerciseResultLocally(exerciseId: number, nextState: BlipStatus) {
+function markExerciseResultLocally(exerciseId: number, nextState: BlipStatusExercise) {
     for (const island of islands.value) {
-        const foundBlip = island.blips.find((blip) => blip.exercise.id === exerciseId)
+        for (const container of island.blips) {
+            const foundExercise = container.containerExercise.exercises.find((exerciseFlow) => exerciseFlow.exercise.id === exerciseId)
 
-        if (!foundBlip) {
-            continue
+            if (!foundExercise) {
+                continue
+            }
+
+            foundExercise.exercise.isCompletedAnswer = true
+            foundExercise.stateExercise = nextState
+            updateIslandProgressLocally(island)
+            return
         }
-
-        foundBlip.exercise.isCompletedAnswer = true
-        foundBlip.state = nextState
-        updateIslandProgressLocally(island)
-        break
     }
 
     if (selectedTask.value && Number(selectedTask.value.id) === exerciseId) {
         selectedTask.value.isCompletedAnswer = true
-        selectedTask.value.status = nextState === 'Correto' ? 'Concluída' : 'Errou'
+        selectedTask.value.status = nextState === 'Correto' ? 'Concluída' : 'Tentar denovo'
     }
+}
+
+function findExerciseFlowMetadata(exerciseId: number): {
+    phaseId: number
+    userExerciseFlowId: number
+    userContainerExerciseFlowId?: number
+} | null {
+    for (const island of islands.value) {
+        for (const container of island.blips) {
+            const foundExercise = container.containerExercise.exercises.find((exerciseFlow) => exerciseFlow.exercise.id === exerciseId)
+
+            if (!foundExercise) {
+                continue
+            }
+
+            return {
+                phaseId: container.phaseId,
+                userExerciseFlowId: foundExercise.userContainerExerciseFlowId,
+                userContainerExerciseFlowId: foundExercise.userContainerExerciseFlowId,
+            }
+        }
+    }
+
+    return null
 }
 
 async function finishExercise() {
@@ -656,12 +815,15 @@ async function finishExercise() {
         gainedPoints,
     }
 
+    const selectedExerciseId = Number(selectedTask.value.id)
+    const exerciseFlow = findExerciseFlowMetadata(selectedExerciseId)
+
     const payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
         exerciseId: selectedTask.value!.source.id,
         userId,
         questionId: question.id,
-        phaseId: islands.value.find(island => island.blips.some(blip => blip.exercise.id === Number(selectedTask.value!.id)))?.blips.find(blip => blip.exercise.id === Number(selectedTask.value!.id))?.phaseId ?? 0,
-        userExerciseFlowId: islands.value.find(island => island.blips.some(blip => blip.exercise.id === Number(selectedTask.value!.id)))?.blips.find(blip => blip.exercise.id === Number(selectedTask.value!.id))?.userExerciseFlowId ?? 0,
+        phaseId: exerciseFlow?.phaseId ?? 0,
+        userExerciseFlowId: exerciseFlow?.userExerciseFlowId ?? exerciseFlow?.userContainerExerciseFlowId ?? 0,
         submissionData: {
             selectedOption: question.typeExercise === 2 ? -1 : (selectedAnswers.value[question.id] ?? -1),
             answerText: question.typeExercise === 2 ? (selectedCodeAnswers.value[question.id] ?? '').trim() : undefined,
@@ -676,16 +838,33 @@ async function finishExercise() {
     }))
 
     try {
+        var verifyAnswersExisting = await $httpClient.exercise.VerifyExistingAnswers(selectedTask.value.id, userId ?? 0);
+
         const submitResponse = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise)
 
         if (submitResponse.success) {
             toast.success('Exercício enviado', 'Sua resposta foi registrada com sucesso.', 3000)
         }
+
+        if (!verifyAnswersExisting.result.existingAnswers) {
+            if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
+                var payloadUserPoints = {
+                    userId: userId ?? 0,
+                    pointsToAdd: gainedPoints,
+                    exerciseDate: selectedTask.value.termAt,
+                }
+
+                var pointsResponse = await $httpClient.point.AddPointsForUser(payloadUserPoints)
+                if (pointsResponse.success) {
+                    toast.success('Parabens!', `Você ganhou ${gainedPoints} pontos com este exercício.`, 3500);
+                }
+            }
+        }
     } catch (error) {
         console.error('Erro ao enviar respostas do exercício da ilha:', error)
         toast.error('Erro', 'Não foi possível enviar as respostas do exercício.', 3500)
     } finally {
-        const nextState: BlipStatus = hasDissertativeQuestion || accuracy === 100 ? 'Correto' : 'Errou'
+        const nextState: BlipStatusExercise = hasDissertativeQuestion || accuracy === 100 ? 'Correto' : 'Errou'
         markExerciseResultLocally(Number(selectedTask.value.id), nextState)
     }
 }
@@ -705,21 +884,19 @@ function islandCardClass(status: IslandStatus) {
 }
 
 function blipStateLabel(status: BlipStatus) {
-    if (status === 'Correto') return 'Concluído'
+    if (status === 'Concluído') return 'Concluído'
     if (status === 'Atual') return 'Disponível'
-    if (status === 'Errou') return 'Erro • caiu lowerState'
     return 'Bloqueado'
 }
 
 function blipIcon(status: BlipStatus) {
-    if (status === 'Correto') return '✓'
+    if (status === 'Concluído') return '✓'
     if (status === 'Atual') return '▶'
-    if (status === 'Errou') return '↓'
     return '🔒'
 }
 
 function blipClass(status: BlipStatus) {
-    if (status === 'Correto') {
+    if (status === 'Concluído') {
         return 'cursor-pointer border-brand-500 bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_10px_0_0_rgba(185,28,28,0.85)] hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(185,28,28,0.8)]'
     }
 
@@ -727,17 +904,12 @@ function blipClass(status: BlipStatus) {
         return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-ink-900 shadow-[0_10px_0_0_rgba(239,68,68,0.65)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.55)]'
     }
 
-    if (status === 'Errou') {
-        return 'cursor-pointer border-brand-200 bg-red-50 text-brand-600 shadow-[0_8px_0_0_rgba(254,202,202,0.95)]'
-    }
-
     return 'cursor-not-allowed border-slate-300 bg-slate-200 text-slate-500 shadow-[0_8px_0_0_rgba(203,213,225,0.85)]'
 }
 
 function blipLabelClass(status: BlipStatus) {
-    if (status === 'Correto') return 'text-brand-600'
+    if (status === 'Concluído') return 'text-brand-600'
     if (status === 'Atual') return 'text-ink-900'
-    if (status === 'Errou') return 'text-brand-600'
     return 'text-ink-500'
 }
 
@@ -779,16 +951,18 @@ function blipConnectorStyle(index: number) {
     }
 }
 
-function lowerExtraCount(island: Island) {
-    return Math.max(1, Math.ceil(island.blips.length * LOWER_EXTRA_RATIO))
+function lowerExtraCount(island: IslandApi) {
+    return Math.max(1, Math.ceil(islandExerciseCount(island) * LOWER_EXTRA_RATIO))
 }
 
-function enterIsland(island: Island) {
-    if (island.status === 'Não Iniciado') return
+function enterIsland(island: IslandApi) {
+    if (island.status === 'Não Iniciado' || island.status === 'Desconhecido') return
+    activeBlipId.value = null
     selectedIslandId.value = island.id
 }
 
 function leaveIsland() {
+    activeBlipId.value = null
     selectedIslandId.value = null
 }
 
@@ -802,7 +976,7 @@ async function fetchIslandByUserAndCurrentModule() {
             return
         }
 
-        const responsePhase = await $httpClient.phase.GetCurrentPhaseUser(userId);
+        const responsePhase = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
 
         if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(userId, responsePhase.result.id);
@@ -819,8 +993,9 @@ async function fetchCurrentModuleIslands(userId: number, phaseId: number) {
     try {
         const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(userId, phaseId);
 
-        if (response.result) {
-            islands.value = response.result;
+        if (response.success) {
+            islands.value = (response.result ?? []) as IslandApi[];
+            activeBlipId.value = null
             toast.success('Progresso carregado', 'As ilhas do módulo atual foram carregadas com sucesso.', 3000)
         } else {
             toast.error('Não foi possível carregar as ilhas para o módulo atual.');

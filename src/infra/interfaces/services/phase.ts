@@ -3,10 +3,11 @@ import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 import type { ICurrentPhaseModule } from './module'
 
-export interface ICurrentPhaseUser {
+export interface ICurrentModuleUser {
   id: number
   name: string
-  module: ICurrentPhaseModule
+  description: string
+  totalPhases: number
 }
 
 export default class PhaseService extends ClientService<any> {
@@ -14,15 +15,15 @@ export default class PhaseService extends ClientService<any> {
     super('Phase', 'api/Phase')
   }
 
-  GetCurrentPhaseUser = async (
+  GetCurrentModulePhaseUser = async (
     userId: number,
     config: FetchOptions = {},
-  ): Promise<ApiResponse<ICurrentPhaseUser>> => {
-    let urlParams = `/GetCurrentPhaseUser?userId=${userId}`
+  ): Promise<ApiResponse<ICurrentModuleUser>> => {
+    let urlParams = `/GetCurrentModuleUser?userId=${userId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
       ...config,
-    })) as ApiResponse<ICurrentPhaseUser>
+    })) as ApiResponse<ICurrentModuleUser>
   }
 }

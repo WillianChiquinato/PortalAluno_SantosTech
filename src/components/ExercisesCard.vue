@@ -183,7 +183,7 @@
                                 <div class="mt-6 flex flex-wrap items-center justify-between gap-2">
                                     <button type="button"
                                         class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
-                                        @click="backToExercises">
+                                        @click="backToExercisesAndRefresh">
                                         Voltar para exercícios
                                     </button>
                                 </div>
@@ -276,6 +276,7 @@ const emit = defineEmits<{
     (event: 'select-answer', payload: { questionId: number; optionIndex: number }): void
     (event: 'update-code-answer', payload: { questionId: number; answer: string }): void
     (event: 'back-to-exercises'): void
+    (event: 'back-to-exercises-and-refresh'): void
     (event: 'finish-quiz'): void
 }>()
 
@@ -363,6 +364,10 @@ const isExerciseCorrect = computed(() => {
 })
 
 function closeTaskQuiz() {
+    if (props.quizResult) {
+        return
+    }
+    
     emit('close')
 }
 
@@ -380,6 +385,10 @@ function updateCodeAnswer(questionId: number, answer: string) {
 
 function backToExercises() {
     emit('back-to-exercises')
+}
+
+function backToExercisesAndRefresh() {
+    emit('back-to-exercises-and-refresh')
 }
 
 function finishQuiz() {

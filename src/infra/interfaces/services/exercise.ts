@@ -54,6 +54,7 @@ export interface ISubmitExerciseAnswer {
   questionId: number
   phaseId?: number
   userExerciseFlowId?: number
+  userContainerExerciseFlowId?: number
   submissionData: IAnswer
 }
 
@@ -88,6 +89,10 @@ export interface DailyTaskGroupView {
   termAt: string
   disabled: boolean
   exercises: ExerciseCardTask[]
+}
+
+export interface ExerciseVerifyAnswerResponse {
+  existingAnswers: boolean
 }
 
 export default class ExerciseService extends ClientService<any> {
@@ -131,5 +136,18 @@ export default class ExerciseService extends ClientService<any> {
       body: payload,
       ...config,
     })) as ApiResponse<void>
+  }
+
+  VerifyExistingAnswers = async (
+    exerciseId: number,
+    userId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<ExerciseVerifyAnswerResponse>> => {
+    let urlParams = `/VerifyExistingAnswers?exerciseId=${exerciseId}&userId=${userId}`
+    
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<ExerciseVerifyAnswerResponse>
   }
 }

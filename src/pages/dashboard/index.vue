@@ -274,7 +274,7 @@ import { getLoggedUser } from '~/composables/useAuth'
 import { UserRole, type IUserProfileData } from '~/infra/interfaces/services/user'
 import { useUserStore } from '~/infra/store/userStore'
 import type { IBadge } from '~/infra/interfaces/services/badge'
-import type { ICurrentPhaseUser } from '~/infra/interfaces/services/phase'
+import type { ICurrentModuleUser } from '~/infra/interfaces/services/phase'
 import NewUploadCover from '~/components/Modals/newUploadCover.vue'
 import CreatedEditModal from '~/components/Modals/CreatedEditModal.vue'
 import ExercisesCard from '~/components/ExercisesCard.vue'
@@ -310,7 +310,7 @@ const profile = ref<IUserProfileData | undefined>();
 const userBadges = ref<IBadge[] | undefined>();
 const badgeSlots = ref<(IBadge & { unlocked: boolean })[]>([]);
 
-const currentPhase = ref<ICurrentPhaseUser | null>(null);
+const currentModule = ref<ICurrentModuleUser | null>(null);
 const ranking = ref<{ position: number; points: number; pointsToNext: number } | null>(null);
 const rankingMessage = computed(() => {
     if (!ranking.value) return 'Ranking indisponível';
@@ -330,8 +330,8 @@ const stats = computed<Array<{
 }>>(() => {
     const allExercises = tasks.value.flatMap(group => group.exercises);
     return [
-        { label: 'Pontuacao Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
-        { label: 'Fase atual', value: currentPhase.value?.name ?? 'Indisponível', helper: currentPhase.value?.module?.name ?? 'Modulo Indisponível', status: 'progress' },
+        { label: 'Pontuação Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
+        { label: `Módulo atual - (${currentModule.value?.totalPhases ?? 0} fases)`, value: currentModule.value?.name ?? 'Indisponível', helper: currentModule.value?.description ?? 'Módulo Indisponível', status: 'progress' },
         { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `${tasks.value.length > 0 ? `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}` : 'Aguardando tarefas disponíveis'}`, status: 'warning' },
     ]
 })
@@ -959,10 +959,10 @@ async function currentStatsUser() {
             return;
         }
 
-        const response = await $httpClient.phase.GetCurrentPhaseUser(userId);
+        const response = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
 
         if (response.result != null) {
-            currentPhase.value = response.result;
+            currentModule.value = response.result;
             console.log('Fase atual do usuário:', response.result);
 
             toast.success('Perfil carregado', 'Dados do perfil atualizados com sucesso.', 3000);
@@ -988,7 +988,7 @@ async function randomDailyTasks() {
             return;
         }
 
-        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentPhase.value?.id ?? 0, userId);
+        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentModule.value?.id ?? 0, userId);
 
         if (response.result != null) {
             tasks.value = response.result;
