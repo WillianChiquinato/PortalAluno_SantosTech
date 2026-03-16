@@ -2,10 +2,17 @@
     <Teleport to="body">
         <Transition name="task-quiz-fade" appear>
             <div v-if="props.visible" class="task-quiz-mask" @click.self="closeTaskQuiz">
-                <div class="task-quiz-modal panel border-red-100/80 bg-white">
+                <div v-if="props.loading" class="panel border-red-100/80 bg-white p-6">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-spinner text-lg text-red-500"></i>
+                        <p class="text-sm text-ink-500">Carregando exercício...</p>
+                    </div>
+                </div>
+                <div class="task-quiz-modal panel border-red-100/80 bg-white" v-else>
                     <div class="flex items-center justify-between border-b border-red-100/80 px-5 py-4 sm:px-6">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Task diária</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Exercicio de Task
+                            </p>
                             <h3 class="text-md sm:text-lg font-semibold text-ink-900">{{ props.task?.title ??
                                 props.dailyTask?.title }}</h3>
                         </div>
@@ -22,11 +29,7 @@
                                 <h4 class="text-lg sm:text-xl font-semibold">Exercícios disponíveis</h4>
                                 <p class="mt-2 text-sm text-ink-500">Escolha um exercício para iniciar o quiz.</p>
 
-                                <div v-if="props.loading" class="mt-4">
-                                    <p class="text-sm text-ink-500">Carregando questões do exercício...</p>
-                                </div>
-
-                                <div v-else
+                                <div
                                     class="hide-scrollbar mt-4 max-h-[52vh] space-y-3 overflow-y-auto pr-1 sm:max-h-[58vh]">
                                     <button v-for="exercise in props.exercises" :key="exercise.id" type="button"
                                         class="relative w-full overflow-hidden rounded-xl border p-4 text-left transition"
@@ -86,14 +89,14 @@
                                 </div>
 
                                 <div v-else class="mt-4 space-y-3">
-                                    <button v-for="(option, optionIndex) in currentQuestion.options"
-                                        :key="`${currentQuestion.id}-${optionIndex}`" type="button"
+                                    <button v-for="option in currentQuestion.options"
+                                        :key="`${currentQuestion.id}-${option.id}`" type="button"
                                         class="w-full rounded-xl border px-4 py-3 text-left text-sm transition cursor-pointer"
-                                        :class="props.selectedAnswers[currentQuestion.id] === optionIndex
+                                        :class="props.selectedAnswers[currentQuestion.id] === option.id
                                             ? 'border-brand-500 bg-red-50 text-brand-600'
                                             : 'border-red-100/80 bg-white text-ink-700 hover:border-brand-200'"
-                                        @click="selectAnswer(currentQuestion.id, optionIndex)">
-                                        {{ option }}
+                                        @click="selectAnswer(currentQuestion.id, option.id)">
+                                        {{ option.label }}
                                     </button>
                                 </div>
 
@@ -245,8 +248,11 @@ type DailyTaskSummary = {
 type TaskQuestion = {
     id: number
     statement: string
-    options: string[]
-    correctOptionIndex: number
+    options: Array<{
+        id: number
+        label: string
+    }>
+    correctOptionId: number
     typeExercise: number
 }
 
@@ -273,7 +279,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (event: 'close'): void
     (event: 'start-quiz', task: any): void
-    (event: 'select-answer', payload: { questionId: number; optionIndex: number }): void
+    (event: 'select-answer', payload: { questionId: number; optionId: number }): void
     (event: 'update-code-answer', payload: { questionId: number; answer: string }): void
     (event: 'back-to-exercises'): void
     (event: 'back-to-exercises-and-refresh'): void
@@ -344,17 +350,19 @@ const questionReport = computed(() => {
     return props.questions.map((question) => {
         const isDissertative = question.typeExercise === 2
         const codeAnswer = (props.selectedCodeAnswers[question.id] ?? '').trim()
-        const selectedOptionIndex = props.selectedAnswers[question.id]
-        const normalizedSelectedIndex = selectedOptionIndex ?? -1
-        const isCorrect = isDissertative ? Boolean(codeAnswer) : normalizedSelectedIndex === question.correctOptionIndex
+        const selectedOptionId = props.selectedAnswers[question.id]
+        const normalizedSelectedOptionId = selectedOptionId ?? -1
+        const isCorrect = isDissertative ? Boolean(codeAnswer) : normalizedSelectedOptionId === question.correctOptionId
+        const selectedOption = question.options.find((option) => option.id === normalizedSelectedOptionId)
+        const correctOption = question.options.find((option) => option.id === question.correctOptionId)
 
         return {
             id: question.id,
             statement: question.statement,
             isDissertative,
             isCorrect,
-            selectedOptionLabel: isDissertative ? (codeAnswer || 'Não respondida') : (question.options[normalizedSelectedIndex] ?? 'Não respondida'),
-            correctOptionLabel: question.options[question.correctOptionIndex] ?? '-',
+            selectedOptionLabel: isDissertative ? (codeAnswer || 'Não respondida') : (selectedOption?.label ?? 'Não respondida'),
+            correctOptionLabel: correctOption?.label ?? '-',
         }
     })
 })
@@ -367,7 +375,7 @@ function closeTaskQuiz() {
     if (props.quizResult) {
         return
     }
-    
+
     emit('close')
 }
 
@@ -375,8 +383,8 @@ function startExerciseQuiz(task: ExerciseCardTask) {
     emit('start-quiz', task)
 }
 
-function selectAnswer(questionId: number, optionIndex: number) {
-    emit('select-answer', { questionId, optionIndex })
+function selectAnswer(questionId: number, optionId: number) {
+    emit('select-answer', { questionId, optionId })
 }
 
 function updateCodeAnswer(questionId: number, answer: string) {

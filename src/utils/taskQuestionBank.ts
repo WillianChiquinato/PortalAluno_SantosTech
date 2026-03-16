@@ -1,11 +1,18 @@
 export type ExerciseQuestionSource = {
   id: number
+  phaseId?: number
   title: string
   description: string
   videoUrl?: string | null
   pointsRedeem: number
   typeExercise: number
   difficulty: number
+}
+
+export type QuizQuestionChoice = {
+  id: number
+  label: string
+  optionId?: number
 }
 
 export type QuizQuestionOption = {
@@ -18,8 +25,8 @@ export type QuizQuestionOption = {
 export type QuizQuestion = {
   id: number
   statement: string
-  options: string[]
-  correctOptionIndex: number
+  options: QuizQuestionChoice[]
+  correctOptionId: number
   typeExercise: number
 }
 
@@ -72,8 +79,13 @@ export function buildTaskQuestions(task: ExerciseQuestionSource): QuizQuestion[]
     options:
       task.typeExercise === 2
         ? []
-        : (template?.options ?? ['Opção A', 'Opção B', 'Opção C', 'Opção D']),
-    correctOptionIndex: task.typeExercise === 2 ? -1 : (template?.correctOptionIndex ?? 0),
+        : (template?.options ?? ['Opção A', 'Opção B', 'Opção C', 'Opção D']).map(
+            (option, index) => ({
+              id: index,
+              label: option,
+            }),
+          ),
+    correctOptionId: task.typeExercise === 2 ? -1 : (template?.correctOptionIndex ?? 0),
     typeExercise: task.typeExercise,
   }
 
@@ -106,8 +118,12 @@ export function buildTaskQuestionsFromOptions(
     return {
       id: questionId || task.id,
       statement: index === 0 ? task.description : `Pergunta ${index + 1}`,
-      options: groupedOptions.map((item) => item.question),
-      correctOptionIndex: correctOptionIndex >= 0 ? correctOptionIndex : 0,
+      options: groupedOptions.map((item, optionIndex) => ({
+        id: optionIndex,
+        label: item.question,
+        optionId: item.id,
+      })),
+      correctOptionId: correctOptionIndex >= 0 ? correctOptionIndex : 0,
       typeExercise: task.typeExercise,
     }
   })

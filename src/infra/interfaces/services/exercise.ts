@@ -53,7 +53,7 @@ export interface ISubmitExerciseAnswer {
   userId: number
   questionId: number
   phaseId?: number
-  userExerciseFlowId?: number
+  userExerciseFlowId?: number | null
   userContainerExerciseFlowId?: number
   submissionData: IAnswer
 }

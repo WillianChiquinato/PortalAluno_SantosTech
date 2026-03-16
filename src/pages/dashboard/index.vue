@@ -232,7 +232,7 @@
         :exercises="availableExercises" :loading="quizLoading" :questions="quizQuestions"
         :selected-answers="selectedAnswers" :selected-code-answers="selectedCodeAnswers"
         :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
-        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
+        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionId)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
         @finish-quiz="finishExercise" />
 
@@ -401,8 +401,8 @@ const taskResult = ref<{ correct: number; total: number; accuracy: number; gaine
 
 const isCorrectAnswer = computed(() => {
     if (!currentQuestion.value) return false
-    const selectedOptionIndex = selectedAnswers.value[currentQuestion.value.id]
-    return selectedOptionIndex === currentQuestion.value.correctOptionIndex
+    const selectedOptionId = selectedAnswers.value[currentQuestion.value.id]
+    return selectedOptionId === currentQuestion.value.correctOptionId
 })
 
 const dailyTaskGroups = computed<DailyTaskGroupView[]>(() => {
@@ -411,7 +411,7 @@ const dailyTaskGroups = computed<DailyTaskGroupView[]>(() => {
         name: group.name,
         exercises: [...group.exercises]
             .sort((a, b) => a.indexOrder - b.indexOrder)
-            .map((exercise) => mapExerciseToTaskCard(exercise)),
+            .map((exercise) => mapExerciseToTaskCard(exercise, group.phaseId)),
         title: group.name,
         due: formatDate(getNearestTermAt(group.exercises), 'pt-BR', { dateStyle: 'short' }),
         points: String(sumGroupPoints(group.exercises)),
@@ -541,7 +541,7 @@ function getGroupStatus(exercises: IDailyExercise[]): string {
     return 'Em aberto'
 }
 
-function mapExerciseToTaskCard(exercise: IDailyExercise): ExerciseCardTask {
+function mapExerciseToTaskCard(exercise: IDailyExercise, phaseId?: number): ExerciseCardTask {
     return {
         id: exercise.id,
         title: exercise.title,
@@ -553,6 +553,7 @@ function mapExerciseToTaskCard(exercise: IDailyExercise): ExerciseCardTask {
         isCompletedAnswer: exercise.isCompletedAnswer,
         source: {
             id: exercise.id,
+            phaseId,
             title: exercise.title,
             description: exercise.description,
             videoUrl: exercise.videoUrl,
@@ -642,8 +643,22 @@ function closeTaskQuiz() {
     taskResult.value = null
 }
 
-function selectAnswer(questionId: number, optionIndex: number) {
-    selectedAnswers.value[questionId] = optionIndex
+function selectAnswer(questionId: number, optionId: number) {
+    selectedAnswers.value[questionId] = optionId
+}
+
+function resolveSubmittedOption(question: QuizQuestion) {
+    if (question.typeExercise === 2) {
+        return -1
+    }
+
+    const selectedOptionId = selectedAnswers.value[question.id]
+    if (selectedOptionId === null || selectedOptionId === undefined) {
+        return -1
+    }
+
+    const selectedOption = question.options.find((option) => option.id === selectedOptionId)
+    return selectedOption?.optionId ?? selectedOptionId
 }
 
 function updateCodeAnswer(questionId: number, answer: string) {
@@ -692,7 +707,7 @@ async function finishExercise() {
 
     const objectiveQuestions = quizQuestions.value.filter((question) => question.typeExercise !== 2)
     const correct = objectiveQuestions.reduce((acc, question) => {
-        return acc + (selectedAnswers.value[question.id] === question.correctOptionIndex ? 1 : 0)
+        return acc + (selectedAnswers.value[question.id] === question.correctOptionId ? 1 : 0)
     }, 0)
 
     const total = objectiveQuestions.length
@@ -711,13 +726,14 @@ async function finishExercise() {
         exerciseId: selectedTask.value!.source.id,
         userId: userId ?? 0,
         questionId: question.id,
+        phaseId: selectedTask.value?.source.phaseId ?? 0,
         submissionData: {
-            selectedOption: question.typeExercise === 2 ? -1 : (selectedAnswers.value[question.id] ?? -1),
+            selectedOption: resolveSubmittedOption(question),
             answerText: question.typeExercise === 2 ? (selectedCodeAnswers.value[question.id] ?? '').trim() : undefined,
-            isCorrect: question.typeExercise === 2 ? false : selectedAnswers.value[question.id] === question.correctOptionIndex,
+            isCorrect: question.typeExercise === 2 ? false : selectedAnswers.value[question.id] === question.correctOptionId,
             pointsEarned: question.typeExercise === 2
                 ? 0
-                : (selectedAnswers.value[question.id] === question.correctOptionIndex
+                : (selectedAnswers.value[question.id] === question.correctOptionId
                     ? Math.round((selectedTask.value!.source.pointsRedeem * accuracy) / 100)
                     : 0),
             submittedAt: new Date(),

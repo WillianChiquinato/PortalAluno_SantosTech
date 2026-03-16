@@ -345,15 +345,19 @@
         :exercises="availableExercises" :loading="quizLoading" :questions="quizQuestions"
         :selected-answers="selectedAnswers" :selected-code-answers="selectedCodeAnswers"
         :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
-        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionIndex)"
+        @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionId)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
         @back-to-exercises-and-refresh="backToExercisesAndRefresh" @finish-quiz="finishExercise" />
+
+    <SelectedExerciseRepeat v-model="showSelectRepeatExerciseModal" :name="'Opções de Exercício'"
+        @generate-with-ai="handleGenerateWithAI" @repeat-current="handleRepeatCurrent" @back="backRepeatExercises" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import ExercisesCard from '~/components/ExercisesCard.vue';
 import BlipPopover from '~/components/UI/BlipPopover.vue'
+import SelectedExerciseRepeat from '~/components/Modals/SelectedExerciseRepeat.vue'
 import type { BlipContainer, BlipStatus, BlipStatusExercise, ContainerExerciseFlow, IslandApi, IslandStatus } from '~/infra/interfaces/services/class'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { ExerciseCardTask, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
@@ -374,6 +378,8 @@ type DailyTaskSummary = {
     status: string
     description: string
 }
+
+const showSelectRepeatExerciseModal = ref(false)
 
 const showTaskQuizModal = ref(false)
 const selectedDailyTask = ref<DailyTaskSummary | null>(null)
@@ -404,7 +410,7 @@ function closeBlipOverlay() {
     activeBlipId.value = null
 }
 
-function enterExercise(container: BlipContainer, exerciseFlow: ContainerExerciseFlow) {
+async function enterExercise(container: BlipContainer, exerciseFlow: ContainerExerciseFlow) {
     closeBlipOverlay()
 
     if (!selectedIsland.value || !canStartExercise(container, exerciseFlow)) {
@@ -416,11 +422,85 @@ function enterExercise(container: BlipContainer, exerciseFlow: ContainerExercise
     }
 
     selectedDailyTask.value = buildContainerSummary(container)
-    const mappedTask = mapExerciseToTaskCard(exerciseFlow)
+    const mappedTask = mapExerciseToTaskCard(exerciseFlow, container.phaseId)
     selectedTask.value = mappedTask
-    showTaskQuizModal.value = true
 
-    startExerciseQuiz(mappedTask)
+    if (mappedTask.status == 'Concluída') {
+        showSelectRepeatExerciseModal.value = true
+    }
+    else {
+        showTaskQuizModal.value = true
+        startExerciseQuiz(mappedTask)
+    }
+}
+
+async function generateTaskFromAIbackend() {
+    if (!selectedTask.value) return
+
+    quizLoading.value = true
+    try {
+        const response = await $httpClient.AI.GenerateExerciseRepeat(
+            selectedTask.value.source.id,
+            getUserIdFromSession() ?? 0,
+            selectedTask.value.source.phaseId,
+        );
+
+        if (response?.createExercise) {
+            const createdExercise = response.createExercise
+
+            selectedTask.value = {
+                id: createdExercise.id,
+                title: createdExercise.title,
+                due: formatDate(new Date(createdExercise.termAt).toISOString(), 'pt-BR', { dateStyle: 'short' }),
+                points: String(createdExercise.pointsRedeem),
+                status: 'Disponível',
+                description: createdExercise.description,
+                termAt: new Date(createdExercise.termAt).toISOString(),
+                source: {
+                    id: createdExercise.id,
+                    phaseId: response.phaseId,
+                    title: createdExercise.title,
+                    description: createdExercise.description,
+                    videoUrl: createdExercise.videoUrl,
+                    pointsRedeem: createdExercise.pointsRedeem,
+                    typeExercise: createdExercise.typeExercise,
+                    difficulty: createdExercise.difficulty,
+                },
+                isCompletedAnswer: false,
+            }
+
+            // Buscar as questões do exercício gerado
+            const questionsResponse = await $httpClient.exercise.GetQuizQuestionsForExercise(Number(createdExercise.id))
+            const options = (questionsResponse.result ?? []) as IQuizQuestionOption[]
+
+            if (questionsResponse.success && options.length) {
+                quizQuestions.value = buildTaskQuestionsFromOptions(createdExercise as ExerciseQuestionSource, options)
+            } else {
+                quizQuestions.value = buildTaskQuestions(createdExercise as ExerciseQuestionSource)
+            }
+
+            resetQuizState()
+        } else {
+            toast.error('Erro', 'Não foi possível gerar a tarefa.')
+        }
+    } catch (error) {
+        console.error('Erro ao gerar tarefa do AI:', error)
+        toast.error('Erro ao gerar tarefa', 'Não foi possível gerar a tarefa. Tente novamente mais tarde.')
+    } finally {
+        quizLoading.value = false
+    }
+}
+
+async function handleGenerateWithAI() {
+    showTaskQuizModal.value = true
+    await generateTaskFromAIbackend()
+}
+
+function handleRepeatCurrent() {
+    showTaskQuizModal.value = true
+    if (selectedTask.value) {
+        startExerciseQuiz(selectedTask.value)
+    }
 }
 
 const islands = ref<IslandApi[]>([]);
@@ -477,7 +557,7 @@ const availableExercises = computed<ExerciseCardTask[]>(() => {
     if (!selectedContainer.value) return []
 
     return sortedContainerExercises(selectedContainer.value)
-        .map((exerciseFlow) => mapExerciseToTaskCard(exerciseFlow))
+        .map((exerciseFlow) => mapExerciseToTaskCard(exerciseFlow, selectedContainer.value?.phaseId))
 })
 
 function sortedContainerExercises(container: BlipContainer) {
@@ -487,15 +567,15 @@ function sortedContainerExercises(container: BlipContainer) {
 }
 
 function containerPrimaryExerciseType(container: BlipContainer) {
-    if (container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.typeExercise === 3)) {
+    if (container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.difficulty === 3)) {
         return 3
     }
 
-    return container.containerExercise.exercises[0]?.exercise.typeExercise ?? 1
+    return container.containerExercise.exercises[0]?.exercise.difficulty ?? 1
 }
 
 function containerHasPracticalExercise(container: BlipContainer) {
-    return container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.typeExercise === 3)
+    return container.containerExercise.exercises.some((exerciseFlow) => exerciseFlow.exercise.difficulty === 3)
 }
 
 function islandExerciseCount(island: IslandApi) {
@@ -508,7 +588,7 @@ function islandContainerCount(island: IslandApi) {
     return island.blips.length
 }
 
-function mapExerciseToTaskCard(exerciseFlow: ContainerExerciseFlow): ExerciseCardTask {
+function mapExerciseToTaskCard(exerciseFlow: ContainerExerciseFlow, phaseId?: number): ExerciseCardTask {
     const { exercise } = exerciseFlow
     const termAt = new Date(exercise.termAt).toISOString()
 
@@ -528,6 +608,7 @@ function mapExerciseToTaskCard(exerciseFlow: ContainerExerciseFlow): ExerciseCar
         termAt,
         source: {
             id: exercise.id,
+            phaseId,
             title: exercise.title,
             description: exercise.description,
             videoUrl: exercise.videoUrl,
@@ -566,8 +647,32 @@ function canStartExercise(container: BlipContainer, exerciseFlow: ContainerExerc
     return !isContainerLocked(container) && exerciseFlow.stateExercise !== 'Não iniciado'
 }
 
+function normalizedDaysRemaining(container: BlipContainer): number | null {
+    const value = Number(container.daysRemaining)
+
+    if (!Number.isFinite(value)) {
+        return null
+    }
+
+    return value
+}
+
 function isContainerLocked(container: BlipContainer) {
-    return container.isLocked
+    if (!container.isLocked) {
+        return false
+    }
+
+    const daysRemaining = normalizedDaysRemaining(container)
+    if (daysRemaining !== null && daysRemaining <= 0) {
+        return false
+    }
+
+    const unlockDate = normalizedUnlockDate(container)
+    if (unlockDate && unlockDate.getTime() <= Date.now()) {
+        return false
+    }
+
+    return true
 }
 
 function normalizedUnlockDate(container: BlipContainer): Date | null {
@@ -584,8 +689,8 @@ function normalizedUnlockDate(container: BlipContainer): Date | null {
 }
 
 function containerUnlockLabel(container: BlipContainer) {
-    const daysRemaining = container.daysRemaining
-    if (typeof daysRemaining === 'number' && daysRemaining > 0) {
+    const daysRemaining = normalizedDaysRemaining(container)
+    if (daysRemaining !== null && daysRemaining > 0) {
         return daysRemaining === 1
             ? 'Disponível em 1 dia.'
             : `Disponível em ${daysRemaining} dias.`
@@ -604,8 +709,8 @@ function containerRemainingChipLabel(container: BlipContainer) {
         return ''
     }
 
-    const daysRemaining = container.daysRemaining
-    if (typeof daysRemaining === 'number' && daysRemaining > 0) {
+    const daysRemaining = normalizedDaysRemaining(container)
+    if (daysRemaining !== null && daysRemaining > 0) {
         return daysRemaining === 1 ? 'Falta 1 dia' : `Faltam ${daysRemaining} dias`
     }
 
@@ -623,7 +728,7 @@ function exerciseStatusLabel(exerciseFlow: ContainerExerciseFlow) {
     }
 
     if (exerciseFlow.stateExercise === 'Atual') {
-        return exerciseFlow.exercise.typeExercise === 3 ? 'Prova prática' : 'Disponível'
+        return exerciseFlow.exercise.difficulty === 3 ? 'Prova prática' : 'Disponível'
     }
 
     if (exerciseFlow.stateExercise == 'Não iniciado') {
@@ -658,7 +763,7 @@ function exerciseActionLabel(exerciseFlow: ContainerExerciseFlow) {
         return 'Iniciar exercício'
     }
 
-    return exerciseFlow.exercise.typeExercise === 3
+    return exerciseFlow.exercise.difficulty === 3
         ? `Realizar prova prática • +${exerciseFlow.exercise.pointsRedeem} pts`
         : `Missão disponível • +${exerciseFlow.exercise.pointsRedeem} pts`
 }
@@ -735,6 +840,10 @@ function closeTaskQuiz() {
     taskResult.value = null
 }
 
+function backRepeatExercises() {
+    showSelectRepeatExerciseModal.value = false
+}
+
 function backToExercises() {
     selectedTask.value = null
     quizLoading.value = false
@@ -760,8 +869,22 @@ async function backToExercisesAndRefresh() {
     await fetchIslandByUserAndCurrentModule()
 }
 
-function selectAnswer(questionId: number, optionIndex: number) {
-    selectedAnswers.value[questionId] = optionIndex
+function selectAnswer(questionId: number, optionId: number) {
+    selectedAnswers.value[questionId] = optionId
+}
+
+function resolveSubmittedOption(question: QuizQuestion) {
+    if (question.typeExercise === 2) {
+        return -1
+    }
+
+    const selectedOptionId = selectedAnswers.value[question.id]
+    if (selectedOptionId === null || selectedOptionId === undefined) {
+        return -1
+    }
+
+    const selectedOption = question.options.find((option) => option.id === selectedOptionId)
+    return selectedOption?.optionId ?? selectedOptionId
 }
 
 function updateCodeAnswer(questionId: number, answer: string) {
@@ -875,7 +998,7 @@ async function finishExercise() {
     const hasDissertativeQuestion = quizQuestions.value.some((question) => question.typeExercise === 2)
 
     const correctAnswers = objectiveQuestions.reduce((accumulator, question) => {
-        return accumulator + (selectedAnswers.value[question.id] === question.correctOptionIndex ? 1 : 0)
+        return accumulator + (selectedAnswers.value[question.id] === question.correctOptionId ? 1 : 0)
     }, 0)
 
     const totalObjectiveQuestions = objectiveQuestions.length
@@ -891,22 +1014,23 @@ async function finishExercise() {
 
     const selectedExerciseId = Number(selectedTask.value.id)
     const exerciseFlow = findExerciseFlowMetadata(selectedExerciseId)
+    const phaseId = exerciseFlow?.phaseId ?? selectedTask.value.source.phaseId ?? 0
 
     const payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
         exerciseId: selectedTask.value!.source.id,
         userId,
         questionId: question.id,
-        phaseId: exerciseFlow?.phaseId ?? 0,
-        userExerciseFlowId: exerciseFlow?.userExerciseFlowId ?? exerciseFlow?.userContainerExerciseFlowId ?? 0,
+        phaseId,
+        userExerciseFlowId: exerciseFlow?.userExerciseFlowId ?? exerciseFlow?.userContainerExerciseFlowId ?? null,
         submissionData: {
-            selectedOption: question.typeExercise === 2 ? -1 : (selectedAnswers.value[question.id] ?? -1),
+            selectedOption: resolveSubmittedOption(question),
             answerText: question.typeExercise === 2 ? (selectedCodeAnswers.value[question.id] ?? '').trim() : undefined,
             isCorrect: question.typeExercise === 2
                 ? false
-                : selectedAnswers.value[question.id] === question.correctOptionIndex,
+                : selectedAnswers.value[question.id] === question.correctOptionId,
             pointsEarned: question.typeExercise === 2
                 ? 0
-                : (selectedAnswers.value[question.id] === question.correctOptionIndex ? gainedPoints : 0),
+                : (selectedAnswers.value[question.id] === question.correctOptionId ? gainedPoints : 0),
             submittedAt: new Date(),
         },
     }))
