@@ -1,3 +1,4 @@
+import type AiService from "./services/ai";
 import type AuthService from "./services/auth";
 import type BadgeService from "./services/badge";
 import type ClassService from "./services/class";
@@ -20,4 +21,5 @@ export interface IClientHttp {
 	course: CourseService;
 	exercise: ExerciseService;
 	auth: AuthService;
+	AI: AiService;
 }

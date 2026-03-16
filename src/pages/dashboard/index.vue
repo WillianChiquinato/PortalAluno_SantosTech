@@ -122,27 +122,21 @@
                         <div>
                             <h3 class="text-lg font-semibold">Resumo rapido</h3>
                             <p class="text-xs text-ink-500">
-                                Seu ritmo esta subindo hoje.
+                                Seu ritmo sempre avançando...
                             </p>
                         </div>
-
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div v-for="item in highlights" :key="item.label" class="flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <p class="text-sm font-semibold">{{ item.label }}</p>
-                            <p class="text-xs text-ink-500">{{ item.helper }}</p>
-                        </div>
-                        <span class="shrink-0 text-right text-lg font-semibold">{{ item.value }}</span>
-                    </div>
+                <div class="max-w-xl space-y-3 text-sm leading-relaxed text-ink-500 text-justify">
+                    <p>{{ messageMotivacional }}</p>
                 </div>
                 <div class="panel mt-2 flex flex-col gap-2 bg-red-50 p-4">
-                    <p class="text-sm font-semibold">Desafio semanal</p>
-                    <p class="text-xs text-ink-500">Estilizar carrossel central usando classes e IDs.</p>
-                    <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto">Ver
-                        briefing</button>
+                    <p class="text-sm font-semibold">Ranking Global</p>
+                    <p class="text-xs text-ink-500">Clique abaixo para ver o ranking completo.</p>
+                    <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto cursor-pointer"
+                        @click="openGlobalRanking">Ver
+                        Ranking</button>
                 </div>
             </div>
         </section>
@@ -257,6 +251,51 @@
             </div>
         </div>
     </Transition>
+
+    <Transition name="image-viewer-fade">
+        <div v-if="showGlobalRanking" class="image-viewer-overlay" @click.self="closeGlobalRanking">
+            <div class="global-ranking-content">
+                <div class="global-ranking-header">
+                    <div>
+                        <p class="global-ranking-title">Ranking Global de Alunos</p>
+                        <p class="global-ranking-subtitle">Pontuação geral da plataforma.</p>
+                    </div>
+
+                    <button type="button" class="image-viewer-close" @click="closeGlobalRanking"
+                        aria-label="Fechar ranking global">
+                        <i class="pi pi-times"></i>
+                    </button>
+                </div>
+
+                <div class="global-ranking-body">
+                    <p v-if="isGlobalRankingLoading" class="text-sm text-ink-500">Carregando ranking...</p>
+
+                    <p v-else-if="globalRanking.length === 0" class="text-sm text-ink-500">
+                        Nenhum aluno encontrado no ranking.
+                    </p>
+
+                    <div v-else class="space-y-2">
+                        <div v-for="entry in globalRanking" :key="entry.userId" class="global-ranking-row"
+                            :class="{ 'global-ranking-row-highlight': entry.isCurrentUser }">
+                            <div class="global-ranking-position">#{{ entry.position }}</div>
+
+                            <img :src="entry.avatarUrl" :alt="`Avatar de ${entry.name}`"
+                                class="global-ranking-avatar" />
+
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-ink-900">{{ entry.name }}</p>
+                                <p class="text-xs text-ink-500">Aluno</p>
+                            </div>
+
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-brand-600">{{ entry.totalPoints }} pts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Transition>
 </template>
 
 <script setup lang="ts">
@@ -285,6 +324,8 @@ import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestion
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 
+const messageMotivacional = ref('')
+
 const showUploadCoverAndPicture = ref(false)
 const showImageViewer = ref(false)
 const imageViewerSrc = ref('')
@@ -312,6 +353,16 @@ const badgeSlots = ref<(IBadge & { unlocked: boolean })[]>([]);
 
 const currentModule = ref<ICurrentModuleUser | null>(null);
 const ranking = ref<{ position: number; points: number; pointsToNext: number } | null>(null);
+const showGlobalRanking = ref(false)
+const isGlobalRankingLoading = ref(false)
+const globalRanking = ref<Array<{
+    position: number
+    userId: number
+    name: string
+    totalPoints: number
+    avatarUrl: string
+    isCurrentUser: boolean
+}>>([])
 const rankingMessage = computed(() => {
     if (!ranking.value) return 'Ranking indisponível';
 
@@ -746,6 +797,48 @@ function closeImagePreview() {
     showImageViewer.value = false
 }
 
+function closeGlobalRanking() {
+    showGlobalRanking.value = false
+}
+
+async function openGlobalRanking() {
+    showGlobalRanking.value = true
+    isGlobalRankingLoading.value = true
+
+    try {
+        const currentUserId = getUserIdFromSession()
+        const [rankingResponse, usersResponse] = await Promise.all([
+            $httpClient.point.GetRanking(),
+            $httpClient.user.GetUsers(),
+        ])
+
+        const rankingList = rankingResponse.result ?? []
+        const usersList = usersResponse.result ?? []
+        const userMap = new Map(usersList.map((user) => [user.id, user]))
+
+        globalRanking.value = rankingList
+            .slice()
+            .sort((a, b) => b.totalPoints - a.totalPoints)
+            .map((entry, index) => {
+                const user = userMap.get(entry.userId)
+                return {
+                    position: index + 1,
+                    userId: entry.userId,
+                    name: user?.name ?? `Aluno ${entry.userId}`,
+                    totalPoints: entry.totalPoints,
+                    avatarUrl: user?.profilePictureUrl?.trim() ? user.profilePictureUrl : profileDefault,
+                    isCurrentUser: currentUserId === entry.userId,
+                }
+            })
+    } catch (error) {
+        console.error('Erro ao carregar ranking global:', error)
+        globalRanking.value = []
+        toast.error('Erro', 'Não foi possível carregar o ranking global. Tente novamente mais tarde.', 4000)
+    } finally {
+        isGlobalRankingLoading.value = false
+    }
+}
+
 function closeUploadCoverAndPicture() {
     showUploadCoverAndPicture.value = false;
 }
@@ -1001,10 +1094,24 @@ async function randomDailyTasks() {
     }
 }
 
+async function getAImotivacionalMessage() {
+    try {
+        const response = await $httpClient.AI.GetMotivationalMessage();
+
+        if (response.message != null) {
+            messageMotivacional.value = response.message;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mensagem motivacional:', error)
+    }
+}
+
 onMounted(async () => {
     await fetchUserProfile();
     await randomDailyTasks();
     ranking.value = await fetchRankingUser();
+
+    await getAImotivacionalMessage();
 })
 </script>
 
@@ -1089,6 +1196,79 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+.global-ranking-content {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 2rem);
+    border-radius: 1rem;
+    background: #fff;
+    border: 1px solid #fee2e2;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.global-ranking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #fee2e2;
+    background: linear-gradient(90deg, #fff7f7 0%, #fff 70%);
+}
+
+.global-ranking-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.global-ranking-subtitle {
+    margin-top: 0.15rem;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.global-ranking-body {
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 10rem);
+}
+
+.global-ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid #fee2e2;
+    border-radius: 0.85rem;
+    padding: 0.55rem 0.65rem;
+    background: #fff;
+}
+
+.global-ranking-row-highlight {
+    border-color: #fb7185;
+    background: #fff1f2;
+}
+
+.global-ranking-position {
+    min-width: 2.2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #be123c;
+}
+
+.global-ranking-avatar {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    border: 1px solid #fecdd3;
+    object-fit: cover;
+    background: #fff;
 }
 
 .image-viewer-header {
