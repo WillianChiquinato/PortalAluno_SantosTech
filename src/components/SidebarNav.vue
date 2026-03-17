@@ -89,6 +89,7 @@
 import { useRoute } from 'nuxt/app';
 import { computed } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
+import { clearAuth } from '~/composables/useAuth'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
@@ -123,9 +124,7 @@ const isActive = (path: string) => {
 }
 
 const logout = async () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('loggedUser')
-    console.log("Logout User");
+    clearAuth()
     return navigateTo('/')
 }
 

@@ -37,7 +37,7 @@ import AppToast from './components/Toast/AppToast.vue';
 import ClickEffect from './components/ClickEffect.vue';
 import NotificationEmail from './components/Toast/NotificationEmail.vue';
 import { useLoadingConfigurations } from './composables/useLoadingConfigurations';
-import { getLoggedUser, verifyToken } from './composables/useAuth';
+import { getLoggedUser, getToken, verifyToken } from './composables/useAuth';
 import { useUserStore } from './infra/store/userStore';
 
 const userConfigs = useUserStore()
@@ -62,10 +62,20 @@ const showWhatsapp = computed(() => {
 
 onMounted(async () => {
     if (!verifyToken()) {
+        disconnectPresence();
         return;
     }
 
+    const token = getToken();
+    if (token) {
+        connectPresence(token);
+    }
+
     await loadConfigurations();
+});
+
+onUnmounted(() => {
+    disconnectPresence();
 });
 
 </script>

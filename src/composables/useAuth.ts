@@ -1,4 +1,5 @@
 import { useNuxtApp } from '#app'
+import { disconnectPresence } from './usePresence'
 
 function getStorage(): Storage | null {
   if (!import.meta.client) {
@@ -29,6 +30,7 @@ export function removeToken() {
 }
 
 export function clearAuth() {
+  disconnectPresence()
   removeToken()
   getStorage()?.removeItem('loggedUser')
 }

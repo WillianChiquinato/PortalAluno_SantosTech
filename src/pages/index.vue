@@ -177,6 +177,7 @@ async function LoadUserData() {
 
         setToken(loadUser.token);
         setLoggedUser(loadUser.user);
+        connectPresence(loadUser.token);
         useUserStore().setUserId(loadUser.user.id);
         useUserStore().setUserEmail(loadUser.user.email);
 
