@@ -1,7 +1,5 @@
 import { ref, readonly, onUnmounted } from 'vue'
-import { getToken, verifyToken } from './useAuth'
-
-// ── Types ──────────────────────────────────────────────
+import { getLoggedUser, getToken, verifyToken } from './useAuth'
 
 type PresenceServerMessage =
   | { type: 'presence:hello'; userId: string; isOnline: boolean; lastSeenAt: string }
@@ -17,15 +15,12 @@ export type PresenceState = {
 
 type PresenceListener = (message: PresenceServerMessage) => void
 
-// ── Constants ──────────────────────────────────────────
-
 const WS_PROTOCOL = 'portal-aluno-presence.v1'
 const TICKET_PREFIX = 'presence-ticket.'
 const HEARTBEAT_INTERVAL_MS = 25_000
+const PRESENCE_STALE_AFTER_MS = 90_000
 const RECONNECT_BASE_MS = 2_000
 const RECONNECT_MAX_MS = 30_000
-
-// ── Singleton state (shared across all component instances) ─
 
 const presenceMap = ref<Map<string, PresenceState>>(new Map())
 const connected = ref(false)
@@ -36,28 +31,73 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let reconnectAttempt = 0
 let shouldRun = false
 let connectionId = 0
+let apiHeartbeatInFlight = false
 
 const listeners = new Set<PresenceListener>()
 
-// ── Internal helpers ───────────────────────────────────
-
-function notify(msg: PresenceServerMessage) {
-  if (msg.type === 'presence:hello' || msg.type === 'presence:update') {
-    const next = new Map(presenceMap.value)
-    next.set(msg.userId, {
-      userId: msg.userId,
-      isOnline: msg.isOnline,
-      lastSeenAt: msg.lastSeenAt,
-    })
-    presenceMap.value = next
+function emit(message: PresenceServerMessage) {
+  for (const listener of listeners) {
+    listener(message)
   }
+}
 
-  if (msg.type === 'presence:reset') {
+function isFreshPresence(isOnline: boolean, lastSeenAt: string) {
+  if (!isOnline) return false
+
+  const timestamp = Date.parse(lastSeenAt)
+  if (!Number.isFinite(timestamp)) return false
+
+  return Date.now() - timestamp <= PRESENCE_STALE_AFTER_MS
+}
+
+function applyPresenceMessage(message: Extract<PresenceServerMessage, { type: 'presence:hello' | 'presence:update' }>) {
+  const next = new Map(presenceMap.value)
+  next.set(message.userId, {
+    userId: message.userId,
+    isOnline: isFreshPresence(message.isOnline, message.lastSeenAt),
+    lastSeenAt: message.lastSeenAt,
+  })
+  presenceMap.value = next
+}
+
+function notify(message: PresenceServerMessage) {
+  if (message.type === 'presence:hello' || message.type === 'presence:update') {
+    applyPresenceMessage(message)
+  } else if (message.type === 'presence:reset') {
     presenceMap.value = new Map()
   }
 
-  for (const fn of listeners) {
-    fn(msg)
+  emit(message)
+}
+
+function pruneStalePresence() {
+  const next = new Map(presenceMap.value)
+  const expiredStates: PresenceServerMessage[] = []
+
+  for (const [userId, state] of next.entries()) {
+    if (!state.isOnline || isFreshPresence(state.isOnline, state.lastSeenAt)) {
+      continue
+    }
+
+    const updatedState = {
+      ...state,
+      isOnline: false,
+    }
+
+    next.set(userId, updatedState)
+    expiredStates.push({
+      type: 'presence:update',
+      userId,
+      isOnline: false,
+      lastSeenAt: state.lastSeenAt,
+    })
+  }
+
+  if (expiredStates.length === 0) return
+
+  presenceMap.value = next
+  for (const message of expiredStates) {
+    emit(message)
   }
 }
 
@@ -66,6 +106,7 @@ function clearTimers() {
     clearInterval(heartbeatTimer)
     heartbeatTimer = null
   }
+
   if (reconnectTimer !== null) {
     clearTimeout(reconnectTimer)
     reconnectTimer = null
@@ -77,6 +118,7 @@ function buildWsUrl(): string {
     (import.meta.env.VITE_PRESENCE_WS_URL as string | undefined)
     ?? (import.meta.env.VITE_WS_URL as string | undefined)
   )?.trim()
+
   if (explicit) return explicit
 
   const apiBase = import.meta.env.VITE_API_BASE_URL as string
@@ -89,32 +131,58 @@ function buildWsUrl(): string {
   return `${protocol}//${url.host}${wsPath}`
 }
 
-function buildTicketUrl(): string {
+function buildPresenceApiUrl(path: string): string {
   const apiBase = import.meta.env.VITE_API_BASE_URL as string
   const apiUrl = new URL(apiBase, window.location.origin)
   const basePath = apiUrl.pathname.replace(/\/$/, '')
   const apiPath = basePath.endsWith('/api') ? basePath : `${basePath}/api`
-  return `${apiUrl.origin}${apiPath}/presence/socket-ticket`
+  return `${apiUrl.origin}${apiPath}${path}`
 }
 
-async function fetchTicket(): Promise<string> {
+function buildTicketUrl(): string {
+  return buildPresenceApiUrl('/presence/socket-ticket')
+}
+
+function buildHeartbeatUrl(): string {
+  return buildPresenceApiUrl('/presence/heartbeat')
+}
+
+async function postPresenceRequest(url: string): Promise<Record<string, unknown>> {
   const token = getToken()
   if (!token) throw new Error('No auth token')
 
-  const res = await fetch(buildTicketUrl(), {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
+    body: '{}',
   })
 
-  if (!res.ok) {
-    throw new Error(`Ticket request failed: ${res.status}`)
+  if (!response.ok) {
+    throw new Error(`Presence request failed: ${response.status}`)
   }
 
-  const data = await res.json()
-  return data.ticket as string
+  return await response.json() as Record<string, unknown>
+}
+
+async function fetchTicket(): Promise<string> {
+  const data = await postPresenceRequest(buildTicketUrl())
+  return String(data.ticket ?? '')
+}
+
+function updateCurrentUserFromHeartbeat(lastSeenAt: string) {
+  const loggedUser = getLoggedUser()
+  const userId = String(loggedUser?.id ?? '').trim()
+  if (!userId) return
+
+  notify({
+    type: 'presence:update',
+    userId,
+    isOnline: true,
+    lastSeenAt,
+  })
 }
 
 function sendWsHeartbeat() {
@@ -123,12 +191,39 @@ function sendWsHeartbeat() {
   }
 }
 
+async function sendApiHeartbeat() {
+  if (!shouldRun || !verifyToken() || apiHeartbeatInFlight) return
+
+  apiHeartbeatInFlight = true
+  try {
+    const data = await postPresenceRequest(buildHeartbeatUrl())
+    const lastSeenAt = typeof data.lastSeenAt === 'string'
+      ? data.lastSeenAt
+      : new Date().toISOString()
+
+    updateCurrentUserFromHeartbeat(lastSeenAt)
+  } catch {
+    // Keep presence best-effort when HTTP heartbeat fails.
+  } finally {
+    apiHeartbeatInFlight = false
+  }
+}
+
+function runHeartbeatCycle() {
+  pruneStalePresence()
+  sendWsHeartbeat()
+  void sendApiHeartbeat()
+}
+
 function scheduleReconnect() {
-  if (reconnectTimer !== null) clearTimeout(reconnectTimer)
+  if (reconnectTimer !== null) {
+    clearTimeout(reconnectTimer)
+  }
+
   if (!shouldRun || !verifyToken()) return
 
   const delay = Math.min(RECONNECT_BASE_MS * 2 ** reconnectAttempt, RECONNECT_MAX_MS)
-  reconnectAttempt++
+  reconnectAttempt += 1
 
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null
@@ -150,7 +245,7 @@ async function openSocket() {
     return
   }
 
-  if (!shouldRun || myId !== connectionId) return
+  if (!ticket || !shouldRun || myId !== connectionId) return
 
   const ws = new WebSocket(buildWsUrl(), [
     WS_PROTOCOL,
@@ -165,22 +260,18 @@ async function openSocket() {
     connected.value = true
     reconnectAttempt = 0
 
-    // Clear old presence data on reconnect
-    presenceMap.value = new Map()
-
-    // Start WS-only heartbeat
-    if (heartbeatTimer !== null) clearInterval(heartbeatTimer)
-    heartbeatTimer = setInterval(sendWsHeartbeat, HEARTBEAT_INTERVAL_MS)
+    notify({ type: 'presence:reset' })
+    runHeartbeatCycle()
   })
 
   ws.addEventListener('message', (event) => {
     if (socket !== ws) return
 
     try {
-      const msg = JSON.parse(event.data as string) as PresenceServerMessage
-      notify(msg)
+      const message = JSON.parse(event.data as string) as PresenceServerMessage
+      notify(message)
     } catch {
-      // ignore malformed
+      // Ignore malformed payloads.
     }
   })
 
@@ -189,27 +280,34 @@ async function openSocket() {
       socket = null
       connected.value = false
     }
+
     scheduleReconnect()
   })
 
   ws.addEventListener('error', () => {
-    if (socket === ws) ws.close()
+    if (socket === ws) {
+      ws.close()
+    }
   })
 }
-
-// ── Public API ─────────────────────────────────────────
 
 export function connectPresence() {
   if (shouldRun) return
 
   shouldRun = true
   reconnectAttempt = 0
+
+  if (heartbeatTimer === null) {
+    heartbeatTimer = setInterval(runHeartbeatCycle, HEARTBEAT_INTERVAL_MS)
+  }
+
+  runHeartbeatCycle()
   void openSocket()
 }
 
 export function disconnectPresence() {
   shouldRun = false
-  connectionId++
+  connectionId += 1
   clearTimers()
 
   if (socket) {
@@ -219,14 +317,16 @@ export function disconnectPresence() {
   }
 
   connected.value = false
-  presenceMap.value = new Map()
+  notify({ type: 'presence:reset' })
 }
 
 export function getPresenceSnapshot(): PresenceState[] {
+  pruneStalePresence()
   return Array.from(presenceMap.value.values())
 }
 
 export function isUserOnline(userId: string): boolean {
+  pruneStalePresence()
   return presenceMap.value.get(userId)?.isOnline ?? false
 }
 
@@ -234,10 +334,6 @@ export function getUserLastSeen(userId: string): string | null {
   return presenceMap.value.get(userId)?.lastSeenAt ?? null
 }
 
-/**
- * Composable for reactive presence state in components.
- * Automatically subscribes/unsubscribes on mount/unmount.
- */
 export function usePresence() {
   const onPresenceUpdate = (listener: PresenceListener) => {
     listeners.add(listener)
@@ -245,21 +341,13 @@ export function usePresence() {
   }
 
   return {
-    /** Reactive map of userId → PresenceState */
     presenceMap: readonly(presenceMap),
-    /** Whether the WebSocket is currently connected */
     isConnected: readonly(connected),
-    /** Check if a specific user is online */
     isUserOnline,
-    /** Get a user's last seen timestamp */
     getUserLastSeen,
-    /** Get a snapshot array of all presence states */
     getPresenceSnapshot,
-    /** Register a listener (auto-cleaned on unmount) */
     onPresenceUpdate,
-    /** Connect (idempotent) */
     connect: connectPresence,
-    /** Disconnect */
     disconnect: disconnectPresence,
   }
 }
