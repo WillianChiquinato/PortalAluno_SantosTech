@@ -39,6 +39,7 @@ import NotificationEmail from './components/Toast/NotificationEmail.vue';
 import { useLoadingConfigurations } from './composables/useLoadingConfigurations';
 import { getLoggedUser, verifyToken } from './composables/useAuth';
 import { useUserStore } from './infra/store/userStore';
+import { connectPresence, disconnectPresence } from './composables/usePresence';
 
 const userConfigs = useUserStore()
 const { isLoading } = useLoading();
@@ -66,6 +67,11 @@ onMounted(async () => {
     }
 
     await loadConfigurations();
+    connectPresence();
+});
+
+onUnmounted(() => {
+    disconnectPresence();
 });
 
 </script>
