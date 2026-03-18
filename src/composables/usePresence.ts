@@ -37,6 +37,8 @@ function closeSocket() {
   socket = null
   activeSocketToken = null
 
+  clearHeartbeatTimer()
+
   if (
     currentSocket.readyState === WebSocket.OPEN ||
     currentSocket.readyState === WebSocket.CONNECTING
@@ -45,7 +47,7 @@ function closeSocket() {
   }
 }
 
-function resolvePresenceUrl(token: string) {
+function resolvePresenceUrl() {
   const rawUrl = String(import.meta.env.VITE_PRESENCE_WS_URL || '').trim()
 
   if (!rawUrl) {
@@ -71,8 +73,6 @@ function resolvePresenceUrl(token: string) {
   } else if (url.protocol === 'https:') {
     url.protocol = 'wss:'
   }
-
-  url.searchParams.set('token', token)
 
   return url.toString()
 }
@@ -111,7 +111,7 @@ function scheduleReconnect() {
 }
 
 function openPresenceSocket(token: string) {
-  const url = resolvePresenceUrl(token)
+  const url = resolvePresenceUrl()
   if (!url) {
     return
   }
@@ -127,6 +127,7 @@ function openPresenceSocket(token: string) {
       return
     }
 
+    nextSocket.send(JSON.stringify({ type: 'presence:auth', token }))
     reconnectAttempt = 0
     startHeartbeat()
   })
