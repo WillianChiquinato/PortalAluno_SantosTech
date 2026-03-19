@@ -7,6 +7,7 @@ type PresenceServerMessage =
   | { type: 'presence:update'; userId: string; isOnline: boolean; lastSeenAt: string }
   | { type: 'presence:reset' }
   | { type: 'presence:error'; message: string }
+  | { type: 'ping' }
 
 export type PresenceState = {
   userId: string
@@ -22,6 +23,9 @@ const HEARTBEAT_INTERVAL_MS = 25_000
 const PRESENCE_STALE_AFTER_MS = 90_000
 const RECONNECT_BASE_MS = 29_000
 const RECONNECT_MAX_MS = 30_000
+const IMMEDIATE_CLOSE_WINDOW_MS = 5_000
+const IMMEDIATE_CLOSE_STRIKES_LIMIT = 4
+const HTTP_ONLY_COOLDOWN_MS = 5 * 60_000
 
 const presenceMap = ref<Map<string, PresenceState>>(new Map())
 const connected = ref(false)
@@ -33,6 +37,10 @@ let reconnectAttempt = 0
 let shouldRun = false
 let connectionId = 0
 let openSocketInFlight: Promise<void> | null = null
+let fallbackUntil = 0
+let fallbackTimer: ReturnType<typeof setTimeout> | null = null
+let immediateCloseStrikes = 0
+let socketAttemptStartedAt = 0
 
 const listeners = new Set<PresenceListener>()
 
@@ -144,6 +152,46 @@ function clearTimers() {
     clearTimeout(reconnectTimer)
     reconnectTimer = null
   }
+}
+
+function clearFallbackTimer() {
+  if (fallbackTimer !== null) {
+    clearTimeout(fallbackTimer)
+    fallbackTimer = null
+  }
+}
+
+function isHttpOnlyFallbackActive(now = Date.now()) {
+  return fallbackUntil > now
+}
+
+function resetFallbackState() {
+  fallbackUntil = 0
+  immediateCloseStrikes = 0
+  clearFallbackTimer()
+}
+
+function scheduleFallbackExit() {
+  clearFallbackTimer()
+  if (!shouldRun || !isHttpOnlyFallbackActive()) return
+
+  fallbackTimer = setTimeout(() => {
+    fallbackTimer = null
+    if (!isHttpOnlyFallbackActive()) {
+      resetFallbackState()
+    }
+    if (!shouldRun) return
+    void openSocket()
+  }, Math.max(0, fallbackUntil - Date.now()))
+}
+
+function enterHttpOnlyFallback() {
+  fallbackUntil = Date.now() + HTTP_ONLY_COOLDOWN_MS
+  if (reconnectTimer !== null) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  scheduleFallbackExit()
 }
 
 function buildWsUrl(): string {
@@ -267,6 +315,7 @@ function runHeartbeatCycle() {
 
   if (hasOpenSocket()) {
     sendWsHeartbeat()
+    return
   }
 
   void sendHeartbeat().then((lastSeenAt) => {
@@ -282,6 +331,11 @@ function scheduleReconnect() {
   }
 
   if (!shouldRun || !verifyToken()) return
+
+  if (isHttpOnlyFallbackActive()) {
+    scheduleFallbackExit()
+    return
+  }
 
   const delay = Math.min(RECONNECT_BASE_MS * 2 ** reconnectAttempt, RECONNECT_MAX_MS)
   reconnectAttempt += 1
@@ -309,6 +363,10 @@ async function openSocket() {
 async function openSocketInternal() {
   if (!import.meta.client) return
   if (!shouldRun || !verifyToken()) return
+  if (isHttpOnlyFallbackActive()) {
+    scheduleFallbackExit()
+    return
+  }
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return
 
   const myId = ++connectionId
@@ -334,6 +392,7 @@ async function openSocketInternal() {
     `${TICKET_PREFIX}${ticket}`,
   ])
 
+  socketAttemptStartedAt = Date.now()
   socket = ws
 
   ws.addEventListener('open', () => {
@@ -346,6 +405,8 @@ async function openSocketInternal() {
 
     connected.value = true
     reconnectAttempt = 0
+    fallbackUntil = 0
+    clearFallbackTimer()
 
     notify({ type: 'presence:reset' })
     markCurrentUserOnline()
@@ -357,6 +418,12 @@ async function openSocketInternal() {
 
     try {
       const message = JSON.parse(event.data as string) as PresenceServerMessage
+      if (message.type === 'ping') {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'pong' }))
+        }
+        return
+      }
       notify(message)
     } catch {
       // Ignore malformed payloads.
@@ -369,11 +436,20 @@ async function openSocketInternal() {
       connected.value = false
     }
 
-    console.warn('Presence WebSocket closed', {
-      code: event.code,
-      reason: event.reason,
-      wasClean: event.wasClean,
-    })
+    const connectedForMs =
+      socketAttemptStartedAt > 0 ? Date.now() - socketAttemptStartedAt : Number.POSITIVE_INFINITY
+    socketAttemptStartedAt = 0
+
+    if (connectedForMs < IMMEDIATE_CLOSE_WINDOW_MS) {
+      immediateCloseStrikes += 1
+    } else {
+      immediateCloseStrikes = 0
+    }
+
+    if (immediateCloseStrikes >= IMMEDIATE_CLOSE_STRIKES_LIMIT) {
+      enterHttpOnlyFallback()
+      return
+    }
 
     scheduleReconnect()
   })
@@ -395,12 +471,17 @@ export function connectPresence() {
     heartbeatTimer = setInterval(runHeartbeatCycle, HEARTBEAT_INTERVAL_MS)
   }
 
+  if (isHttpOnlyFallbackActive()) {
+    runHeartbeatCycle()
+  }
   void openSocket()
 }
 
 export function disconnectPresence() {
   shouldRun = false
   connectionId += 1
+  socketAttemptStartedAt = 0
+  resetFallbackState()
   clearTimers()
 
   if (socket) {
