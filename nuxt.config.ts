@@ -2,6 +2,13 @@ export default defineNuxtConfig({
   srcDir: 'src/',
   modules: ['@pinia/nuxt'],
   css: ['@/assets/styles.css'],
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.VITE_API_BASE_URL ?? '',
+      presenceWsUrl: process.env.VITE_PRESENCE_WS_URL ?? '',
+      wsUrl: process.env.VITE_WS_URL ?? '',
+    },
+  },
   vite: {
     assetsInclude: ['**/*.lottie'],
   },

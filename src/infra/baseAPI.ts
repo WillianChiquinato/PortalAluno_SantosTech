@@ -1,15 +1,14 @@
 import { navigateTo } from '#app'
+import { useRuntimeConfig } from '#imports'
 import { $fetch } from 'ofetch'
 import { clearAuth, getToken, verifyToken } from '~/composables/useAuth'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-
 export const fetchInstance = $fetch.create({
-  baseURL,
-
   onRequest({ options }) {
+    const { public: { apiBaseUrl } } = useRuntimeConfig()
     const headers = new Headers(options.headers)
 
+    options.baseURL = apiBaseUrl
     headers.set('Content-Type', 'application/json')
 
     const token = getToken()
