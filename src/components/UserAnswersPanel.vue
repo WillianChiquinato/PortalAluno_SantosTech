@@ -20,8 +20,8 @@
                 <p class="mt-1 text-xl font-semibold text-ink-900">{{ totalWrong }}</p>
             </article>
             <article class="rounded-xl border border-success-200/80 bg-success-200/20 p-3">
-                <p class="text-[11px] uppercase tracking-[0.14em] text-ink-500">Pendentes</p>
-                <p class="mt-1 text-xl font-semibold text-success-600">{{ totalPending }}</p>
+                <p class="text-[11px] uppercase tracking-[0.14em] text-ink-500">Total</p>
+                <p class="mt-1 text-xl font-semibold text-success-600">{{ totalAnswers }}</p>
             </article>
         </div>
 
@@ -82,7 +82,7 @@ const props = withDefaults(
     },
 )
 
-const filters: UserAnswerStatus[] = ['Todas', 'Correta', 'Incorreta', 'Pendente']
+const filters: UserAnswerStatus[] = ['Todas', 'Correta', 'Incorreta']
 const selectedFilter = ref<UserAnswerStatus>('Todas')
 
 const filteredAnswers = computed(() => {
@@ -95,7 +95,7 @@ const filteredAnswers = computed(() => {
 
 const totalCorrect = computed(() => props.answers.filter((answer) => answer.status === 'Correta').length)
 const totalWrong = computed(() => props.answers.filter((answer) => answer.status === 'Incorreta').length)
-const totalPending = computed(() => props.answers.filter((answer) => answer.status === 'Pendente').length)
+const totalAnswers = computed(() => props.answers.length)
 
 function formatDate(dateString: string): string {
     const parsed = new Date(dateString)

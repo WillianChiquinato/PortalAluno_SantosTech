@@ -18,7 +18,7 @@
                             <button type="button" class="btn-primary w-full py-3 font-semibold transition-all cursor-pointer"
                                 @click="handleGenerateWithAI">
                                 <i class="pi pi-sparkles mr-2"></i>
-                                Gerar exercício com IA (beta)
+                                Gerar outro exercício similar (beta)
                             </button>
 
                             <button type="button"

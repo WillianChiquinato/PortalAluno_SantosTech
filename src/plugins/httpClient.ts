@@ -1,6 +1,7 @@
 import { defineNuxtPlugin } from "nuxt/app";
 import type { IClientHttp } from "~/infra/interfaces/config";
 import AiService from "~/infra/interfaces/services/ai";
+import AnswersService from "~/infra/interfaces/services/answers";
 import AuthService from "~/infra/interfaces/services/auth";
 import BadgeService from "~/infra/interfaces/services/badge";
 import ClassService from "~/infra/interfaces/services/class";
@@ -25,6 +26,7 @@ export default defineNuxtPlugin(()=>{
 		course: new CourseService(),
 		exercise: new ExerciseService(),
 		auth: new AuthService(),
+		answers: new AnswersService(),
 		AI: new AiService(),
 	};
 

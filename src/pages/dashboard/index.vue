@@ -170,7 +170,8 @@
                 enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0"
                 leave-active-class="duration-200 ease-in transition-all" leave-from-class="opacity-100 translate-y-0"
                 leave-to-class="opacity-0 -translate-y-2">
-                <UserAnswersPanel v-if="showAnswersPanel" title="Respostas do usuario" :answers="userAnswersPreview" />
+                <UserAnswersPanel v-if="showAnswersPanel" title="Respostas do usuario"
+                    :answers="userAnswersPanelItems" />
             </Transition>
         </section>
     </div>
@@ -307,6 +308,7 @@ import TaskList from '~/assets/lottie/TaskList.json'
 import BadgeUnlocked from '~/assets/lottie/Badges.json'
 import Locked from '~/assets/lottie/lockBadge.json'
 
+import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
 import { getLoggedUser } from '~/composables/useAuth'
@@ -323,6 +325,7 @@ import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask } from '~/infra/interfaces/services/exercise'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
+import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
 
 const messageMotivacional = ref('')
 
@@ -450,40 +453,56 @@ const highlights = [
 ]
 
 const showAnswersPanel = ref(false)
-const newAnswersCount = ref(2)
-const userAnswersPreview = ref<UserAnswerItem[]>([
-    {
-        id: 1,
-        question: 'Qual e o objetivo do estado reativo no Vue?',
-        answer: 'Atualizar a interface automaticamente quando os dados mudam.',
-        status: 'Correta',
-        answeredAt: '2026-03-07T09:40:00.000Z',
-        score: 10,
-    },
-    {
-        id: 2,
-        question: 'Quando usar computed em vez de metodo comum?',
-        answer: 'Quando preciso de cache com base em dependencias reativas.',
-        status: 'Correta',
-        answeredAt: '2026-03-07T09:44:00.000Z',
-        score: 9,
-    },
-    {
-        id: 3,
-        question: 'Qual a diferenca entre composable e componente?',
-        answer: 'Ainda estou revisando esse ponto.',
-        status: 'Pendente',
-        answeredAt: '2026-03-07T09:46:00.000Z',
-    },
-    {
-        id: 4,
-        question: 'O que e importante ao tratar erro de API?',
-        answer: 'Apenas fazer console.log ja resolve tudo.',
-        status: 'Incorreta',
-        answeredAt: '2026-03-07T09:47:00.000Z',
-        score: 2,
-    },
-])
+const newAnswersCount = ref(0)
+const userAnswersPreview = ref<IAnswersByUserIdResponse | null>(null)
+const userAnswersPanelItems = computed<UserAnswerItem[]>(() => {
+    const groups = userAnswersPreview.value?.exerciseGroups ?? []
+
+    return groups
+        .flatMap((group) => {
+            const exerciseTitle = group.exercise.title
+            return group.answers.map((answer) => mapAnswerToPanelItem(answer, exerciseTitle))
+        })
+        .sort((first, second) => {
+            return new Date(second.answeredAt).getTime() - new Date(first.answeredAt).getTime()
+        })
+})
+
+function mapAnswerStatus(isCorrect: boolean | null | undefined): UserAnswerItem['status'] {
+    if (isCorrect === true) {
+        return 'Correta'
+    }
+
+    if (isCorrect === false) {
+        return 'Incorreta'
+    }
+
+    return 'Pendente'
+}
+
+function mapAnswerContent(answerText: string | null, selectedOption: string): string {
+    const normalizedText = answerText?.trim()
+
+    if (normalizedText) {
+        return normalizedText
+    }
+
+    if (selectedOption.trim()) {
+        return `Opcao selecionada: ${selectedOption}`
+    }
+
+    return 'Resposta enviada.'
+}
+
+function mapAnswerToPanelItem(answer: IAnswerByUser, exerciseTitle: string): UserAnswerItem {
+    return {
+        id: answer.id,
+        question: `${exerciseTitle} - Questao #${answer.questionId}`,
+        answer: mapAnswerContent(answer.answerText, answer.selectedOption),
+        status: mapAnswerStatus(answer.isCorrect),
+        answeredAt: answer.answeredAt,
+    }
+}
 
 function toggleAnswersPanel() {
     showAnswersPanel.value = !showAnswersPanel.value
@@ -772,22 +791,6 @@ async function finishExercise() {
 type UploadProfileImagesPayload = {
     coverFile: File | null
     profileFile: File | null
-}
-
-function getUserIdFromSession(): number | null {
-    if (userData.userId && userData.userId > 0) {
-        return userData.userId;
-    }
-
-    const loggedUser = getLoggedUser();
-    const recoveredId = Number(loggedUser?.id);
-
-    if (!Number.isFinite(recoveredId) || recoveredId <= 0) {
-        return null;
-    }
-
-    userData.setUserId(recoveredId);
-    return recoveredId;
 }
 
 function openUploadCoverAndPicture() {
@@ -1122,13 +1125,31 @@ async function getAImotivacionalMessage() {
     }
 }
 
+async function getAnswersPreview(userId: number) {
+    try {
+        const response = await $httpClient.answers.GetAnswersByUserId(userId);
+
+        if (response.result != null) {
+            userAnswersPreview.value = response.result;
+            newAnswersCount.value = response.result.unreadResponsesCount ?? 0
+        }
+    } catch (error) {
+        console.error('Erro ao carregar prévia de respostas do usuário:', error)
+    }
+}
+
 onMounted(async () => {
+    const userId = getUserIdFromSession();
+
+    if (userId != null && userId > 0) {
+        await getAnswersPreview(userId);
+    }
+
     await fetchUserProfile();
     await randomDailyTasks();
     ranking.value = await fetchRankingUser();
-
     await getAImotivacionalMessage();
-})
+});
 </script>
 
 <style scoped lang="scss">
