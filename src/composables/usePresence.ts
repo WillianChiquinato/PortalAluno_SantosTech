@@ -18,14 +18,10 @@ export type PresenceState = {
 type PresenceListener = (message: PresenceServerMessage) => void
 
 const WS_PROTOCOL = 'portal-aluno-presence.v1'
-const TICKET_PREFIX = 'presence-ticket.'
 const HEARTBEAT_INTERVAL_MS = 25_000
 const PRESENCE_STALE_AFTER_MS = 90_000
 const RECONNECT_BASE_MS = 29_000
 const RECONNECT_MAX_MS = 30_000
-const IMMEDIATE_CLOSE_WINDOW_MS = 5_000
-const IMMEDIATE_CLOSE_STRIKES_LIMIT = 4
-const HTTP_ONLY_COOLDOWN_MS = 5 * 60_000
 
 const presenceMap = ref<Map<string, PresenceState>>(new Map())
 const connected = ref(false)
@@ -37,10 +33,6 @@ let reconnectAttempt = 0
 let shouldRun = false
 let connectionId = 0
 let openSocketInFlight: Promise<void> | null = null
-let fallbackUntil = 0
-let fallbackTimer: ReturnType<typeof setTimeout> | null = null
-let immediateCloseStrikes = 0
-let socketAttemptStartedAt = 0
 
 const listeners = new Set<PresenceListener>()
 
@@ -154,46 +146,6 @@ function clearTimers() {
   }
 }
 
-function clearFallbackTimer() {
-  if (fallbackTimer !== null) {
-    clearTimeout(fallbackTimer)
-    fallbackTimer = null
-  }
-}
-
-function isHttpOnlyFallbackActive(now = Date.now()) {
-  return fallbackUntil > now
-}
-
-function resetFallbackState() {
-  fallbackUntil = 0
-  immediateCloseStrikes = 0
-  clearFallbackTimer()
-}
-
-function scheduleFallbackExit() {
-  clearFallbackTimer()
-  if (!shouldRun || !isHttpOnlyFallbackActive()) return
-
-  fallbackTimer = setTimeout(() => {
-    fallbackTimer = null
-    if (!isHttpOnlyFallbackActive()) {
-      resetFallbackState()
-    }
-    if (!shouldRun) return
-    void openSocket()
-  }, Math.max(0, fallbackUntil - Date.now()))
-}
-
-function enterHttpOnlyFallback() {
-  fallbackUntil = Date.now() + HTTP_ONLY_COOLDOWN_MS
-  if (reconnectTimer !== null) {
-    clearTimeout(reconnectTimer)
-    reconnectTimer = null
-  }
-  scheduleFallbackExit()
-}
-
 function buildWsUrl(): string {
   const { public: { apiBaseUrl, presenceWsUrl, wsUrl } } = useRuntimeConfig()
   const explicit = (
@@ -235,10 +187,6 @@ function buildTicketUrl(): string {
   return buildPresenceApiUrl('/presence/socket-ticket')
 }
 
-function buildHeartbeatUrl(): string {
-  return buildPresenceApiUrl('/presence/heartbeat')
-}
-
 async function postPresenceRequest(url: string): Promise<Record<string, unknown>> {
   if (!url) {
     throw new Error('Presence URL is not configured')
@@ -268,15 +216,6 @@ async function fetchTicket(): Promise<string> {
   return String(data.ticket ?? '')
 }
 
-async function sendHeartbeat(): Promise<string | null> {
-  try {
-    const data = await postPresenceRequest(buildHeartbeatUrl())
-    return String((data as { lastSeenAt?: string }).lastSeenAt ?? '')
-  } catch {
-    return null
-  }
-}
-
 function markCurrentUserOnline(lastSeenAt = new Date().toISOString()) {
   const loggedUser = getLoggedUser()
   const userId = normalizePresenceKey(loggedUser?.id)
@@ -296,10 +235,6 @@ function hasOpenSocket() {
   return socket?.readyState === WebSocket.OPEN
 }
 
-function isSocketConnecting() {
-  return socket?.readyState === WebSocket.CONNECTING
-}
-
 function sendWsHeartbeat() {
   if (!hasOpenSocket()) return
 
@@ -313,16 +248,9 @@ function sendWsHeartbeat() {
 function runHeartbeatCycle() {
   pruneStalePresence()
 
-  if (hasOpenSocket()) {
-    sendWsHeartbeat()
-    return
-  }
+  if (!hasOpenSocket()) return
 
-  void sendHeartbeat().then((lastSeenAt) => {
-    if (lastSeenAt) {
-      markCurrentUserOnline(lastSeenAt)
-    }
-  })
+  sendWsHeartbeat()
 }
 
 function scheduleReconnect() {
@@ -331,11 +259,6 @@ function scheduleReconnect() {
   }
 
   if (!shouldRun || !verifyToken()) return
-
-  if (isHttpOnlyFallbackActive()) {
-    scheduleFallbackExit()
-    return
-  }
 
   const delay = Math.min(RECONNECT_BASE_MS * 2 ** reconnectAttempt, RECONNECT_MAX_MS)
   reconnectAttempt += 1
@@ -363,10 +286,6 @@ async function openSocket() {
 async function openSocketInternal() {
   if (!import.meta.client) return
   if (!shouldRun || !verifyToken()) return
-  if (isHttpOnlyFallbackActive()) {
-    scheduleFallbackExit()
-    return
-  }
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return
 
   const myId = ++connectionId
@@ -387,12 +306,19 @@ async function openSocketInternal() {
     return
   }
 
-  const ws = new WebSocket(wsUrl, [
+  const socketUrl = new URL(wsUrl)
+  socketUrl.searchParams.set('ticket', ticket)
+  if (/^(127\.0\.0\.1|localhost)$/i.test(socketUrl.hostname)) {
+    const token = getToken()
+    if (token) {
+      socketUrl.searchParams.set('token', token)
+    }
+  }
+
+  const ws = new WebSocket(socketUrl.toString(), [
     WS_PROTOCOL,
-    `${TICKET_PREFIX}${ticket}`,
   ])
 
-  socketAttemptStartedAt = Date.now()
   socket = ws
 
   ws.addEventListener('open', () => {
@@ -405,8 +331,6 @@ async function openSocketInternal() {
 
     connected.value = true
     reconnectAttempt = 0
-    fallbackUntil = 0
-    clearFallbackTimer()
 
     notify({ type: 'presence:reset' })
     markCurrentUserOnline()
@@ -430,25 +354,10 @@ async function openSocketInternal() {
     }
   })
 
-  ws.addEventListener('close', (event) => {
+  ws.addEventListener('close', () => {
     if (socket === ws) {
       socket = null
       connected.value = false
-    }
-
-    const connectedForMs =
-      socketAttemptStartedAt > 0 ? Date.now() - socketAttemptStartedAt : Number.POSITIVE_INFINITY
-    socketAttemptStartedAt = 0
-
-    if (connectedForMs < IMMEDIATE_CLOSE_WINDOW_MS) {
-      immediateCloseStrikes += 1
-    } else {
-      immediateCloseStrikes = 0
-    }
-
-    if (immediateCloseStrikes >= IMMEDIATE_CLOSE_STRIKES_LIMIT) {
-      enterHttpOnlyFallback()
-      return
     }
 
     scheduleReconnect()
@@ -471,17 +380,12 @@ export function connectPresence() {
     heartbeatTimer = setInterval(runHeartbeatCycle, HEARTBEAT_INTERVAL_MS)
   }
 
-  if (isHttpOnlyFallbackActive()) {
-    runHeartbeatCycle()
-  }
   void openSocket()
 }
 
 export function disconnectPresence() {
   shouldRun = false
   connectionId += 1
-  socketAttemptStartedAt = 0
-  resetFallbackState()
   clearTimers()
 
   if (socket) {
