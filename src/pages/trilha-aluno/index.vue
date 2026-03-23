@@ -1180,7 +1180,7 @@ async function fetchIslandByUserAndCurrentModule() {
             return
         }
 
-        const responsePhase = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
+        const responsePhase = await $httpClient.phase.GetCurrentModuleUser(userId);
 
         if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(userId, responsePhase.result.id);
@@ -1193,9 +1193,9 @@ async function fetchIslandByUserAndCurrentModule() {
     }
 }
 
-async function fetchCurrentModuleIslands(userId: number, phaseId: number) {
+async function fetchCurrentModuleIslands(userId: number, moduleId: number) {
     try {
-        const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(userId, phaseId);
+        const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(userId, moduleId);
 
         if (response.success) {
             islands.value = (response.result ?? []) as IslandApi[];

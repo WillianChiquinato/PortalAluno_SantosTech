@@ -88,10 +88,10 @@ export default class ClassService extends ClientService<any> {
 
   GetIslandsByUserIdAndCurrentModule = async (
     userId: number,
-    phaseId: number,
+    moduleId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IslandApi[]>> => {
-    let urlParams = `/GetIslandsByUserIdAndCurrentModule?userId=${userId}&phaseId=${phaseId}`
+    let urlParams = `/GetIslandsByUserIdAndCurrentModule?userId=${userId}&moduleId=${moduleId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

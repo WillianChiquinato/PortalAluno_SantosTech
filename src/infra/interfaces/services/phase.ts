@@ -15,7 +15,7 @@ export default class PhaseService extends ClientService<any> {
     super('Phase', 'api/Phase')
   }
 
-  GetCurrentModulePhaseUser = async (
+  GetCurrentModuleUser = async (
     userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<ICurrentModuleUser>> => {
