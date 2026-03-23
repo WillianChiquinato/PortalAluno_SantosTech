@@ -68,10 +68,14 @@ onMounted(async () => {
 
     await loadConfigurations();
     connectPresence();
+
+    window.addEventListener('beforeunload', disconnectPresence);
 });
 
 onUnmounted(() => {
-    disconnectPresence();
+    if (import.meta.client) {
+        window.removeEventListener('beforeunload', disconnectPresence);
+    }
 });
 
 </script>
