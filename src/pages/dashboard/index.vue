@@ -1071,7 +1071,7 @@ async function currentStatsUser() {
             return;
         }
 
-        const response = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
+        const response = await $httpClient.phase.GetCurrentModuleUser(userId);
 
         if (response.result != null) {
             currentModule.value = response.result;
