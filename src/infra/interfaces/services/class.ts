@@ -7,6 +7,31 @@ export interface IClass {
   name: string
 }
 
+export interface IClassRoomExercise {
+  id: number
+  title: string
+  description: string
+  videoUrl: string | null
+  targetLimited?: number | string | null
+  pointsRedeem: number
+  termAt: string
+  typeExercise: number
+  difficulty: number
+  indexOrder: number
+  isDailyTask: boolean | null
+  isFinalExercise: boolean
+  isCompletedAnswer: boolean
+  exercisePeriod: string
+}
+
+export interface IClassRoom {
+  id: number
+  className: string
+  name: string
+  targetLimited?: number | string | null
+  exercises: IClassRoomExercise[]
+}
+
 export type BlipStatus = 'Concluído' | 'Atual' | 'Não iniciado'
 export type IslandStatus = 'Concluído' | 'Em Progresso' | 'Não Iniciado' | 'Desconhecido'
 export type BlipStatusExercise = 'Correto' | 'Errou' | 'Atual' | 'Não iniciado'
@@ -97,5 +122,17 @@ export default class ClassService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<IslandApi[]>
+  }
+
+  GetClassRoomsByClassId = async (
+    classId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IClassRoom[]>> => {
+    let urlParams = `/GetClassRoomsByClassId?classId=${classId}`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IClassRoom[]>
   }
 }

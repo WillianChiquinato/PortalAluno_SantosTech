@@ -89,6 +89,8 @@ export interface DailyTaskGroupView {
   termAt: string
   disabled: boolean
   exercises: ExerciseCardTask[]
+  highlighted?: boolean
+  highlightLabel?: string
 }
 
 export interface ExerciseVerifyAnswerResponse {
@@ -144,7 +146,7 @@ export default class ExerciseService extends ClientService<any> {
     config: FetchOptions = {},
   ): Promise<ApiResponse<ExerciseVerifyAnswerResponse>> => {
     let urlParams = `/VerifyExistingAnswers?exerciseId=${exerciseId}&userId=${userId}`
-    
+
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
       ...config,

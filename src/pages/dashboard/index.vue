@@ -98,9 +98,10 @@
                         {{ dailyTasksCards.length }} pendentes
                     </span>
                 </div>
-                <div v-if="dailyTaskGroups.length" class="space-y-3">
+                <div v-if="dailyTasksCards.length" class="space-y-3">
                     <TaskCard v-for="task in dailyTasksCards" :key="task.id" :title="task.title" :due="task.due"
                         :points="task.points" :status="task.status" :disabled="task.disabled"
+                        :featured="task.highlighted" :highlight-label="task.highlightLabel"
                         @select="openDailyTask(task)" />
                 </div>
                 <div v-else class="panel p-5">
@@ -312,6 +313,7 @@ import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
 import { getLoggedUser } from '~/composables/useAuth'
+import type { IClassRoom, IClassRoomExercise } from '~/infra/interfaces/services/class'
 import { UserRole, type IUserProfileData } from '~/infra/interfaces/services/user'
 import { useUserStore } from '~/infra/store/userStore'
 import type { IBadge } from '~/infra/interfaces/services/badge'
@@ -391,6 +393,9 @@ const stats = computed<Array<{
 })
 
 const tasks = ref<IDailyTaskGroup[]>([]);
+const classRoomSpotlight = ref<IClassRoom | null>(null)
+const nowTick = ref(Date.now())
+const countdownTimer = ref<ReturnType<typeof setInterval> | null>(null)
 
 const showTaskQuizModal = ref(false)
 const selectedDailyTask = ref<DailyTaskGroupView | null>(null)
@@ -425,7 +430,13 @@ const dailyTaskGroups = computed<DailyTaskGroupView[]>(() => {
     }))
 })
 
-const dailyTasksCards = computed(() => dailyTaskGroups.value)
+const dailyTasksCards = computed(() => {
+    if (!classRoomSpotlight.value) {
+        return dailyTaskGroups.value
+    }
+
+    return [mapClassRoomToSpotlight(classRoomSpotlight.value), ...dailyTaskGroups.value]
+})
 
 const availableExercises = computed(() => selectedDailyTask.value?.exercises ?? [])
 
@@ -528,6 +539,119 @@ function getTaskStatus(termAt: string): string {
     return 'Em aberto'
 }
 
+function hasInvalidDate(dateValue: string): boolean {
+    if (!dateValue) return true
+
+    if (dateValue.startsWith('0001-01-01')) {
+        return true
+    }
+
+    return Number.isNaN(new Date(dateValue).getTime())
+}
+
+function toTodayDeadline(targetLimited: number | string | null | undefined): Date | null {
+    if (targetLimited === null || targetLimited === undefined) {
+        return null
+    }
+
+    let hours = 0
+    let minutes = 0
+    let seconds = 0
+
+    if (typeof targetLimited === 'number') {
+        if (!Number.isFinite(targetLimited) || targetLimited < 0) {
+            return null
+        }
+
+        hours = Math.floor(targetLimited)
+        const minuteValue = (targetLimited - hours) * 60
+        minutes = Math.floor(minuteValue)
+        seconds = Math.round((minuteValue - minutes) * 60)
+    } else {
+        const normalized = targetLimited.trim()
+
+        if (!normalized) {
+            return null
+        }
+
+        // Aceita formatos completos de data/hora vindos da API.
+        const parsedDate = new Date(normalized)
+        if (!Number.isNaN(parsedDate.getTime()) && (normalized.includes('T') || normalized.includes('-') || normalized.includes('/'))) {
+            return parsedDate
+        }
+
+        if (normalized.includes(':')) {
+            const [h, m = '0', s = '0'] = normalized.split(':')
+            hours = Number(h)
+            minutes = Number(m)
+            seconds = Number(s)
+        } else {
+            const numericValue = Number(normalized)
+
+            if (!Number.isFinite(numericValue) || numericValue < 0) {
+                return null
+            }
+
+            hours = Math.floor(numericValue)
+            const minuteValue = (numericValue - hours) * 60
+            minutes = Math.floor(minuteValue)
+            seconds = Math.round((minuteValue - minutes) * 60)
+        }
+    }
+
+    if ([hours, minutes, seconds].some((value) => Number.isNaN(value) || value < 0)) {
+        return null
+    }
+
+    const now = new Date(nowTick.value)
+    const deadline = new Date(now)
+    deadline.setHours(hours, minutes, seconds, 0)
+
+    return deadline
+}
+
+function formatCountdown(remainingMs: number): string {
+    const safeMs = Math.max(0, remainingMs)
+    const totalSeconds = Math.floor(safeMs / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    return [hours, minutes, seconds]
+        .map((value) => String(value).padStart(2, '0'))
+        .join(':')
+}
+
+function buildTargetLimitedCountdown(targetLimited: number | string | null | undefined) {
+    const deadline = toTodayDeadline(targetLimited)
+
+    if (!deadline) {
+        return null
+    }
+
+    const remainingMs = deadline.getTime() - nowTick.value
+    const expired = remainingMs <= 0
+
+    return {
+        deadline,
+        expired,
+        dueText: expired ? 'Tempo encerrado' : `Termina hoje em ${formatCountdown(remainingMs)}`,
+        status: expired ? 'Atrasada' : 'Vence hoje',
+    }
+}
+
+function getNearestCountdown(targetLimits: Array<number | string | null | undefined>) {
+    const countdowns = targetLimits
+        .map((value) => buildTargetLimitedCountdown(value))
+        .filter((countdown): countdown is NonNullable<ReturnType<typeof buildTargetLimitedCountdown>> => countdown !== null)
+
+    if (!countdowns.length) {
+        return null
+    }
+
+    return countdowns.sort((first, second) => first.deadline.getTime() - second.deadline.getTime())[0]
+}
+
 function sumGroupPoints(exercises: IDailyExercise[]): number {
     return exercises.reduce((acc, exercise) => acc + exercise.pointsRedeem, 0)
 }
@@ -580,6 +704,108 @@ function mapExerciseToTaskCard(exercise: IDailyExercise, phaseId?: number): Exer
             typeExercise: exercise.typeExercise,
             difficulty: exercise.difficulty,
         },
+    }
+}
+
+function mapClassRoomExerciseToTaskCard(
+    exercise: IClassRoomExercise,
+    roomTargetLimited?: number | string | null,
+): ExerciseCardTask {
+    const countdown = buildTargetLimitedCountdown(exercise.targetLimited ?? roomTargetLimited)
+
+    const due = countdown
+        ? countdown.dueText
+        : hasInvalidDate(exercise.termAt)
+            ? 'Sem prazo definido'
+            : formatDate(exercise.termAt, 'pt-BR', { dateStyle: 'short' })
+
+    const status = exercise.isCompletedAnswer
+        ? 'Concluída'
+        : countdown?.status ?? 'Em aberto'
+
+    return {
+        id: exercise.id,
+        title: exercise.title,
+        due,
+        points: String(exercise.pointsRedeem),
+        status,
+        description: exercise.description,
+        termAt: countdown?.deadline.toISOString() ?? (hasInvalidDate(exercise.termAt) ? new Date().toISOString() : exercise.termAt),
+        isCompletedAnswer: exercise.isCompletedAnswer,
+        source: {
+            id: exercise.id,
+            title: exercise.title,
+            description: exercise.description,
+            videoUrl: exercise.videoUrl,
+            pointsRedeem: exercise.pointsRedeem,
+            typeExercise: exercise.typeExercise,
+            difficulty: exercise.difficulty,
+        },
+    }
+}
+
+function mapClassRoomToSpotlight(room: IClassRoom): DailyTaskGroupView {
+    const roomCountdown = getNearestCountdown([room.targetLimited, ...room.exercises.map((exercise) => exercise.targetLimited)])
+
+    const mappedExercises = [...room.exercises]
+        .sort((a, b) => a.indexOrder - b.indexOrder)
+        .map((exercise) => mapClassRoomExerciseToTaskCard(exercise, room.targetLimited))
+
+    const isCompleted = mappedExercises.length > 0 && mappedExercises.every((exercise) => exercise.isCompletedAnswer)
+    const isExpired = !isCompleted && Boolean(roomCountdown?.expired)
+
+    const due = roomCountdown?.dueText ?? 'Sem prazo definido'
+    const status = isCompleted ? 'Concluída' : isExpired ? 'Atrasada' : roomCountdown?.status ?? 'Destaque'
+
+    return {
+        id: `class-room-${room.id}`,
+        name: room.name,
+        title: room.name,
+        due,
+        points: String(mappedExercises.reduce((total, exercise) => total + Number(exercise.points), 0)),
+        status,
+        description: `Atividades da ${room.className} com ${mappedExercises.length} exercício(s).`,
+        termAt: roomCountdown?.deadline.toISOString() ?? new Date().toISOString(),
+        disabled: mappedExercises.length === 0 || isCompleted || isExpired,
+        exercises: mappedExercises,
+        highlighted: true,
+        highlightLabel: roomCountdown ? 'Tempo restante' : 'Nova sala',
+    }
+}
+
+function resolveClassId(): number | null {
+    const profileClassId = profile.value?.class?.id
+    if (profileClassId && profileClassId > 0) {
+        return profileClassId
+    }
+
+    const loggedUser = getLoggedUser()
+    const fallbackClassId = Number(loggedUser?.class?.id ?? loggedUser?.classId ?? 0)
+
+    return fallbackClassId > 0 ? fallbackClassId : null
+}
+
+async function fetchClassRoomSpotlight() {
+    try {
+        const classId = resolveClassId()
+
+        if (!classId) {
+            classRoomSpotlight.value = null
+            return
+        }
+
+        const response = await $httpClient.class.GetClassRoomsByClassId(classId)
+        const rooms = response.result ?? []
+
+        if (!response.success || rooms.length === 0) {
+            classRoomSpotlight.value = null
+            return
+        }
+
+        classRoomSpotlight.value = rooms[0]
+    } catch (error) {
+        console.error('Erro ao carregar container destaque da sala:', error)
+        classRoomSpotlight.value = null
     }
 }
 
@@ -1139,6 +1365,10 @@ async function getAnswersPreview(userId: number) {
 }
 
 onMounted(async () => {
+    countdownTimer.value = setInterval(() => {
+        nowTick.value = Date.now()
+    }, 1000)
+
     const userId = getUserIdFromSession();
 
     if (userId != null && userId > 0) {
@@ -1146,10 +1376,18 @@ onMounted(async () => {
     }
 
     await fetchUserProfile();
+    await fetchClassRoomSpotlight();
     await randomDailyTasks();
     ranking.value = await fetchRankingUser();
     await getAImotivacionalMessage();
 });
+
+onBeforeUnmount(() => {
+    if (!countdownTimer.value) return
+
+    clearInterval(countdownTimer.value)
+    countdownTimer.value = null
+})
 </script>
 
 <style scoped lang="scss">
