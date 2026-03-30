@@ -36,9 +36,9 @@
             <p class="login-support">Esqueceu a senha? Faça a recuperação <button @click="handlePassword"
                     class="text-brand-600 cursor-pointer"><u>Aqui</u></button></p>
 
-            <div class="login-courses">
+            <!-- <div class="login-courses">
                 <CoursesCardResume v-for="course in coursesAvailable" :key="course.id" :course="course" />
-            </div>
+            </div> -->
         </div>
         <div v-else class="login-panel">
             <template v-if="!showSentPage">

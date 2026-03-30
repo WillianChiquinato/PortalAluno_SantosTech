@@ -1365,10 +1365,6 @@ async function getAnswersPreview(userId: number) {
 }
 
 onMounted(async () => {
-    countdownTimer.value = setInterval(() => {
-        nowTick.value = Date.now()
-    }, 1000)
-
     const userId = getUserIdFromSession();
 
     if (userId != null && userId > 0) {
@@ -1380,6 +1376,10 @@ onMounted(async () => {
     await randomDailyTasks();
     ranking.value = await fetchRankingUser();
     await getAImotivacionalMessage();
+
+    countdownTimer.value = setInterval(() => {
+        nowTick.value = Date.now()
+    }, 500)
 });
 
 onBeforeUnmount(() => {
