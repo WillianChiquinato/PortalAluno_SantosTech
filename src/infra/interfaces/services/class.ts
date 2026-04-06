@@ -1,4 +1,4 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 
@@ -87,11 +87,10 @@ export default class ClassService extends ClientService<any> {
   }
 
   GetIslandsByUserIdAndCurrentModule = async (
-    userId: number,
     phaseId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IslandApi[]>> => {
-    let urlParams = `/GetIslandsByUserIdAndCurrentModule?userId=${userId}&phaseId=${phaseId}`
+    const urlParams = `/GetIslandsByUserIdAndCurrentModule?phaseId=${phaseId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

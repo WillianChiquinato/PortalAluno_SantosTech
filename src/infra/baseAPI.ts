@@ -1,7 +1,7 @@
 import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#imports'
 import { $fetch } from 'ofetch'
-import { clearAuth, getToken, verifyToken } from '~/composables/useAuth'
+import { clearAuth } from '~/composables/useAuth'
 
 export const fetchInstance = $fetch.create({
   onRequest({ options }) {
@@ -9,12 +9,8 @@ export const fetchInstance = $fetch.create({
     const headers = new Headers(options.headers)
 
     options.baseURL = apiBaseUrl
+    options.credentials = 'include'
     headers.set('Content-Type', 'application/json')
-
-    const token = getToken()
-    if (token && verifyToken()) {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
 
     options.headers = headers
   },

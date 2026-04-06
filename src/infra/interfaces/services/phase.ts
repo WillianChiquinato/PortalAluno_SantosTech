@@ -1,7 +1,6 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
-import type { ICurrentPhaseModule } from './module'
 
 export interface ICurrentModuleUser {
   id: number
@@ -16,12 +15,9 @@ export default class PhaseService extends ClientService<any> {
   }
 
   GetCurrentModulePhaseUser = async (
-    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<ICurrentModuleUser>> => {
-    let urlParams = `/GetCurrentModuleUser?userId=${userId}`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetCurrentModuleUser`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<ICurrentModuleUser>

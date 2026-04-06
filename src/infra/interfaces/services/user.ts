@@ -1,4 +1,4 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 import type { LoginResponse } from '../loginResponse'
@@ -9,7 +9,6 @@ export interface IUser {
   id: number
   name: string
   email: string
-  passwordHash: number
   role: UserRole
   profilePictureUrl: string
   createdAt: Date
@@ -17,23 +16,21 @@ export interface IUser {
 }
 
 export interface IUpdateUserProfileRequest {
-  id: number
+  // [SEC] id and role removed — backend extracts userId from JWT token
   name: string
   email: string
-  password: string
-  role: UserRole
+  password?: string
   bio: string
-  profilePictureUrl: string
-  coverPictureUrl: string
-  updatedAt: Date
+  profilePictureUrl?: string
+  coverPictureUrl?: string
+  updatedAt?: Date
 }
 
 export interface IUserProfileData {
   id: number
   name: string
   email: string
-  passwordHash: number
-  role: UserRole
+  role: string
   bio: string
   profilePictureUrl: string
   coverPictureUrl: string
@@ -45,8 +42,8 @@ export interface IUserProfileData {
 
 export enum UserRole {
   Student = 1,
-  Admin = 2,
-  Teacher = 3,
+  Teacher = 2,
+  Admin = 3,
 }
 
 export default class UserService extends ClientService<any> {
@@ -67,9 +64,7 @@ export default class UserService extends ClientService<any> {
   }
 
   GetUsers = async (config: FetchOptions = {}): Promise<ApiResponse<IUser[]>> => {
-    let urlParams = `/GetAllUsers`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetAllUsers`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IUser[]>
@@ -79,9 +74,7 @@ export default class UserService extends ClientService<any> {
     userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IUserProfileData>> => {
-    let urlParams = `/GetProfileData?userid=${userId}`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetProfileData?userid=${userId}`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IUserProfileData>

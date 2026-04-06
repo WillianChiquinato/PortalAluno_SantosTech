@@ -284,7 +284,7 @@ async function fetchVideoData() {
             return
         }
 
-        const progressResponse = await $httpClient.video.GetProgressUserVideos(userId)
+        const progressResponse = await $httpClient.video.GetProgressUserVideos()
 
         if (progressResponse.success) {
             userProgress.value = progressResponse.result.find((item) => item.videoId === videoId.value) ?? null
@@ -381,7 +381,6 @@ async function saveVideoProgress({ force }: { force: boolean }) {
 
         const payloadVideos: IVideoProgress = {
             videoId: video.value.id,
-            userId,
             watchSeconds,
             isCompleted,
             lastWatched: new Date().toISOString(),
@@ -395,7 +394,6 @@ async function saveVideoProgress({ force }: { force: boolean }) {
 
         userProgress.value = {
             videoId: payloadVideos.videoId,
-            userId: payloadVideos.userId,
             watchSeconds: payloadVideos.watchSeconds,
             isCompleted: payloadVideos.isCompleted,
             lastWatched: payloadVideos.lastWatched,

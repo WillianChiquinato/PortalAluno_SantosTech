@@ -208,10 +208,7 @@ async function saveConfigurations() {
     loadingPush();
 
     try {
-        const userId = getUserIdFromSession();
-
         const payloadConfigs: IAuthConfigUserUpdateRequest = {
-            userId: userId ?? 0,
             receiveEmailNotifications: form.receiveEmailNotifications,
             darkModeEnabled: form.darkModeEnabled,
             reportFrequency: form.reportFrequency,

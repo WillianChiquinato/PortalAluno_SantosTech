@@ -132,7 +132,7 @@ async function fetchAllVideos() {
 
 async function fetchProgressUserVideos(userId: number) {
     try {
-        const response = await $httpClient.video.GetProgressUserVideos(userId);
+        const response = await $httpClient.video.GetProgressUserVideos();
         if (response.success) {
             progressVideosUser.value = response.result;
             videos.value = videos.value.map(video => {

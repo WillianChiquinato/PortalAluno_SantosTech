@@ -361,6 +361,7 @@ import SelectedExerciseRepeat from '~/components/Modals/SelectedExerciseRepeat.v
 import type { BlipContainer, BlipStatus, BlipStatusExercise, ContainerExerciseFlow, IslandApi, IslandStatus } from '~/infra/interfaces/services/class'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { ExerciseCardTask, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
+import type { IPointAwardResult } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { getLoggedUser } from '~/composables/useAuth'
 import { useUserStore } from '~/infra/store/userStore'
@@ -441,7 +442,6 @@ async function generateTaskFromAIbackend() {
     try {
         const response = await $httpClient.AI.GenerateExerciseRepeat(
             selectedTask.value.source.id,
-            getUserIdFromSession() ?? 0,
             selectedTask.value.source.phaseId,
         );
 
@@ -1018,7 +1018,6 @@ async function finishExercise() {
 
     const payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
         exerciseId: selectedTask.value!.source.id,
-        userId,
         questionId: question.id,
         phaseId,
         userExerciseFlowId: exerciseFlow?.userExerciseFlowId ?? exerciseFlow?.userContainerExerciseFlowId ?? null,
@@ -1036,25 +1035,33 @@ async function finishExercise() {
     }))
 
     try {
-        var verifyAnswersExisting = await $httpClient.exercise.VerifyExistingAnswers(selectedTask.value.id, userId ?? 0);
-
         const submitResponse = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise)
 
         if (submitResponse.success) {
             toast.success('Exercício enviado', 'Sua resposta foi registrada com sucesso.', 3000)
         }
 
-        if (!verifyAnswersExisting.result.existingAnswers) {
-            if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
-                var payloadUserPoints = {
-                    userId: userId ?? 0,
-                    pointsToAdd: gainedPoints,
-                    exerciseDate: selectedTask.value.termAt,
+        if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
+            var payloadUserPoints = {
+                exerciseId: selectedTask.value.source.id,
+            }
+
+            var pointsResponse = await $httpClient.point.AddPointsForUser(payloadUserPoints)
+            const awardResult = pointsResponse.result as IPointAwardResult | undefined
+
+            if (!pointsResponse.success || !awardResult) {
+                toast.error('Erro', pointsResponse.errors?.[0] ?? 'Nao foi possivel contabilizar os pontos do exercicio.', 3500)
+            } else {
+                if (taskResult.value) {
+                    taskResult.value.gainedPoints = awardResult.pointsAwarded
                 }
 
-                var pointsResponse = await $httpClient.point.AddPointsForUser(payloadUserPoints)
-                if (pointsResponse.success) {
-                    toast.success('Parabens!', `Você ganhou ${gainedPoints} pontos com este exercício.`, 3500);
+                if (awardResult.alreadyAwarded) {
+                    toast.info('Pontos ja contabilizados', awardResult.message, 3500)
+                } else if (awardResult.pointsAwarded > 0) {
+                    toast.success('Parabens!', awardResult.message, 3500)
+                } else {
+                    toast.info('Pontuacao atualizada', awardResult.message, 3500)
                 }
             }
         }
@@ -1180,10 +1187,10 @@ async function fetchIslandByUserAndCurrentModule() {
             return
         }
 
-        const responsePhase = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
+        const responsePhase = await $httpClient.phase.GetCurrentModulePhaseUser();
 
         if (responsePhase.result != null) {
-            await fetchCurrentModuleIslands(userId, responsePhase.result.id);
+            await fetchCurrentModuleIslands(responsePhase.result.id);
         }
     } catch (error) {
         console.error('Erro ao buscar progresso do aluno nas ilhas:', error);
@@ -1193,9 +1200,9 @@ async function fetchIslandByUserAndCurrentModule() {
     }
 }
 
-async function fetchCurrentModuleIslands(userId: number, phaseId: number) {
+async function fetchCurrentModuleIslands(phaseId: number) {
     try {
-        const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(userId, phaseId);
+        const response = await $httpClient.class.GetIslandsByUserIdAndCurrentModule(phaseId);
 
         if (response.success) {
             islands.value = (response.result ?? []) as IslandApi[];

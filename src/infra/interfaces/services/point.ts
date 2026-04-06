@@ -1,16 +1,22 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 
 export interface IPointRanking {
   userId: number
   totalPoints: number
+  name: string
+  profilePictureUrl?: string | null
 }
 
 export interface IAddPointsForUser {
-  userId: number
-  pointsToAdd: number
-  exerciseDate: string
+  exerciseId: number
+}
+
+export interface IPointAwardResult {
+  alreadyAwarded: boolean
+  pointsAwarded: number
+  message: string
 }
 
 export default class PointService extends ClientService<any> {
@@ -19,9 +25,7 @@ export default class PointService extends ClientService<any> {
   }
 
   GetRanking = async (config: FetchOptions = {}): Promise<ApiResponse<IPointRanking[]>> => {
-    let urlParams = `/GetRanking`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetRanking`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IPointRanking[]>
@@ -30,13 +34,11 @@ export default class PointService extends ClientService<any> {
   AddPointsForUser = async (
     payload: IAddPointsForUser,
     config: FetchOptions = {},
-  ): Promise<ApiResponse<void>> => {
-    let urlParams = `/AddPointsForUser`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+  ): Promise<ApiResponse<IPointAwardResult>> => {
+    return (await this.fetchInstance(`${this.address}/AddPointsForUser`, {
       method: 'POST',
       body: payload,
       ...config,
-    })) as ApiResponse<void>
+    })) as ApiResponse<IPointAwardResult>
   }
 }

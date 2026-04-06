@@ -37,11 +37,10 @@ export function useLoadingConfigurations() {
     userData.setConfigurationsLoaded(false)
 
     try {
-      const userId = getUserIdFromSession()
-      const responseConfig = await $httpClient.auth.GetConfigsByUserId(userId ?? 0)
+      const responseConfig = await $httpClient.auth.GetConfigsByUserId()
 
       if (!responseConfig.success) {
-        await $httpClient.auth.CreateNewConfig(userId ?? 0);
+        await $httpClient.auth.CreateNewConfig()
         return
       }
 

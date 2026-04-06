@@ -1,4 +1,5 @@
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useState } from '#app'
+import type { IAuth } from '~/infra/interfaces/services/auth'
 
 function getStorage(): Storage | null {
   if (!import.meta.client) {
@@ -8,78 +9,101 @@ function getStorage(): Storage | null {
   return window.localStorage
 }
 
-export function getToken() {
-  return getStorage()?.getItem('token') ?? null
+function authUserState() {
+  return useState<IAuth | null>('auth-user', () => null)
 }
 
-export function setToken(token: string) {
-  getStorage()?.setItem('token', token)
+function authInitializedState() {
+  return useState<boolean>('auth-initialized', () => false)
 }
+
+function authPendingState() {
+  return useState<Promise<boolean> | null>('auth-pending', () => null)
+}
+
+export function getToken() {
+  return null
+}
+
+export function setToken(_token: string) {}
 
 export function verifyToken(): boolean {
-  const token = getToken()
-
-  if (!token) return false
-
-  return !isTokenExpired(token)
+  return Boolean(authUserState().value)
 }
 
-export function removeToken() {
-  getStorage()?.removeItem('token')
-}
+export function removeToken() {}
 
 export function clearAuth() {
-  removeToken()
+  authUserState().value = null
+  authInitializedState().value = false
+  authPendingState().value = null
+
+  getStorage()?.removeItem('token')
   getStorage()?.removeItem('loggedUser')
 }
 
 export function getLoggedUser() {
-  if (!verifyToken()) {
-    clearAuth()
-    return null
-  }
-
-  const user = getStorage()?.getItem('loggedUser')
-
-  if (!user) {
-    return null
-  }
-
-  try {
-    return JSON.parse(user)
-  } catch {
-    clearAuth()
-    return null
-  }
+  return authUserState().value
 }
 
-export function setLoggedUser(user: any) {
-  getStorage()?.setItem('loggedUser', JSON.stringify(user))
-}
+export function setLoggedUser(user: IAuth | null) {
+  authUserState().value = user
+  authInitializedState().value = true
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return payload.exp * 1000 < Date.now()
-  } catch {
-    return true
+  if (user) {
+    getStorage()?.setItem('loggedUser', JSON.stringify(user))
+    return
   }
+
+  getStorage()?.removeItem('loggedUser')
 }
 
-export async function checkAuth() {
+async function fetchSession(force = false) {
   if (!import.meta.client) {
     return false
   }
 
-  const token = getToken()
-  if (!token) return false
+  const initialized = authInitializedState()
+  const pending = authPendingState()
+
+  if (!force && initialized.value) {
+    return verifyToken()
+  }
+
+  if (!force && pending.value) {
+    return await pending.value
+  }
+
+  const sessionPromise = (async () => {
+    try {
+      const { $httpClient } = useNuxtApp()
+      const response = await $httpClient.auth.Session()
+
+      setLoggedUser(response.result)
+      return true
+    } catch {
+      clearAuth()
+      return false
+    } finally {
+      authInitializedState().value = true
+      authPendingState().value = null
+    }
+  })()
+
+  pending.value = sessionPromise
+  return await sessionPromise
+}
+
+export async function checkAuth(force = false) {
+  return await fetchSession(force)
+}
+
+export async function logout() {
+  const { $httpClient } = useNuxtApp()
 
   try {
-    const { $httpClient } = useNuxtApp()
-    await $httpClient.auth.Logged()
-    return true
-  } catch {
+    await $httpClient.auth.Logout()
+  } finally {
     clearAuth()
-    return false
   }
 }

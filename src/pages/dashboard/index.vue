@@ -1,5 +1,108 @@
 <template>
-    <div class="space-y-6 overflow-x-hidden">
+    <div v-if="isDashboardHydrating" class="space-y-6 overflow-x-hidden" aria-busy="true" aria-live="polite">
+        <section class="panel overflow-hidden p-0">
+            <div class="dashboard-skeleton-block h-51 w-full"></div>
+
+            <div class="relative z-10 space-y-4 p-3 pt-4 sm:p-5">
+                <div class="-mt-14 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="flex min-w-0 items-end gap-3 sm:gap-4">
+                        <div
+                            class="dashboard-skeleton-block h-20 w-20 rounded-2xl border-4 border-white sm:h-25 sm:w-25">
+                        </div>
+
+                        <div class="min-w-0 space-y-2">
+                            <div class="dashboard-skeleton-block h-6 w-44 rounded-full sm:w-56"></div>
+                            <div class="dashboard-skeleton-block h-4 w-40 rounded-full sm:w-64"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
+                        <div class="dashboard-skeleton-block h-9 w-full rounded-full sm:w-32"></div>
+                        <div class="dashboard-skeleton-block h-9 w-full rounded-full sm:w-32"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-skeleton-block h-4 w-full max-w-xl rounded-full"></div>
+
+                <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div v-for="card in 3" :key="`dashboard-stat-skeleton-${card}`" class="panel space-y-3 p-4">
+                        <div class="dashboard-skeleton-block h-3 w-24 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-8 w-32 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-4 w-full rounded-full"></div>
+                    </div>
+                </section>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="dashboard-skeleton-block h-3 w-20 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-7 w-28 rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                        <div v-for="badge in 6" :key="`dashboard-badge-skeleton-${badge}`"
+                            class="panel space-y-2 p-3 text-center">
+                            <div class="dashboard-skeleton-block mx-auto h-9 w-9 rounded-full"></div>
+                            <div class="dashboard-skeleton-block h-3 w-full rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="space-y-2">
+                        <div class="dashboard-skeleton-block h-7 w-48 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-4 w-28 rounded-full"></div>
+                    </div>
+
+                    <div class="dashboard-skeleton-block h-7 w-24 rounded-full"></div>
+                </div>
+
+                <div v-for="task in 2" :key="`dashboard-task-skeleton-${task}`" class="panel space-y-3 p-5">
+                    <div class="dashboard-skeleton-block h-5 w-48 rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-full rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-2/3 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="panel flex flex-col gap-4 p-4 sm:p-5">
+                <div class="space-y-2">
+                    <div class="dashboard-skeleton-block h-6 w-40 rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-52 rounded-full"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="dashboard-skeleton-block h-4 w-full rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-11/12 rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-10/12 rounded-full"></div>
+                </div>
+
+                <div class="panel space-y-3 bg-red-50 p-4">
+                    <div class="dashboard-skeleton-block h-5 w-32 rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-4 w-48 rounded-full"></div>
+                    <div class="dashboard-skeleton-block h-9 w-full rounded-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <div class="panel space-y-4 p-4 sm:p-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="space-y-2">
+                        <div class="dashboard-skeleton-block h-3 w-24 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-6 w-56 rounded-full"></div>
+                        <div class="dashboard-skeleton-block h-4 w-72 rounded-full"></div>
+                    </div>
+
+                    <div class="dashboard-skeleton-block h-10 w-36 rounded-full"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div v-else class="space-y-6 overflow-x-hidden">
         <section class="panel overflow-hidden p-0">
             <div
                 class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
@@ -235,6 +338,7 @@
         :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
         @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionId)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
+        @back-to-exercises-and-refresh="backToExercises"
         @finish-quiz="finishExercise" />
 
     <Transition name="image-viewer-fade">
@@ -312,7 +416,7 @@ import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
 import { getLoggedUser } from '~/composables/useAuth'
-import { UserRole, type IUserProfileData } from '~/infra/interfaces/services/user'
+import type { IUserProfileData } from '~/infra/interfaces/services/user'
 import { useUserStore } from '~/infra/store/userStore'
 import type { IBadge } from '~/infra/interfaces/services/badge'
 import type { ICurrentModuleUser } from '~/infra/interfaces/services/phase'
@@ -323,11 +427,13 @@ import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersP
 
 import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask } from '~/infra/interfaces/services/exercise'
+import type { IPointAwardResult } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
 
 const messageMotivacional = ref('')
+const isDashboardHydrating = ref(true)
 
 const showUploadCoverAndPicture = ref(false)
 const showImageViewer = ref(false)
@@ -722,8 +828,6 @@ async function finishExercise() {
         return
     }
 
-    const userId = getUserIdFromSession();
-
     const objectiveQuestions = quizQuestions.value.filter((question) => question.typeExercise !== 2)
     const correct = objectiveQuestions.reduce((acc, question) => {
         return acc + (selectedAnswers.value[question.id] === question.correctOptionId ? 1 : 0)
@@ -743,7 +847,6 @@ async function finishExercise() {
 
     var payloadSubmitExercise: ISubmitExerciseAnswer[] = quizQuestions.value.map((question) => ({
         exerciseId: selectedTask.value!.source.id,
-        userId: userId ?? 0,
         questionId: question.id,
         phaseId: selectedTask.value?.source.phaseId ?? 0,
         submissionData: {
@@ -767,16 +870,34 @@ async function finishExercise() {
 
             if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
                 var payloadUserPoints = {
-                    userId: userId ?? 0,
-                    pointsToAdd: gainedPoints,
-                    exerciseDate: selectedTask.value.termAt,
+                    exerciseId: selectedTask.value.source.id,
                 }
 
                 var pointsResponse = await $httpClient.point.AddPointsForUser(payloadUserPoints)
-                if (pointsResponse.success) {
-                    toast.success('Parabens!', `Você ganhou ${gainedPoints} pontos com este exercício.`, 3500)
-                    profile.value?.pointsQuantity ? profile.value.pointsQuantity += gainedPoints : null
-                    ranking.value ? ranking.value.points += gainedPoints : null
+                const awardResult = pointsResponse.result as IPointAwardResult | undefined
+
+                if (!pointsResponse.success || !awardResult) {
+                    toast.error('Erro', pointsResponse.errors?.[0] ?? 'Nao foi possivel contabilizar os pontos do exercicio.', 3500)
+                } else {
+                    if (taskResult.value) {
+                        taskResult.value.gainedPoints = awardResult.pointsAwarded
+                    }
+
+                    if (awardResult.alreadyAwarded) {
+                        toast.info('Pontos ja contabilizados', awardResult.message, 3500)
+                    } else if (awardResult.pointsAwarded > 0) {
+                        toast.success('Parabens!', awardResult.message, 3500)
+
+                        if (profile.value) {
+                            profile.value.pointsQuantity = (profile.value.pointsQuantity ?? 0) + awardResult.pointsAwarded
+                        }
+
+                        if (ranking.value) {
+                            ranking.value.points += awardResult.pointsAwarded
+                        }
+                    } else {
+                        toast.info('Pontuacao atualizada', awardResult.message, 3500)
+                    }
                 }
             }
         }
@@ -826,26 +947,20 @@ async function openGlobalRanking() {
 
     try {
         const currentUserId = getUserIdFromSession()
-        const [rankingResponse, usersResponse] = await Promise.all([
-            $httpClient.point.GetRanking(),
-            $httpClient.user.GetUsers(),
-        ])
+        const rankingResponse = await $httpClient.point.GetRanking()
 
         const rankingList = rankingResponse.result ?? []
-        const usersList = usersResponse.result ?? []
-        const userMap = new Map(usersList.map((user) => [user.id, user]))
 
         globalRanking.value = rankingList
             .slice()
             .sort((a, b) => b.totalPoints - a.totalPoints)
             .map((entry, index) => {
-                const user = userMap.get(entry.userId)
                 return {
                     position: index + 1,
                     userId: entry.userId,
-                    name: user?.name ?? `Aluno ${entry.userId}`,
+                    name: entry.name?.trim() ? entry.name : `Aluno ${entry.userId}`,
                     totalPoints: entry.totalPoints,
-                    avatarUrl: user?.profilePictureUrl?.trim() ? user.profilePictureUrl : profileDefault,
+                    avatarUrl: entry.profilePictureUrl?.trim() ? entry.profilePictureUrl : profileDefault,
                     isCurrentUser: currentUserId === entry.userId,
                 }
             })
@@ -884,15 +999,11 @@ async function UpdateUserProfile() {
             return;
         }
 
-        var RoleUpdateUser = UserRole.Student ? 1 : UserRole.Teacher ? 2 : 3;
-
         var payloadUpdateUser = {
-            id: userId,
             name: profile.value?.name ?? '',
             bio: profile.value?.bio ?? '',
             email: profile.value?.email ?? '',
             password: editPassword.value.trim(),
-            role: RoleUpdateUser,
             profilePictureUrl: profile.value?.profilePictureUrl ?? '',
             coverPictureUrl: profile.value?.coverPictureUrl ?? '',
             updatedAt: new Date(),
@@ -1027,6 +1138,7 @@ async function fetchUserProfile() {
     } catch (error) {
         console.error('Erro ao carregar perfil do usuário:', error)
         toast.error('Erro', 'Não foi possível carregar os dados do perfil. Tente novamente mais tarde.', 4000)
+    } finally {
         loadingPop();
     }
 }
@@ -1054,14 +1166,10 @@ async function fetchBadgeData() {
     } catch (error) {
         console.error('Erro ao carregar badges do usuário:', error)
         toast.error('Erro', 'Não foi possível carregar os dados das badges. Tente novamente mais tarde.', 4000)
-    } finally {
-        loadingPop();
     }
 }
 
 async function currentStatsUser() {
-    loadingPush();
-
     try {
         const userId = getUserIdFromSession();
 
@@ -1071,20 +1179,15 @@ async function currentStatsUser() {
             return;
         }
 
-        const response = await $httpClient.phase.GetCurrentModulePhaseUser(userId);
+        const response = await $httpClient.phase.GetCurrentModulePhaseUser();
 
         if (response.result != null) {
             currentModule.value = response.result;
             console.log('Fase atual do usuário:', response.result);
-
-            toast.success('Perfil carregado', 'Dados do perfil atualizados com sucesso.', 3000);
         }
-        loadingPop();
     } catch (error) {
         console.error('Erro ao carregar fase atual do usuário:', error)
         toast.error('Erro', 'Não foi possível carregar os dados da fase atual. Tente novamente mais tarde.', 4000)
-    } finally {
-        loadingPop();
     }
 }
 
@@ -1100,7 +1203,7 @@ async function randomDailyTasks() {
             return;
         }
 
-        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentModule.value?.id ?? 0, userId);
+        const response = await $httpClient.exercise.GetDailyTasksForPhase(currentModule.value?.id ?? 0);
 
         if (response.result != null) {
             tasks.value = response.result;
@@ -1125,9 +1228,9 @@ async function getAImotivacionalMessage() {
     }
 }
 
-async function getAnswersPreview(userId: number) {
+async function getAnswersPreview() {
     try {
-        const response = await $httpClient.answers.GetAnswersByUserId(userId);
+        const response = await $httpClient.answers.GetAnswersByUserId();
 
         if (response.result != null) {
             userAnswersPreview.value = response.result;
@@ -1138,21 +1241,45 @@ async function getAnswersPreview(userId: number) {
     }
 }
 
-onMounted(async () => {
+async function bootstrapDashboard() {
     const userId = getUserIdFromSession();
 
-    if (userId != null && userId > 0) {
-        await getAnswersPreview(userId);
+    if (userId == null || userId <= 0) {
+        return;
     }
 
+    const answersPreviewPromise = getAnswersPreview();
+
     await fetchUserProfile();
-    await randomDailyTasks();
-    ranking.value = await fetchRankingUser();
-    await getAImotivacionalMessage();
+
+    const [userRanking] = await Promise.all([
+        fetchRankingUser(),
+        currentModule.value?.id ? randomDailyTasks() : Promise.resolve(),
+        getAImotivacionalMessage(),
+        answersPreviewPromise,
+    ]);
+
+    ranking.value = userRanking;
+}
+
+onMounted(async () => {
+    try {
+        await bootstrapDashboard();
+    } finally {
+        isDashboardHydrating.value = false;
+    }
 });
 </script>
 
 <style scoped lang="scss">
+.dashboard-skeleton-block {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.18), rgba(226, 232, 240, 0.28), rgba(148, 163, 184, 0.18));
+    background-size: 200% 100%;
+    animation: dashboard-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
 .profile-frame {
     position: absolute;
     inset: 0;
@@ -1365,6 +1492,16 @@ onMounted(async () => {
     }
 }
 
+@keyframes dashboard-skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 .medal-idle {
     animation: medalFloat 1.6s ease-in-out infinite;
     will-change: transform;
@@ -1383,6 +1520,10 @@ onMounted(async () => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .dashboard-skeleton-block {
+        animation: none;
+    }
+
     .medal-idle {
         animation: none;
     }

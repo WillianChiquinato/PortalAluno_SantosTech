@@ -1,4 +1,4 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 
@@ -8,7 +8,7 @@ export interface ICoursePaid {
   description: string
   isPaid: boolean
   price: number
-  duration: number // Duration in hours
+  duration: number
   levelDifficulty: string
   paidFocus: string | null
   createdAt: string
@@ -34,21 +34,16 @@ export default class CourseService extends ClientService<any> {
   }
 
   GetFullCoursesPaid = async (options?: FetchOptions): Promise<ApiResponse<ICoursePaid[]>> => {
-    let urlParams = `/GetFullCoursesPaid`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetFullCoursesPaid`, {
       method: 'GET',
       ...options,
     })) as ApiResponse<ICoursePaid[]>
   }
 
   GetProgressUserPaidCourses = async (
-    userId: number,
     options?: FetchOptions,
   ): Promise<ApiResponse<{ courseId: number; progress: number }[]>> => {
-    let urlParams = `/GetProgressUserPaidCourses/?userId=${userId}`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetProgressUserPaidCourses`, {
       method: 'GET',
       ...options,
     })) as ApiResponse<{ courseId: number; progress: number }[]>
@@ -57,9 +52,7 @@ export default class CourseService extends ClientService<any> {
   GetCoursesAvailables = async (
     options?: FetchOptions,
   ): Promise<ApiResponse<ICourseAvailable[]>> => {
-    let urlParams = `/GetCoursesAvailables`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetCoursesAvailables`, {
       method: 'GET',
       ...options,
     })) as ApiResponse<ICourseAvailable[]>

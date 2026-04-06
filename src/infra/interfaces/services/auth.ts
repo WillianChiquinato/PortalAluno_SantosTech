@@ -1,14 +1,19 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 
 export interface IAuth {
   id: number
-  userName: string
   name: string
   email: string
-  phoneDDD: string
-  primaryPhone: string
+  role: number
+  profilePictureUrl: string
+}
+
+export interface IOAuthProvider {
+  id: 'google' | 'github'
+  label: string
+  enabled: boolean
 }
 
 export interface IAuthConfigUser {
@@ -20,7 +25,6 @@ export interface IAuthConfigUser {
 }
 
 export interface IAuthConfigUserUpdateRequest {
-  userId: number
   receiveEmailNotifications: boolean
   darkModeEnabled: boolean
   reportFrequency: boolean
@@ -40,21 +44,35 @@ export default class AuthService extends ClientService<any> {
     })) as ApiResponse<IAuth>
   }
 
+  Session = async (config: FetchOptions = {}): Promise<ApiResponse<IAuth>> => {
+    return (await this.fetchInstance(`${this.address}/session`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IAuth>
+  }
+
+  GetProviders = async (
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IOAuthProvider[]>> => {
+    return (await this.fetchInstance(`${this.address}/providers`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IOAuthProvider[]>
+  }
+
   GetConfigsByUserId = async (
-    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IAuthConfigUser>> => {
-    return (await this.fetchInstance(`${this.address}/GetConfigs?userId=${userId}`, {
+    return (await this.fetchInstance(`${this.address}/GetConfigs`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IAuthConfigUser>
   }
 
   CreateNewConfig = async (
-    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IAuthConfigUserUpdateRequest>> => {
-    return (await this.fetchInstance(`${this.address}/CreateNewConfig?userId=${userId}`, {
+    return (await this.fetchInstance(`${this.address}/CreateNewConfig`, {
       method: 'POST',
       ...config,
     })) as ApiResponse<IAuthConfigUserUpdateRequest>
@@ -69,5 +87,12 @@ export default class AuthService extends ClientService<any> {
       body: payload,
       ...config,
     })) as ApiResponse<IAuthConfigUserUpdateRequest>
+  }
+
+  Logout = async (config: FetchOptions = {}): Promise<ApiResponse<string>> => {
+    return (await this.fetchInstance(`${this.address}/Logout`, {
+      method: 'POST',
+      ...config,
+    })) as ApiResponse<string>
   }
 }

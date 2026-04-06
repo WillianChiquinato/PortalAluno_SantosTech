@@ -47,12 +47,9 @@ export default class AnswersService extends ClientService<any> {
   }
 
   GetAnswersByUserId = async (
-    userId: number,
     options?: FetchOptions,
   ): Promise<ApiResponse<IAnswersByUserIdResponse>> => {
-    let urlParams = `/GetAnswersByUserId?userId=${userId}`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GetAnswersByUserId`, {
       method: 'GET',
       ...options,
     })) as ApiResponse<IAnswersByUserIdResponse>

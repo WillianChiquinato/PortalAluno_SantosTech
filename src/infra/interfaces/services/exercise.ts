@@ -1,4 +1,4 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
 import type { ApiResponse } from '~/infra/response/apiResponse'
 
@@ -50,7 +50,6 @@ export interface IQuizQuestionOption {
 
 export interface ISubmitExerciseAnswer {
   exerciseId: number
-  userId: number
   questionId: number
   phaseId?: number
   userExerciseFlowId?: number | null
@@ -102,10 +101,9 @@ export default class ExerciseService extends ClientService<any> {
 
   GetDailyTasksForPhase = async (
     phaseId: number,
-    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IDailyTaskGroup[]>> => {
-    let urlParams = `/GetDailyTasksForPhase?phaseId=${phaseId}&userId=${userId}`
+    const urlParams = `/GetDailyTasksForPhase?phaseId=${phaseId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
@@ -117,7 +115,7 @@ export default class ExerciseService extends ClientService<any> {
     exerciseId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IQuizQuestionOption[]>> => {
-    let urlParams = `/GetQuestionsOptionsForExercise?exerciseId=${exerciseId}`
+    const urlParams = `/GetQuestionsOptionsForExercise?exerciseId=${exerciseId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
@@ -129,9 +127,7 @@ export default class ExerciseService extends ClientService<any> {
     payload: ISubmitExerciseAnswer[],
     config: FetchOptions = {},
   ): Promise<ApiResponse<void>> => {
-    let urlParams = `/SubmitExerciseAnswers`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/SubmitExerciseAnswers`, {
       method: 'POST',
       body: payload,
       ...config,
@@ -140,11 +136,10 @@ export default class ExerciseService extends ClientService<any> {
 
   VerifyExistingAnswers = async (
     exerciseId: number,
-    userId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<ExerciseVerifyAnswerResponse>> => {
-    let urlParams = `/VerifyExistingAnswers?exerciseId=${exerciseId}&userId=${userId}`
-    
+    const urlParams = `/VerifyExistingAnswers?exerciseId=${exerciseId}`
+
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',
       ...config,

@@ -1,6 +1,5 @@
-import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
+import type { FetchOptions } from 'ofetch'
 import ClientService from '~/infra/clientService'
-import type { ApiResponse } from '~/infra/response/apiResponse'
 import type { Exercise } from './class'
 
 export interface IAiMotivacionalMessage {
@@ -9,7 +8,6 @@ export interface IAiMotivacionalMessage {
 
 export interface IAIExerciseRepeat {
   exerciseId: number
-  userId: number
   phaseId?: number
 }
 
@@ -25,9 +23,7 @@ export default class AiService extends ClientService<any> {
   }
 
   GetMotivationalMessage = async (config: FetchOptions = {}): Promise<IAiMotivacionalMessage> => {
-    let urlParams = `/GenerateMotivationalMessage`
-
-    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+    return (await this.fetchInstance(`${this.address}/GenerateMotivationalMessage`, {
       method: 'GET',
       ...config,
     })) as IAiMotivacionalMessage
@@ -35,11 +31,10 @@ export default class AiService extends ClientService<any> {
 
   GenerateExerciseRepeat = async (
     exerciseId: number,
-    userId: number,
     phaseId?: number,
     config: FetchOptions = {},
   ): Promise<IAIExerciseRepeatResponse> => {
-    let urlParams = `/GenerateExerciseRepeat?exerciseId=${exerciseId}&userId=${userId}`
+    let urlParams = `/GenerateExerciseRepeat?exerciseId=${exerciseId}`
     if (phaseId) {
       urlParams += `&phaseId=${phaseId}`
     }

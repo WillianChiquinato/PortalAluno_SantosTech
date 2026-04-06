@@ -1,21 +1,25 @@
-import { verifyToken } from '@/composables/useAuth'
+import { checkAuth, verifyToken } from '@/composables/useAuth'
 
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   if (!process.client) {
     return
   }
 
-  const isPublicRoute = to.path === '/'
-  const hasValidToken = verifyToken()
+  const publicRoutes = new Set([
+    '/',
+    '/auth/callback',
+  ])
+  const isPublicRoute = publicRoutes.has(to.path)
+  const hasValidSession = verifyToken() || (await checkAuth())
 
-  if (!hasValidToken && !isPublicRoute) {
+  if (!hasValidSession && !isPublicRoute) {
     return navigateTo({
       path: '/',
       query: { auth: 'required' },
     })
   }
 
-  if (hasValidToken && isPublicRoute) {
+  if (hasValidSession && isPublicRoute) {
     return navigateTo('/dashboard')
   }
 })

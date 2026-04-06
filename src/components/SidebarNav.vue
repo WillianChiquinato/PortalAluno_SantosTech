@@ -9,7 +9,7 @@
                 <h1
                     class="bg-gradient-to-r from-brand-600 via-brand-500 to-ink-900 bg-clip-text text-2xl font-semibold text-transparent">
                     {{ t('sidebarTitle') }}</h1>
-                <div class="h-1 w-20 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 mb-2"></div>
+                <div class="mb-2 h-1 w-20 rounded-full bg-gradient-to-r from-brand-500 to-accent-500"></div>
             </div>
         </div>
 
@@ -41,11 +41,9 @@
         </div>
     </aside>
     <nav v-else class="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-md">
-        <div class="flex justify-around items-center h-16 relative">
-
-            <!-- Principais -->
+        <div class="relative flex h-16 items-center justify-around">
             <NuxtLink v-for="item in navItems.slice(0, 5)" :key="item.path" :to="item.path"
-                class="flex flex-col items-center justify-center gap-1 flex-1 py-2 transition-all duration-200" :class="isActive(item.path)
+                class="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200" :class="isActive(item.path)
                     ? 'text-brand-600 scale-105'
                     : 'text-slate-500'">
                 <i :class="[item.icon, 'text-lg']"></i>
@@ -56,8 +54,7 @@
                 <span v-if="isActive(item.path)" class="absolute bottom-0 h-1 w-6 rounded-full bg-brand-500" />
             </NuxtLink>
 
-            <!-- Botão Mais -->
-            <button class="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-slate-500"
+            <button class="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-slate-500"
                 @click="showMobileMenu = true">
                 <i class="pi pi-ellipsis-h text-lg"></i>
                 <span class="text-[11px] leading-none">
@@ -86,9 +83,10 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'nuxt/app';
+import { useRoute } from 'nuxt/app'
 import { computed } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
+import { logout as logoutSession } from '~/composables/useAuth'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
@@ -123,25 +121,27 @@ const isActive = (path: string) => {
 }
 
 const logout = async () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('loggedUser')
-    console.log("Logout User");
+    try {
+        await logoutSession()
+    } catch (error) {
+        console.error('Erro ao invalidar sessao:', error)
+    }
+
     return navigateTo('/')
 }
 
 const handleLogout = async () => {
-    showMobileMenu.value = false;
-    await logout();
+    showMobileMenu.value = false
+    await logout()
 }
 </script>
 
 <style scoped lang="scss">
-/* Overlay escuro cobrindo toda a tela e menu mobile animado */
 .sidebar-mobile-overlay {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background: rgba(0, 0, 0, 0.40);
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: flex-end;
     justify-content: center;
