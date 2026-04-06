@@ -88,6 +88,8 @@ export interface DailyTaskGroupView {
   termAt: string
   disabled: boolean
   exercises: ExerciseCardTask[]
+  highlighted?: boolean
+  highlightLabel?: string
 }
 
 export interface ExerciseVerifyAnswerResponse {

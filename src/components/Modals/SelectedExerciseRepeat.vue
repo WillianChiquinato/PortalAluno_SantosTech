@@ -85,7 +85,7 @@ function handleRepeatCurrent() {
     justify-content: center;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 50;
+    z-index: 100;
 }
 
 .upload-cover-modal {

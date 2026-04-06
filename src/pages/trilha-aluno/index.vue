@@ -44,7 +44,7 @@
             </section>
         </Transition>
 
-        <section class="panel p-4 sm:p-6">
+        <section class="panel p-4 sm:p-6 relative z-30">
             <Transition mode="out-in" enter-active-class="duration-600 ease-out transition-all"
                 enter-from-class="opacity-0 translate-y-10 scale-95 blur-[4px]"
                 enter-to-class="opacity-100 translate-y-0 scale-100 blur-0"
@@ -319,7 +319,7 @@
             </Transition>
         </section>
 
-        <section class="panel relative overflow-hidden p-6">
+        <section class="panel relative overflow-hidden p-6 z-10">
             <div class="absolute inset-0 bg-slate-100/70 backdrop-blur-sm"></div>
             <div class="absolute -top-10 right-10 h-28 w-28 rounded-full bg-white/60 blur-2xl"></div>
             <div class="absolute -bottom-12 left-6 h-28 w-28 rounded-full bg-red-100/60 blur-2xl"></div>
@@ -426,7 +426,8 @@ async function enterExercise(container: BlipContainer, exerciseFlow: ContainerEx
     const mappedTask = mapExerciseToTaskCard(exerciseFlow, container.phaseId)
     selectedTask.value = mappedTask
 
-    if (mappedTask.status == 'Concluída') {
+    console.log("Status: ", mappedTask.status);
+    if (mappedTask.status == 'Concluída' || mappedTask.status == 'Tentar denovo') {
         showSelectRepeatExerciseModal.value = true
     }
     else {
@@ -1187,7 +1188,7 @@ async function fetchIslandByUserAndCurrentModule() {
             return
         }
 
-        const responsePhase = await $httpClient.phase.GetCurrentModulePhaseUser();
+        const responsePhase = await $httpClient.phase.GetCurrentModuleUser();
 
         if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(responsePhase.result.id);
