@@ -1,13 +1,6 @@
 import { useNuxtApp, useState } from '#app'
 import type { IAuth } from '~/infra/interfaces/services/auth'
-
-function getStorage(): Storage | null {
-  if (!import.meta.client) {
-    return null
-  }
-
-  return window.localStorage
-}
+import { useUserStore } from '~/infra/store/userStore'
 
 function authUserState() {
   return useState<IAuth | null>('auth-user', () => null)
@@ -37,9 +30,7 @@ export function clearAuth() {
   authUserState().value = null
   authInitializedState().value = false
   authPendingState().value = null
-
-  getStorage()?.removeItem('token')
-  getStorage()?.removeItem('loggedUser')
+  useUserStore().clearUserId()
 }
 
 export function getLoggedUser() {
@@ -49,13 +40,6 @@ export function getLoggedUser() {
 export function setLoggedUser(user: IAuth | null) {
   authUserState().value = user
   authInitializedState().value = true
-
-  if (user) {
-    getStorage()?.setItem('loggedUser', JSON.stringify(user))
-    return
-  }
-
-  getStorage()?.removeItem('loggedUser')
 }
 
 async function fetchSession(force = false) {

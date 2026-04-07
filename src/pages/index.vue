@@ -1,5 +1,7 @@
 <template>
-  <div class="login-page">
+  <LoadingScreen v-if="showLoginSplash" />
+
+  <div v-else class="login-page">
     <div
       class="hero-panel"
       :style="{
@@ -277,6 +279,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import LoadingScreen from '~/components/UI/LoadingScreen.vue'
 import { setLoggedUser } from '~/composables/useAuth'
 import { useLoadingConfigurations } from '~/composables/useLoadingConfigurations'
 import type { IOAuthProvider } from '~/infra/interfaces/services/auth'
@@ -311,6 +314,7 @@ const userStore = useUserStore()
 const showPasswordPage = ref(false)
 const showSentPage = ref(false)
 const isSubmitting = ref(false)
+const showLoginSplash = ref(true)
 const oauthProviders = ref<IOAuthProvider[]>([])
 const availableCourses = ref<ICourseAvailable[]>([])
 const coursesLoading = ref(true)
@@ -604,7 +608,13 @@ onMounted(async () => {
     toast.error('Acesso nao autorizado', oauthError, 4500)
   }
 
-  await Promise.all([fetchOAuthProviders(), fetchAvailableCourses()])
+  await Promise.all([
+    fetchOAuthProviders(),
+    fetchAvailableCourses(),
+    new Promise((resolve) => window.setTimeout(resolve, 900)),
+  ])
+
+  showLoginSplash.value = false
 })
 
 definePageMeta({

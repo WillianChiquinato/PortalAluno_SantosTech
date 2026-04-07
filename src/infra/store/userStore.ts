@@ -51,6 +51,7 @@ export const useUserStore = defineStore('user', {
     },
     clearUserId() {
       this.userId = null
+      this.userEmail = null
       this.configurationsLoaded = false
     },
   },
