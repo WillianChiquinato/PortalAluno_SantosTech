@@ -100,9 +100,9 @@
 
 <script setup lang="ts">
 import { useRoute } from 'nuxt/app'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
-import { getStudentViewReturnUrl, logout as logoutSession } from '~/composables/useAuth'
+import { getStudentViewReturnUrl, logout as logoutSession, setStudentViewReturnUrl } from '~/composables/useAuth'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
@@ -114,7 +114,22 @@ const { t } = usePortalI18n()
 
 const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
-const studentViewReturnUrl = computed(() => getStudentViewReturnUrl())
+
+const routeReturnTo = computed(() => {
+    const value = Array.isArray(route.query.returnTo)
+        ? route.query.returnTo[0]
+        : route.query.returnTo
+
+    return typeof value === 'string' && value.trim().length > 0 ? value : null
+})
+
+watchEffect(() => {
+    if (routeReturnTo.value) {
+        setStudentViewReturnUrl(routeReturnTo.value)
+    }
+})
+
+const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentViewReturnUrl())
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
