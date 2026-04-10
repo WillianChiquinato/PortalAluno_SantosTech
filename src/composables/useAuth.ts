@@ -1,6 +1,7 @@
 import { useNuxtApp, useState } from '#app'
 import type { IAuth } from '~/infra/interfaces/services/auth'
 import { useUserStore } from '~/infra/store/userStore'
+const STUDENT_VIEW_RETURN_URL_KEY = 'student-view:return-url'
 
 function authUserState() {
   return useState<IAuth | null>('auth-user', () => null)
@@ -26,11 +27,34 @@ export function verifyToken(): boolean {
 
 export function removeToken() {}
 
+export function setStudentViewReturnUrl(url: string | null) {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (!url || !url.trim()) {
+    window.sessionStorage.removeItem(STUDENT_VIEW_RETURN_URL_KEY)
+    return
+  }
+
+  window.sessionStorage.setItem(STUDENT_VIEW_RETURN_URL_KEY, url)
+}
+
+export function getStudentViewReturnUrl() {
+  if (!import.meta.client) {
+    return null
+  }
+
+  const value = window.sessionStorage.getItem(STUDENT_VIEW_RETURN_URL_KEY)
+  return value && value.trim().length > 0 ? value : null
+}
+
 export function clearAuth() {
   authUserState().value = null
   authInitializedState().value = false
   authPendingState().value = null
   useUserStore().clearUserId()
+  setStudentViewReturnUrl(null)
 }
 
 export function getLoggedUser() {

@@ -27,6 +27,15 @@
         </div>
 
         <div class="space-y-2">
+            <button
+                v-if="studentViewReturnUrl"
+                type="button"
+                class="nav-link w-full"
+                @click="returnToAdminPortal"
+            >
+                <span class="h-2 w-2 rounded-full bg-brand-400"></span>
+                <span>Voltar ao portal</span>
+            </button>
             <template v-for="item in footerItems" :key="item.label">
                 <NuxtLink v-if="item.type === 'link'" :to="item.path" class="nav-link">
                     <span class="h-2 w-2 rounded-full bg-slate-300"></span>
@@ -68,6 +77,13 @@
                 <div v-if="isMobile && showMobileMenu" class="sidebar-mobile-overlay"
                     @click.self="showMobileMenu = false">
                     <div class="sidebar-mobile-menu animate-slideUp" @click.stop>
+                        <button
+                            v-if="studentViewReturnUrl"
+                            class="block w-full text-left text-base font-medium text-brand-600"
+                            @click="handleReturnToAdminPortal"
+                        >
+                            <i class="pi pi-arrow-left text-lg"></i> Voltar ao portal
+                        </button>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-cog text-lg"></i> {{ t('navSettings') }}
@@ -86,7 +102,7 @@
 import { useRoute } from 'nuxt/app'
 import { computed } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
-import { logout as logoutSession } from '~/composables/useAuth'
+import { getStudentViewReturnUrl, logout as logoutSession } from '~/composables/useAuth'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
@@ -98,6 +114,7 @@ const { t } = usePortalI18n()
 
 const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
+const studentViewReturnUrl = computed(() => getStudentViewReturnUrl())
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
@@ -130,9 +147,23 @@ const logout = async () => {
     return navigateTo('/')
 }
 
+const returnToAdminPortal = () => {
+    const target = studentViewReturnUrl.value
+    if (!target || !import.meta.client) {
+        return
+    }
+
+    window.location.href = target
+}
+
 const handleLogout = async () => {
     showMobileMenu.value = false
     await logout()
+}
+
+const handleReturnToAdminPortal = () => {
+    showMobileMenu.value = false
+    returnToAdminPortal()
 }
 </script>
 

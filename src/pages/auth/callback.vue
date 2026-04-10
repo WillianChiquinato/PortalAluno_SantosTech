@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { checkAuth, getLoggedUser } from '~/composables/useAuth'
+import { checkAuth, getLoggedUser, setStudentViewReturnUrl } from '~/composables/useAuth'
 import { useLoadingConfigurations } from '~/composables/useLoadingConfigurations'
 import { useUserStore } from '~/infra/store/userStore'
 
@@ -24,6 +24,31 @@ const { loadConfigurations } = useLoadingConfigurations()
 const userStore = useUserStore()
 
 onMounted(async () => {
+    const queryReturnTo = Array.isArray(route.query.returnTo)
+        ? route.query.returnTo[0]
+        : route.query.returnTo
+
+    if (typeof queryReturnTo === 'string' && queryReturnTo.trim()) {
+        setStudentViewReturnUrl(queryReturnTo)
+    } else if (import.meta.client) {
+        const referrer = document.referrer
+
+        if (referrer) {
+            try {
+                const referrerUrl = new URL(referrer)
+                if (referrerUrl.origin !== window.location.origin) {
+                    setStudentViewReturnUrl(referrerUrl.toString())
+                } else {
+                    setStudentViewReturnUrl(null)
+                }
+            } catch {
+                setStudentViewReturnUrl(null)
+            }
+        } else {
+            setStudentViewReturnUrl(null)
+        }
+    }
+
     const errorMessage = Array.isArray(route.query.message)
         ? route.query.message[0]
         : route.query.message
