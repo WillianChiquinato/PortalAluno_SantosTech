@@ -134,4 +134,13 @@ export default class ClassService extends ClientService<any> {
       ...config,
     })) as ApiResponse<IClassRoom[]>
   }
+
+  GetClassesByUserId = async (config: FetchOptions = {}): Promise<ApiResponse<IClass[]>> => {
+    const urlParams = `/GetClassesByUserId`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IClass[]>
+  }
 }

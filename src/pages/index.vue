@@ -2,12 +2,16 @@
   <LoadingScreen v-if="showLoginSplash" />
 
   <div v-else class="login-page">
-    <div
-      class="hero-panel"
-      :style="{
-        backgroundImage: `linear-gradient(145deg, rgba(15,10,10,0.88), rgba(60,15,15,0.75)), url(${bgSantosGames})`,
-      }"
-    >
+    <div class="hero-panel" :style="{
+      backgroundImage: `linear-gradient(145deg, rgba(15,10,10,0.88), rgba(60,15,15,0.75)), url(${bgSantosGames})`,
+    }">
+      <transition name="fade">
+        <div v-if="showLottieEffect" class="lottie-footer">
+          <BaseLottie :animation-data="EffectLogin" :loop="false" :autoplay="true" class="lottie-effect-footer"
+            @complete="onLottieComplete" />
+        </div>
+      </transition>
+
       <div class="hero-panel__content">
         <div class="hero-panel__brand">
           <p class="hero-panel__eyebrow">Portal Santos Tech</p>
@@ -32,52 +36,34 @@
               Informe seu email para receber as orientacoes de recuperacao.
             </p>
             <p v-else>
-              Enviamos as orientacoes para <strong>{{ emailLogin }}</strong
-              >.
+              Enviamos as orientacoes para <strong>{{ emailLogin }}</strong>.
             </p>
           </div>
 
           <template v-if="!showPasswordPage">
             <div class="login-socials">
-              <button
-                type="button"
-                class="social-btn"
-                :disabled="!isProviderEnabled('google')"
-                @click="startOAuth('google')"
-              >
+              <button type="button" class="social-btn" :disabled="!isProviderEnabled('google')"
+                @click="startOAuth('google')">
                 <span class="social-btn__icon social-btn__icon--google" aria-hidden="true">
                   <svg viewBox="0 0 256 262" class="social-btn__svg social-btn__svg--google">
-                    <path
-                      fill="#4285F4"
-                      d="M255.68 133.45c0-10.95-.98-21.46-2.8-31.55H130v59.7h70.35c-3.03 16.32-12.23 30.14-26.07 39.38v32.72h42.16c24.67-22.72 39.24-56.24 39.24-100.25Z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M130 261.1c35.44 0 65.18-11.75 86.9-31.82l-42.16-32.72c-11.75 7.87-26.77 12.53-44.74 12.53-34.36 0-63.48-23.22-73.88-54.44H12.54v34.02A131.16 131.16 0 0 0 130 261.1Z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M56.12 154.65A78.9 78.9 0 0 1 52 128c0-9.24 1.6-18.18 4.12-26.65V67.33H12.54A131.18 131.18 0 0 0 0 128c0 21.1 5.06 41.1 12.54 60.67l43.58-34.02Z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M130 50.91c19.3 0 36.64 6.64 50.29 19.67l37.74-37.74C195.15 11.34 165.41 0 130 0 78.9 0 34.97 29.57 12.54 67.33l43.58 34.02C66.52 74.13 95.64 50.91 130 50.91Z"
-                    />
+                    <path fill="#4285F4"
+                      d="M255.68 133.45c0-10.95-.98-21.46-2.8-31.55H130v59.7h70.35c-3.03 16.32-12.23 30.14-26.07 39.38v32.72h42.16c24.67-22.72 39.24-56.24 39.24-100.25Z" />
+                    <path fill="#34A853"
+                      d="M130 261.1c35.44 0 65.18-11.75 86.9-31.82l-42.16-32.72c-11.75 7.87-26.77 12.53-44.74 12.53-34.36 0-63.48-23.22-73.88-54.44H12.54v34.02A131.16 131.16 0 0 0 130 261.1Z" />
+                    <path fill="#FBBC05"
+                      d="M56.12 154.65A78.9 78.9 0 0 1 52 128c0-9.24 1.6-18.18 4.12-26.65V67.33H12.54A131.18 131.18 0 0 0 0 128c0 21.1 5.06 41.1 12.54 60.67l43.58-34.02Z" />
+                    <path fill="#EA4335"
+                      d="M130 50.91c19.3 0 36.64 6.64 50.29 19.67l37.74-37.74C195.15 11.34 165.41 0 130 0 78.9 0 34.97 29.57 12.54 67.33l43.58 34.02C66.52 74.13 95.64 50.91 130 50.91Z" />
                   </svg>
                 </span>
                 Entrar com Google
               </button>
-              <button
-                type="button"
-                class="social-btn"
-                :disabled="!isProviderEnabled('github')"
-                @click="startOAuth('github')"
-              >
+              <button type="button" class="social-btn" :disabled="!isProviderEnabled('github')"
+                @click="startOAuth('github')">
                 <span class="social-btn__icon social-btn__icon--github" aria-hidden="true">
                   <svg viewBox="0 0 24 24" class="social-btn__svg social-btn__svg--github">
                     <path
-                      d="M12 .5C5.65.5.5 5.65.5 12.01c0 5.08 3.29 9.39 7.85 10.91.57.1.78-.25.78-.56 0-.28-.01-1.19-.02-2.16-3.19.69-3.86-1.35-3.86-1.35-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.69.08-.69 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.14 1.18a10.9 10.9 0 0 1 5.72 0c2.18-1.49 3.14-1.18 3.14-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.39-5.25 5.67.41.35.77 1.04.77 2.09 0 1.51-.01 2.72-.01 3.09 0 .31.21.67.79.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"
-                    />
+                      d="M12 .5C5.65.5.5 5.65.5 12.01c0 5.08 3.29 9.39 7.85 10.91.57.1.78-.25.78-.56 0-.28-.01-1.19-.02-2.16-3.19.69-3.86-1.35-3.86-1.35-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.69.08-.69 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.14 1.18a10.9 10.9 0 0 1 5.72 0c2.18-1.49 3.14-1.18 3.14-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.39-5.25 5.67.41.35.77 1.04.77 2.09 0 1.51-.01 2.72-.01 3.09 0 .31.21.67.79.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
                   </svg>
                 </span>
                 Entrar com GitHub
@@ -91,21 +77,12 @@
             <form class="login-form" @submit.prevent="loadUserData">
               <label>
                 <span>Email</span>
-                <input
-                  v-model="emailLogin"
-                  type="email"
-                  autocomplete="email"
-                  placeholder="aluno@santos-tech.com"
-                />
+                <input v-model="emailLogin" type="email" autocomplete="email" placeholder="aluno@santos-tech.com" />
               </label>
               <label>
                 <span>Senha</span>
-                <input
-                  v-model="passwordLogin"
-                  type="password"
-                  autocomplete="current-password"
-                  placeholder="Digite sua senha"
-                />
+                <input v-model="passwordLogin" type="password" autocomplete="current-password"
+                  placeholder="Digite sua senha" />
               </label>
               <button type="submit" class="primary-btn" :disabled="isFormInvalid || isSubmitting">
                 <span v-if="!isSubmitting">Entrar no portal</span>
@@ -123,12 +100,7 @@
             <form class="login-form" @submit.prevent="handlePassword">
               <label>
                 <span>Email</span>
-                <input
-                  v-model="emailLogin"
-                  type="email"
-                  autocomplete="email"
-                  placeholder="aluno@santos-tech.com"
-                />
+                <input v-model="emailLogin" type="email" autocomplete="email" placeholder="aluno@santos-tech.com" />
               </label>
               <button type="submit" class="primary-btn" :disabled="!emailLogin">
                 Enviar orientacoes
@@ -184,12 +156,8 @@
         </div>
 
         <div class="info-grid">
-          <article
-            v-for="feature in featureHighlights"
-            :key="feature.title"
-            class="info-card"
-            :class="{ 'info-card--accent': feature.accent }"
-          >
+          <article v-for="feature in featureHighlights" :key="feature.title" class="info-card"
+            :class="{ 'info-card--accent': feature.accent }">
             <div class="info-card__icon">
               <i :class="feature.icon"></i>
             </div>
@@ -286,6 +254,7 @@ import type { IOAuthProvider } from '~/infra/interfaces/services/auth'
 import type { ICourseAvailable } from '~/infra/interfaces/services/course'
 import { useUserStore } from '~/infra/store/userStore'
 import bgSantosGames from '~/assets/Images-Default/background-default.png'
+import EffectLogin from "~/assets/lottie/EffectLogin.json";
 
 interface LandingFeature {
   icon: string
@@ -300,9 +269,15 @@ interface LandingStat {
   description: string
 }
 
+const showLottieEffect = ref(false);
+function onLottieComplete() {
+  showLottieEffect.value = false;
+}
+
 const {
   public: { apiBaseUrl },
 } = useRuntimeConfig()
+
 const { $httpClient } = useNuxtApp()
 const { loadingPush, loadingPop } = useLoading()
 const toast = useToastService()
@@ -572,7 +547,13 @@ async function loadUserData() {
     emailLogin.value = ''
     passwordLogin.value = ''
 
-    await navigateTo('/dashboard')
+    setTimeout(() => {
+      showLottieEffect.value = true;
+    }, 70);
+
+    setTimeout(async () => {
+      await navigateTo('/dashboard')
+    }, 600)
   } catch (error) {
     const err = error as { error?: string }
 
@@ -640,6 +621,23 @@ definePageMeta({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.lottie-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.lottie-effect-footer {
+  width: min(100vw, 360px);
+  max-width: 100%;
+  height: auto;
 }
 
 .hero-panel__content {
@@ -1312,6 +1310,7 @@ definePageMeta({
 }
 
 @media (max-width: 1024px) {
+
   .info-header,
   .course-showcase__intro {
     flex-direction: column;

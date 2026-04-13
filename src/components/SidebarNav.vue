@@ -17,22 +17,20 @@
             <NuxtLink v-for="item in navItems" :key="item.path" :to="item.path"
                 :class="['nav-link', isActive(item.path) && 'nav-link-active', isActive(item.path) ? 'text-ink-900 scale-107' : 'text-ink-500', item.isActive ? '' : 'pointer-events-none opacity-50']"
                 class="hover:scale-104 transition-transform">
-                <span class="h-2 w-2 rounded-full"
-                    :class="isActive(item.path) ? 'bg-accent-200' : 'bg-slate-300'"></span>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg border"
+                    :class="isActive(item.path) ? 'border-white/50 bg-white/15 text-white' : 'border-slate-200 bg-white text-ink-500'">
+                    <i :class="[item.icon, 'text-sm']"></i>
+                </span>
                 <span class="flex flex-col">
                     <span>{{ item.label }}</span>
-                    <span class="text-xs font-normal text-ink-600">{{ item.note }}</span>
+                    <span class="text-xs font-normal" :class="isActive(item.path) ? 'text-white/85' : 'text-ink-600'">{{
+                        item.note }}</span>
                 </span>
             </NuxtLink>
         </div>
 
         <div class="space-y-2">
-            <button
-                v-if="studentViewReturnUrl"
-                type="button"
-                class="nav-link w-full"
-                @click="returnToAdminPortal"
-            >
+            <button v-if="studentViewReturnUrl" type="button" class="nav-link w-full" @click="returnToAdminPortal">
                 <span class="h-2 w-2 rounded-full bg-brand-400"></span>
                 <span>Voltar ao portal</span>
             </button>
@@ -77,13 +75,15 @@
                 <div v-if="isMobile && showMobileMenu" class="sidebar-mobile-overlay"
                     @click.self="showMobileMenu = false">
                     <div class="sidebar-mobile-menu animate-slideUp" @click.stop>
-                        <button
-                            v-if="studentViewReturnUrl"
+                        <button v-if="studentViewReturnUrl"
                             class="block w-full text-left text-base font-medium text-brand-600"
-                            @click="handleReturnToAdminPortal"
-                        >
+                            @click="handleReturnToAdminPortal">
                             <i class="pi pi-arrow-left text-lg"></i> Voltar ao portal
                         </button>
+                        <NuxtLink to="/metas" class="block text-base font-medium text-black"
+                            @click="showMobileMenu = false">
+                            <i class="pi pi-trophy text-lg"></i> {{ t('navGoals') }}
+                        </NuxtLink>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-cog text-lg"></i> {{ t('navSettings') }}
@@ -133,6 +133,7 @@ const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentVie
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
+    { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/metas', note: t('navGoalsNote'), isActive: true },
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
     { label: t('navMaterial'), short: t('navMaterialShort'), icon: 'pi pi-folder', path: '/materiais', note: t('navMaterialNote'), isActive: true },
