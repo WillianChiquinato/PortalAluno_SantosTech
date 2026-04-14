@@ -12,12 +12,12 @@
 
     <transition name="whatsapp-fade">
         <div v-if="showWhatsapp && !isWhatsappMinimized" class="whatsapp-container-float">
-            <a :href="`https://wa.me/+5511986652872?text=Olá, quero tirar duvidas sobre o portal do aluno!!`"
+            <a :href="whatsAppHref"
                 target="_blank" class="whatsapp-float">
                 <i class="pi pi-whatsapp whatsapp-icon"></i>
             </a>
 
-            <button @click="isWhatsappMinimized = true" class="whatsapp-close-btn" title="Minimizar WhatsApp">
+            <button @click="isWhatsappMinimized = true" class="whatsapp-close-btn" :title="t('appWhatsappMinimize')">
                 <i class="pi pi-times"></i>
             </button>
         </div>
@@ -25,7 +25,7 @@
 
     <transition name="arrow-slide">
         <button v-if="showWhatsapp && isWhatsappMinimized" @click="isWhatsappMinimized = false"
-            class="whatsapp-arrow-btn" title="Abrir WhatsApp">
+            class="whatsapp-arrow-btn" :title="t('appWhatsappOpen')">
             <i class="pi pi-chevron-left"></i>
         </button>
     </transition>
@@ -40,10 +40,15 @@ import { useLoadingConfigurations } from './composables/useLoadingConfigurations
 import { checkAuth, getLoggedUser, verifyToken } from './composables/useAuth';
 import { useUserStore } from './infra/store/userStore';
 import { connectPresence, disconnectPresence } from './composables/usePresence';
+import { useNotifications } from './composables/useNotifications';
+import { usePortalI18n } from './composables/usePortalI18n';
 
 const userConfigs = useUserStore()
+const { t } = usePortalI18n()
 const { isLoading } = useLoading();
 const { loadConfigurations } = useLoadingConfigurations();
+const { refreshNotifications } = useNotifications();
+let notificationsPollInterval: ReturnType<typeof setInterval> | null = null
 const loggedUserEmail = computed(() => {
     return getLoggedUser()?.email ?? ''
 })
@@ -60,6 +65,9 @@ const isWhatsappMinimized = ref(false);
 const showWhatsapp = computed(() => {
     return true;
 });
+const whatsAppHref = computed(() =>
+    `https://wa.me/+5511986652872?text=${encodeURIComponent(t('appWhatsappMessage'))}`,
+)
 
 onMounted(async () => {
     const isAuthenticated = verifyToken() || await checkAuth();
@@ -70,6 +78,13 @@ onMounted(async () => {
 
     await loadConfigurations();
     connectPresence();
+    await refreshNotifications({ toastNew: true });
+
+    if (import.meta.client) {
+        notificationsPollInterval = window.setInterval(() => {
+            void refreshNotifications({ toastNew: true });
+        }, 60000);
+    }
 
     window.addEventListener('beforeunload', disconnectPresence);
 });
@@ -77,6 +92,10 @@ onMounted(async () => {
 onUnmounted(() => {
     if (import.meta.client) {
         window.removeEventListener('beforeunload', disconnectPresence);
+        if (notificationsPollInterval) {
+            window.clearInterval(notificationsPollInterval);
+            notificationsPollInterval = null;
+        }
     }
 });
 

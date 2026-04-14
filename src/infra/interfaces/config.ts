@@ -6,6 +6,7 @@ import type ClassService from "./services/class";
 import type CourseService from "./services/course";
 import type ExerciseService from "./services/exercise";
 import type MaterialService from "./services/material";
+import type NotificationService from "./services/notification";
 import type PhaseService from "./services/phase";
 import type PointService from "./services/point";
 import type UserService from "./services/user";
@@ -15,6 +16,7 @@ export interface IClientHttp {
 	user: UserService;
 	video: VideoService;
 	material: MaterialService;
+	notification: NotificationService;
 	badge: BadgeService;
 	class: ClassService;
 	phase: PhaseService;
