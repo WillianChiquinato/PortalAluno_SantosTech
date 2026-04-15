@@ -1,6 +1,9 @@
 export default defineNuxtConfig({
   srcDir: 'src/',
   modules: ['@pinia/nuxt'],
+  experimental: {
+    appManifest: false,
+  },
   css: ['@/assets/styles.css'],
   runtimeConfig: {
     public: {

@@ -21,10 +21,14 @@
                     :class="isActive(item.path) ? 'border-white/50 bg-white/15 text-white' : 'border-slate-200 bg-white text-ink-500'">
                     <i :class="[item.icon, 'text-sm']"></i>
                 </span>
-                <span class="flex flex-col">
+                <span class="flex min-w-0 flex-1 flex-col">
                     <span>{{ item.label }}</span>
                     <span class="text-xs font-normal" :class="isActive(item.path) ? 'text-white/85' : 'text-ink-600'">{{
                         item.note }}</span>
+                </span>
+                <span v-if="item.badge && item.badge > 0"
+                    class="inline-flex min-w-7 items-center justify-center rounded-full bg-brand-500 px-2 py-1 text-xs font-semibold text-white">
+                    {{ formatBadge(item.badge) }}
                 </span>
             </NuxtLink>
         </div>
@@ -53,7 +57,13 @@
                 class="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200" :class="isActive(item.path)
                     ? 'text-brand-600 scale-105'
                     : 'text-slate-500'">
-                <i :class="[item.icon, 'text-lg']"></i>
+                <span class="relative inline-flex">
+                    <i :class="[item.icon, 'text-lg']"></i>
+                    <span v-if="item.badge && item.badge > 0"
+                        class="absolute -right-3 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        {{ formatBadge(item.badge) }}
+                    </span>
+                </span>
                 <span class="text-[11px] leading-none">
                     {{ item.short }}
                 </span>
@@ -84,6 +94,19 @@
                             @click="showMobileMenu = false">
                             <i class="pi pi-video text-lg"></i> {{ t('navVideos') }}
                         </NuxtLink>
+                        <NuxtLink v-for="item in overflowNavItems" :key="item.path" :to="item.path"
+                            class="flex items-center justify-between gap-3 text-base font-medium text-black"
+                            :class="item.isActive ? '' : 'pointer-events-none opacity-50'"
+                            @click="showMobileMenu = false">
+                            <span class="inline-flex items-center gap-2">
+                                <i :class="[item.icon, 'text-lg']"></i>
+                                {{ item.label }}
+                            </span>
+                            <span v-if="item.badge && item.badge > 0"
+                                class="inline-flex min-w-6 items-center justify-center rounded-full bg-brand-500 px-2 py-1 text-xs font-semibold text-white">
+                                {{ formatBadge(item.badge) }}
+                            </span>
+                        </NuxtLink>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-cog text-lg"></i> {{ t('navSettings') }}
@@ -103,6 +126,7 @@ import { useRoute } from 'nuxt/app'
 import { computed, watchEffect } from 'vue'
 import logoColorida from '@/assets/LogoColorida.png'
 import { getStudentViewReturnUrl, logout as logoutSession, setStudentViewReturnUrl } from '~/composables/useAuth'
+import { useNotifications } from '~/composables/useNotifications'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
@@ -111,6 +135,7 @@ const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
 
 const route = useRoute()
 const { t } = usePortalI18n()
+const { unreadCount } = useNotifications()
 
 const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
@@ -133,6 +158,7 @@ const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentVie
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
+    { label: t('navNotifications'), short: t('navNotificationsShort'), icon: 'pi pi-bell', path: '/notificacoes', note: t('navNotificationsNote'), isActive: true, badge: unreadCount.value },
     { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/metas', note: t('navGoalsNote'), isActive: true },
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
@@ -140,10 +166,20 @@ const navItems = computed(() => [
     { label: t('navVideos'), short: t('navVideosShort'), icon: 'pi pi-video', path: '/videos', note: t('navVideosNote'), isActive: true },
 ])
 
+const overflowNavItems = computed(() => navItems.value.slice(5))
+
 const footerItems = computed(() => [
     { label: t('navSettings'), path: '/configuracoes', type: 'link' },
     { label: t('navLogout'), type: 'action' },
 ] as const)
+
+function formatBadge(value: number) {
+    if (value > 99) {
+        return '99+'
+    }
+
+    return String(value)
+}
 
 const isActive = (path: string) => {
     if (path === '/') {
