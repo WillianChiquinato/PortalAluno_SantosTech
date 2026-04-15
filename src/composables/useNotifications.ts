@@ -68,7 +68,7 @@ export function useNotifications() {
       const unseenItems = items.filter((item) => !seenIds.has(item.id) && !item.isRead)
 
       unseenItems.slice(0, 3).forEach((item) => {
-        toast.info('Nova notificacao', item.title)
+        toast.info('Nova notificação', item.title)
       })
 
       items.forEach((item) => {

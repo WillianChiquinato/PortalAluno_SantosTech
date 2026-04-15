@@ -88,10 +88,10 @@ const messages = {
     notificationsNoResultsTitle: 'Nenhum resultado encontrado.',
     notificationsNoResultsDescription:
       'Tente outro termo ou limpe a busca para ver todas as notificacoes desta aba.',
-    notificationsNoPendingTitle: 'Nenhuma notificacao pendente.',
+    notificationsNoPendingTitle: 'Nenhuma notificação pendente.',
     notificationsNoPendingDescription:
       'Quando houver novos avisos nao lidos, eles aparecerao aqui.',
-    notificationsNoHistoryTitle: 'Nenhuma notificacao no historico.',
+    notificationsNoHistoryTitle: 'Nenhuma notificação no historico.',
     notificationsNoHistoryDescription:
       'As notificacoes lidas ficarao organizadas aqui para consulta.',
     notificationsStatusRead: 'Lida',
@@ -100,7 +100,7 @@ const messages = {
     notificationsClass: 'Turma',
     notificationsMarkAsRead: 'Marcar como lida',
     notificationsLoadErrorTitle: 'Erro ao carregar notificacoes',
-    notificationsUpdateErrorTitle: 'Erro ao atualizar notificacao',
+    notificationsUpdateErrorTitle: 'Erro ao atualizar notificação',
     notificationsInboxUpdateErrorTitle: 'Erro ao atualizar inbox',
     notificationsTryAgain: 'Tente novamente.',
     notificationsInboxUpdatedTitle: 'Inbox atualizada',

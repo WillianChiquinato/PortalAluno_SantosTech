@@ -105,7 +105,7 @@
     <div v-else class="space-y-6 overflow-x-hidden">
         <section class="panel overflow-hidden p-0">
             <div
-                class="relative h-51 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
+                class="relative h-51 bg-linear-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
                 <img :src="profile?.coverPictureUrl !== null && profile?.coverPictureUrl !== '' ? profile?.coverPictureUrl : backgroundDefault"
                     alt="Capa do perfil" class="h-full w-full object-cover brightness-75" />
                 <button type="button" class="preview-btn preview-btn-cover" @click="openImagePreview('cover')">
@@ -133,9 +133,9 @@
                         </div>
 
                         <div class="min-w-0 space-y-1">
-                            <h2 class="max-w-[150px] truncate text-base font-semibold sm:max-w-none sm:text-xl">{{
+                            <h2 class="max-w-37.5 truncate text-base font-semibold sm:max-w-none sm:text-xl">{{
                                 profile?.name ?? 'Nome não disponível' }}</h2>
-                            <p class="max-w-[150px] truncate text-xs text-ink-500 sm:max-w-none sm:text-sm">{{
+                            <p class="max-w-37.5 truncate text-xs text-ink-500 sm:max-w-none sm:text-sm">{{
                                 profile?.class?.name ?? 'Turma não disponível' }} • Nível {{ profile?.levelUser ??
                                     'Nível não disponível' }}</p>
                         </div>
