@@ -40,15 +40,6 @@ export default class CourseService extends ClientService<any> {
     })) as ApiResponse<ICoursePaid[]>
   }
 
-  GetProgressUserPaidCourses = async (
-    options?: FetchOptions,
-  ): Promise<ApiResponse<{ courseId: number; progress: number }[]>> => {
-    return (await this.fetchInstance(`${this.address}/GetProgressUserPaidCourses`, {
-      method: 'GET',
-      ...options,
-    })) as ApiResponse<{ courseId: number; progress: number }[]>
-  }
-
   GetCoursesAvailables = async (
     options?: FetchOptions,
   ): Promise<ApiResponse<ICourseAvailable[]>> => {

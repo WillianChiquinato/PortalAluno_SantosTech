@@ -10,6 +10,7 @@ import ExerciseService from "~/infra/interfaces/services/exercise";
 import MaterialService from "~/infra/interfaces/services/material";
 import PhaseService from "~/infra/interfaces/services/phase";
 import PointService from "~/infra/interfaces/services/point";
+import ProgressService from "~/infra/interfaces/services/progress";
 import UserService from "~/infra/interfaces/services/user";
 import VideoService from "~/infra/interfaces/services/video";
 
@@ -27,6 +28,7 @@ export default defineNuxtPlugin(()=>{
 		exercise: new ExerciseService(),
 		auth: new AuthService(),
 		answers: new AnswersService(),
+		progress: new ProgressService(),
 		AI: new AiService(),
 	};
 

@@ -52,7 +52,8 @@
 </template>
 
 <script setup lang="ts">
-import type { IVideo, IVideoProgress } from '~/infra/interfaces/services/video'
+import type { IVideoProgress } from '~/infra/interfaces/services/progress'
+import type { IVideo } from '~/infra/interfaces/services/video'
 import { useUserStore } from '~/infra/store/userStore'
 
 type YoutubePlayerState = {
@@ -284,7 +285,7 @@ async function fetchVideoData() {
             return
         }
 
-        const progressResponse = await $httpClient.video.GetProgressUserVideos()
+        const progressResponse = await $httpClient.progress.GetProgressUserVideos()
 
         if (progressResponse.success) {
             userProgress.value = progressResponse.result.find((item) => item.videoId === videoId.value) ?? null
@@ -386,7 +387,7 @@ async function saveVideoProgress({ force }: { force: boolean }) {
             lastWatched: new Date().toISOString(),
         }
 
-        const responseProgress = await $httpClient.video.SaveProgressVideo(payloadVideos)
+        const responseProgress = await $httpClient.progress.SaveProgressVideo(payloadVideos)
 
         if (responseProgress.result == null) {
             return

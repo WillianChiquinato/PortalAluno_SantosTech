@@ -189,7 +189,7 @@ async function fetchPaidCourses() {
 
 async function fetchProgressPaidCourses(userId: number) {
     try {
-        const response = await $httpClient.course.GetProgressUserPaidCourses()
+        const response = await $httpClient.progress.GetProgressUserPaidCourses()
 
         if (response.success) {
             coursesProgress.value = response.result.reduce<Record<number, number>>((acc, item) => {

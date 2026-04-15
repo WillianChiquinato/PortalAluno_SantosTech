@@ -18,6 +18,7 @@ export interface IBadge {
 }
 
 export interface IGoalRewardsData {
+  goalRewardId?: number
   goalId: number
   goalName: string
   goalDescription: string
@@ -30,7 +31,11 @@ export interface IGoalRewardsData {
 export interface IActivatedGoalUser {
   id: number
   userId: number
-  goalId: number
+  goalRewardId: number
+  goalName: string
+  goalDescription: string
+  goalType: GoalType
+  rewardType: number
   courseId: number
   progress: number
   isCompleted: boolean
@@ -75,10 +80,10 @@ export default class BadgeService extends ClientService<any> {
   }
 
   UpdateActivatedGoalId = async (
-    goalId: number,
+    goalRewardId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<boolean>> => {
-    let urlParams = `/UpdateActivatedGoalId?goalId=${goalId}`
+    let urlParams = `/UpdateActivatedGoalId?goalRewardId=${goalRewardId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'POST',

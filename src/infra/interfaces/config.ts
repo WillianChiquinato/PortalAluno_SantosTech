@@ -8,6 +8,7 @@ import type ExerciseService from "./services/exercise";
 import type MaterialService from "./services/material";
 import type PhaseService from "./services/phase";
 import type PointService from "./services/point";
+import type ProgressService from "./services/progress";
 import type UserService from "./services/user";
 import type VideoService from "./services/video";
 
@@ -23,5 +24,6 @@ export interface IClientHttp {
 	exercise: ExerciseService;
 	auth: AuthService;
 	answers: AnswersService;
+	progress: ProgressService;
 	AI: AiService;
 }

@@ -48,7 +48,8 @@
 
 <script setup lang="ts">
 import VideoCard from '@/components/VideoCard.vue'
-import type { IVideo, IVideoProgress } from '~/infra/interfaces/services/video';
+import type { IVideoProgress } from '~/infra/interfaces/services/progress';
+import type { IVideo } from '~/infra/interfaces/services/video';
 import { useUserStore } from '~/infra/store/userStore';
 
 const { $httpClient } = useNuxtApp();
@@ -132,11 +133,11 @@ async function fetchAllVideos() {
 
 async function fetchProgressUserVideos(userId: number) {
     try {
-        const response = await $httpClient.video.GetProgressUserVideos();
+        const response = await $httpClient.progress.GetProgressUserVideos();
         if (response.success) {
             progressVideosUser.value = response.result;
             videos.value = videos.value.map(video => {
-                const progress = progressVideosUser.value.find(pv => pv.videoId === video.id);
+                const progress = progressVideosUser.value.find((pv: IVideoProgress) => pv.videoId === video.id);
                 const watchSeconds = Math.max(0, Number(progress?.watchSeconds) || 0);
                 const progressPercentage = progress?.isCompleted
                     ? 100
