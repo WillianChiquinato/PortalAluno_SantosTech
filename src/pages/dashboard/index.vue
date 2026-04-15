@@ -339,8 +339,7 @@
         :current-question-index="currentQuestionIndex" :quiz-result="taskResult" @close="closeTaskQuiz"
         @start-quiz="startExerciseQuiz" @select-answer="selectAnswer($event.questionId, $event.optionId)"
         @update-code-answer="updateCodeAnswer($event.questionId, $event.answer)" @back-to-exercises="backToExercises"
-        @back-to-exercises-and-refresh="backToExercises"
-        @finish-quiz="finishExercise" />
+        @back-to-exercises-and-refresh="backToExercises" @finish-quiz="finishExercise" />
 
     <Transition name="image-viewer-fade">
         <div v-if="showImageViewer" class="image-viewer-overlay" @click.self="closeImagePreview">
@@ -402,18 +401,33 @@
             </div>
         </div>
     </Transition>
+
+    <!-- Floating notification bell -->
+    <button type="button"
+        class="fixed right-6 top-5 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200 text-ink-600 transition-all duration-200 hover:scale-105 hover:border-brand-300 hover:text-brand-600 hover:shadow-brand-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-brand-500/60 dark:hover:text-brand-400"
+        aria-label="Abrir notificações" @click="showNotificationPanel = true">
+        <i class="pi pi-bell text-base"></i>
+        <span v-if="notificationUnreadCount > 0"
+            class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-brand-600 px-1 text-[10px] font-bold text-white dark:border-slate-900">
+            {{ notificationUnreadCount > 99 ? '99+' : notificationUnreadCount }}
+        </span>
+    </button>
+
+    <NotificationPanel v-model:visible="showNotificationPanel" />
 </template>
 
 <script setup lang="ts">
 import BaseLottie from '@/components/BaseLottie.vue'
 import StatCard from '@/components/StatCard.vue'
 import TaskCard from '@/components/TaskCard.vue'
+import NotificationPanel from '@/components/NotificationPanel.vue'
 import warningStatus from '@/assets/lottie/Warning Status.json'
 import TaskList from '~/assets/lottie/TaskList.json'
 import BadgeUnlocked from '~/assets/lottie/Badges.json'
 import Locked from '~/assets/lottie/lockBadge.json'
 
 import { getUserIdFromSession } from '~/composables/useLoadingConfigurations';
+import { useNotifications } from '~/composables/useNotifications'
 import profileDefault from '@/assets/Images-Default/profile-default.png'
 import backgroundDefault from '@/assets/Images-Default/background-default.png'
 import { getLoggedUser } from '~/composables/useAuth'
@@ -436,6 +450,9 @@ import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces
 
 const messageMotivacional = ref('')
 const isDashboardHydrating = ref(true)
+
+const showNotificationPanel = ref(false)
+const { unreadCount: notificationUnreadCount } = useNotifications()
 
 const showUploadCoverAndPicture = ref(false)
 const showImageViewer = ref(false)
@@ -884,7 +901,7 @@ function resolveClassId(): number | null {
     if (profileClassId && profileClassId > 0) {
         return profileClassId
     }
-    
+
     return null
 }
 

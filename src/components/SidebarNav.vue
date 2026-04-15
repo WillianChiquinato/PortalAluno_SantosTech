@@ -26,10 +26,6 @@
                     <span class="text-xs font-normal" :class="isActive(item.path) ? 'text-white/85' : 'text-ink-600'">{{
                         item.note }}</span>
                 </span>
-                <span v-if="item.badge && item.badge > 0"
-                    class="inline-flex min-w-7 items-center justify-center rounded-full bg-brand-500 px-2 py-1 text-xs font-semibold text-white">
-                    {{ formatBadge(item.badge) }}
-                </span>
             </NuxtLink>
         </div>
 
@@ -59,10 +55,6 @@
                     : 'text-slate-500'">
                 <span class="relative inline-flex">
                     <i :class="[item.icon, 'text-lg']"></i>
-                    <span v-if="item.badge && item.badge > 0"
-                        class="absolute -right-3 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                        {{ formatBadge(item.badge) }}
-                    </span>
                 </span>
                 <span class="text-[11px] leading-none">
                     {{ item.short }}
@@ -93,19 +85,6 @@
                         <NuxtLink to="/videos" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-video text-lg"></i> {{ t('navVideos') }}
-                        </NuxtLink>
-                        <NuxtLink v-for="item in overflowNavItems" :key="item.path" :to="item.path"
-                            class="flex items-center justify-between gap-3 text-base font-medium text-black"
-                            :class="item.isActive ? '' : 'pointer-events-none opacity-50'"
-                            @click="showMobileMenu = false">
-                            <span class="inline-flex items-center gap-2">
-                                <i :class="[item.icon, 'text-lg']"></i>
-                                {{ item.label }}
-                            </span>
-                            <span v-if="item.badge && item.badge > 0"
-                                class="inline-flex min-w-6 items-center justify-center rounded-full bg-brand-500 px-2 py-1 text-xs font-semibold text-white">
-                                {{ formatBadge(item.badge) }}
-                            </span>
                         </NuxtLink>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
@@ -158,7 +137,6 @@ const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentVie
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
-    { label: t('navNotifications'), short: t('navNotificationsShort'), icon: 'pi pi-bell', path: '/notificacoes', note: t('navNotificationsNote'), isActive: true, badge: unreadCount.value },
     { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/metas', note: t('navGoalsNote'), isActive: true },
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
