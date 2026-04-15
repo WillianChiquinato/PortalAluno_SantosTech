@@ -8,10 +8,10 @@
 
                 <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Metas do aluno</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Missões do aluno</p>
                         <h2 class="text-2xl font-semibold text-tag-100">Desafios e recompensas</h2>
                         <p class="mt-1 max-w-2xl text-sm text-tag-100/85">
-                            Ao concluir metas, o aluno evolui com pontuacao, desbloqueio de medalhas e progresso
+                            Ao concluir missões, o aluno evolui com pontuacao, desbloqueio de medalhas e progresso
                             visivel.
                         </p>
                     </div>
@@ -27,7 +27,7 @@
                         </div>
                         <div
                             class="rounded-2xl border border-white/30 bg-white/10 p-3 text-tag-100 col-span-2 sm:col-span-1">
-                            <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Metas do curso</p>
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-tag-100/75">Missões do curso</p>
                             <p class="mt-1 text-xl font-semibold">{{ goals.length }}</p>
                         </div>
                     </div>
@@ -40,12 +40,12 @@
                 <button type="button" class="chip cursor-pointer transition"
                     :class="selectedTab === 'all' ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
                     @click="selectedTab = 'all'">
-                    Todas as metas
+                    Todas as missões
                 </button>
                 <button type="button" class="chip cursor-pointer transition"
                     :class="selectedTab === 'active' ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
                     @click="selectedTab = 'active'">
-                    Minhas metas
+                    Minhas missões
                 </button>
             </div>
         </section>
@@ -64,7 +64,9 @@
                             <h3 class="text-lg font-semibold text-ink-900 sm:text-xl">{{ goal.goalName }}</h3>
                             <p class="max-w-2xl text-sm leading-relaxed text-ink-600">{{ goal.goalDescription }}</p>
                         </div>
+                    </div>
 
+                    <div class="flex w-full">
                         <span class="chip shrink-0 !border-amber-200 !bg-amber-50 !text-amber-700">
                             <i class="pi pi-star-fill text-[11px]"></i>
                             {{ goal.points }} pts
@@ -84,7 +86,7 @@
                     <div class="rounded-2xl border border-red-100 bg-red-50/50 p-3 sm:p-4">
                         <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ink-500">
-                                Medalhas da meta
+                                Medalhas da missão
                             </p>
                             <span class="text-xs font-medium text-ink-500">Passe o mouse para ler</span>
                         </div>
@@ -165,12 +167,17 @@
 
                     <div v-if="goal.isCompleted || formatProgress(goal.progress) >= 100"
                         class="mt-auto flex items-center justify-end">
-                        <button type="button"
-                            class="group relative overflow-hidden rounded-xl border border-amber-300 bg-gradient-to-r from-amber-400 to-orange-400 px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:from-amber-500 hover:to-orange-500 hover:shadow-amber-200 active:scale-95 cursor-pointer"
-                            @click="redeemGoal(goal)">
-                            <span class="relative z-10 flex items-center gap-2">
-                                <i class="pi pi-gift text-[13px]"></i>
+                        <button type="button" @click="redeemGoal(goal)"
+                            class="transition hover:scale-105 disabled:opacity-50">
+                            <span v-if="!goal.rewardClaimed"
+                                class="flex items-center gap-2 px-5 py-2 rounded-[1rem] font-semibold text-white bg-gradient-to-r from-emerald-500 to-emerald-400 border border-emerald-400 shadow-md text-sm hover:from-emerald-600 hover:to-emerald-500 active:scale-95 cursor-pointer animate-fade-in">
+                                <i class="pi pi-gift text-[16px] drop-shadow"></i>
                                 Resgatar recompensa
+                            </span>
+                            <span v-else
+                                class="flex items-center gap-2 px-5 py-2 rounded-[1rem] font-semibold text-white bg-gradient-to-r from-amber-400 to-orange-400 border border-amber-300 shadow-md text-sm animate-pulse cursor-pointer animate-fade-in">
+                                <i class="pi pi-gift text-[16px] drop-shadow animate-twinkle"></i>
+                                Recompensa Resgatada
                             </span>
                         </button>
                     </div>
@@ -180,22 +187,23 @@
 
         <section v-if="selectedTab === 'all' && !goals.length"
             class="panel border-slate-200 bg-slate-50/70 p-8 text-center">
-            <p class="text-base font-semibold text-ink-700">Nenhuma meta disponivel</p>
-            <p class="mt-1 text-sm text-ink-500">As metas deste curso aparecerão aqui quando forem criadas no painel
+            <p class="text-base font-semibold text-ink-700">Nenhuma missão disponivel</p>
+            <p class="mt-1 text-sm text-ink-500">As missões deste curso aparecerão aqui quando forem criadas no painel
                 administrativo.</p>
         </section>
 
         <section v-if="selectedTab === 'active' && !activatedGoalsDetailed.length"
             class="panel border-slate-200 bg-slate-50/70 p-8 text-center">
-            <p class="text-base font-semibold text-ink-700">Nenhuma meta ativada</p>
-            <p class="mt-1 text-sm text-ink-500">Ative um desafio na aba "Todas as metas" para acompanhar seu progresso
+            <p class="text-base font-semibold text-ink-700">Nenhuma missão ativada</p>
+            <p class="mt-1 text-sm text-ink-500">Ative um desafio na aba "Todas as missões" para acompanhar seu
+                progresso
                 aqui.</p>
         </section>
     </div>
 
     <Teleport to="body">
         <Transition name="reward-overlay">
-            <div v-if="showRewardAnimation" class="reward-screen" @click.self="showRewardAnimation = false">
+            <div v-if="showRewardAnimation" class="reward-screen" @click.self="ResetPageGoals()">
 
                 <!-- Confetti -->
                 <div class="confetti-wrap" aria-hidden="true">
@@ -221,7 +229,7 @@
                             class="relative z-10 h-12 w-12 sm:h-36 sm:w-36" />
                     </div>
 
-                    <!-- Nome da meta -->
+                    <!-- Nome da missão -->
                     <h2 class="reward-title">{{ redeemedGoalData?.name }}</h2>
 
                     <!-- Pontos ganhos -->
@@ -247,7 +255,7 @@
 
                     <p class="reward-sub">Seus pontos e medalhas foram adicionados ao seu perfil.</p>
 
-                    <button class="reward-close-btn" type="button" @click="showRewardAnimation = false">
+                    <button class="reward-close-btn" type="button" @click="ResetPageGoals()">
                         Continuar explorando
                         <i class="pi pi-arrow-right ml-2 text-[13px]" />
                     </button>
@@ -306,13 +314,13 @@ const activatedGoalsDetailed = computed(() => {
 const goalTypeLabels: Record<GoalType, string> = {
     1: 'Completar Curso',
     2: 'Completar Fase',
-    3: 'Metas por Pontos',
+    3: 'Missões por Pontos',
     4: 'Tempo Investido',
-    5: 'Meta Customizada',
+    5: 'Missão Customizada',
 }
 
 function getGoalTypeLabel(goalType: GoalType): string {
-    return goalTypeLabels[goalType] ?? 'Meta Desconhecida'
+    return goalTypeLabels[goalType] ?? 'Missão Desconhecida'
 }
 
 function isGoalActivated(goalRewardId: number): boolean {
@@ -349,7 +357,21 @@ function confettiStyle(i: number): Record<string, string> {
     }
 }
 
-function redeemGoal(goal: IActivatedGoalUser) {
+async function ResetPageGoals() {
+    await delay(150)
+
+    showRewardAnimation.value = false
+    redeemedGoalData.value = null
+    await fetchGoalData()
+    await fetchActivedGoalsUserData()
+}
+
+async function redeemGoal(goal: IActivatedGoalUser) {
+    if (goal.rewardClaimed) {
+        toast.info('Recompensa ja resgatada', 'Voce ja resgatou a recompensa deste desafio.', 3000)
+        return
+    }
+
     const rewardData = goalsById.value.get(goal.goalRewardId)
     redeemedGoalData.value = {
         name: goal.goalName,
@@ -357,9 +379,24 @@ function redeemGoal(goal: IActivatedGoalUser) {
         badges: rewardData?.badges.length ?? 0,
     }
     showRewardAnimation.value = true
-    setTimeout(() => {
-        showRewardAnimation.value = false
-    }, 7000)
+
+    await redeemGoalReward(goal)
+}
+
+async function redeemGoalReward(goal: IActivatedGoalUser) {
+    try {
+        const response = await $httpClient.badge.GoalRewardOperation(goal.goalRewardId)
+
+        if (!response.success || !response.result) {
+            toast.error('Erro', response.errors?.[0] ?? 'Nao foi possivel resgatar a recompensa do desafio.', 3500)
+            return
+        }
+
+        toast.success('Recompensa resgatada', 'Parabens por concluir o desafio! Sua recompensa foi adicionada ao seu perfil.', 3500)
+    } catch (error) {
+        console.error('Erro ao resgatar recompensa do desafio:', error)
+        toast.error('Erro', 'Nao foi possivel resgatar a recompensa do desafio agora.', 3500)
+    }
 }
 
 async function activateGoal(goal: IGoalRewardsData) {
@@ -407,7 +444,7 @@ async function fetchActivedGoalsUserData() {
             activatedGoalIds.value = response.result.map((item) => item.goalRewardId ?? 0)
 
             setTimeout(() => {
-                toast.success('Metas ativadas', 'As metas foram carregadas com sucesso.', 3000)
+                toast.success('Missões ativadas', 'As missões foram carregadas com sucesso.', 3000)
             }, 600)
 
             for (const activeGoal of response.result) {
@@ -420,8 +457,8 @@ async function fetchActivedGoalsUserData() {
             }
         }
     } catch (error) {
-        console.error('Erro ao carregar metas ativas do usuario:', error)
-        toast.error('Erro', 'Nao foi possivel carregar as metas ativas do aluno.', 4000)
+        console.error('Erro ao carregar missões ativas do usuario:', error)
+        toast.error('Erro', 'Nao foi possivel carregar as missões ativas do aluno.', 4000)
     } finally {
         loadingPop()
     }
@@ -434,7 +471,7 @@ async function fetchGoalData() {
         const userId = getUserIdFromSession()
 
         if (!userId) {
-            toast.error('Sessao invalida', 'Faca login novamente para carregar suas metas.', 3500)
+            toast.error('Sessao invalida', 'Faca login novamente para carregar suas missões.', 3500)
             await navigateTo('/')
             return
         }
@@ -462,12 +499,12 @@ async function fetchGoalData() {
             const goalsResponse = await $httpClient.badge.GetGoalsWithBadgesByCourseId(courseId)
             goals.value = goalsResponse.result ?? []
         } else {
-            console.warn('Nenhum courseId disponivel. Metas nao carregadas.')
+            console.warn('Nenhum courseId disponivel. Missões nao carregadas.')
             goals.value = []
         }
     } catch (error) {
-        console.error('Erro ao carregar dados de metas:', error)
-        toast.error('Erro', 'Nao foi possivel carregar as metas do aluno.', 4000)
+        console.error('Erro ao carregar dados de missões:', error)
+        toast.error('Erro', 'Nao foi possivel carregar as missões do aluno.', 4000)
     } finally {
         loadingPop()
     }
@@ -478,10 +515,10 @@ async function evaluateProgress(GoalRewardId: number, RewardType: number) {
         const response = await $httpClient.progress.EvaluateProgress(GoalRewardId, RewardType)
 
         if (!response.success) {
-            console.warn('Nao foi possivel avaliar o progresso das metas ativas:', response.errors)
+            console.warn('Nao foi possivel avaliar o progresso das missões ativas:', response.errors)
         }
     } catch (error) {
-        console.error('Erro ao avaliar progresso das metas ativas:', error)
+        console.error('Erro ao avaliar progresso das missões ativas:', error)
     }
 }
 
@@ -661,7 +698,7 @@ onMounted(async () => {
     }
 }
 
-/* === Título da meta === */
+/* === Título da missão === */
 .reward-title {
     font-size: 1.25rem;
     font-weight: 700;

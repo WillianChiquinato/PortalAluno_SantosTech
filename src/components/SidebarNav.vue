@@ -137,7 +137,7 @@ const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentVie
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
-    { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/metas', note: t('navGoalsNote'), isActive: true },
+    { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/missoes', note: t('navGoalsNote'), isActive: true },
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
     { label: t('navMaterial'), short: t('navMaterialShort'), icon: 'pi pi-folder', path: '/materiais', note: t('navMaterialNote'), isActive: true },

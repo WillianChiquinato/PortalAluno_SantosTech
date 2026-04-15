@@ -40,6 +40,8 @@ export interface IActivatedGoalUser {
   progress: number
   isCompleted: boolean
   completedAt: string | null
+  rewardClaimed: boolean
+  rewardClaimedAt: string | null
 }
 
 export default class BadgeService extends ClientService<any> {
@@ -87,6 +89,18 @@ export default class BadgeService extends ClientService<any> {
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'POST',
+      ...config,
+    })) as ApiResponse<boolean>
+  }
+
+  GoalRewardOperation = async (
+    goalRewardId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<boolean>> => {
+    let urlParams = `/GoalRewardOperation?goalRewardId=${goalRewardId}`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'PUT',
       ...config,
     })) as ApiResponse<boolean>
   }
