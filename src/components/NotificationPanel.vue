@@ -13,7 +13,7 @@
             enter-to-class="translate-x-0" leave-active-class="transition-transform duration-200 ease-in"
             leave-from-class="translate-x-0" leave-to-class="translate-x-full">
             <div v-if="visible"
-                class="fixed right-0 top-0 z-60 flex h-full w-full flex-col bg-white shadow-2xl sm:w-[440px] dark:bg-black dark:border-l dark:border-slate-800">
+                class="fixed right-0 top-0 z-60 flex h-full w-full flex-col bg-white shadow-2xl sm:w-110 dark:bg-black dark:border-l dark:border-slate-800">
 
                 <!-- Header -->
                 <div
@@ -31,7 +31,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button v-if="hasUnread"
-                            class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-brand-700 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:text-brand-400 dark:hover:bg-slate-900"
+                            class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:text-brand-400 dark:hover:bg-slate-900"
                             :disabled="isLoading" @click="handleMarkAllAsRead">
                             Marcar todas
                         </button>
@@ -139,7 +139,7 @@
                             : 'border-brand-200 bg-brand-50/60 shadow-sm hover:border-brand-300 dark:border-brand-500/40 dark:bg-slate-950 dark:hover:border-brand-400/60'">
 
                         <div class="absolute inset-y-0 left-0 w-1 rounded-r-full"
-                            :class="notification.isRead ? 'bg-slate-200 dark:bg-slate-800' : 'bg-gradient-to-b from-brand-500 to-accent-500'">
+                            :class="notification.isRead ? 'bg-slate-200 dark:bg-slate-800' : 'bg-linear-to-b from-brand-500 to-accent-500'">
                         </div>
 
                         <div class="pl-3">

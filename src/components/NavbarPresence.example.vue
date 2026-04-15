@@ -6,7 +6,7 @@
 <template>
   <header class="navbar">
     <div class="navbar-brand">
-      Portal Willian
+      Portal Aluno
     </div>
 
     <div class="navbar-content">
