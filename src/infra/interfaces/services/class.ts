@@ -5,6 +5,10 @@ import type { ApiResponse } from '~/infra/response/apiResponse'
 export interface IClass {
   id: number
   name: string
+  currentModuleId: number
+  courseId: number
+  startDate: string
+  endDate: string
 }
 
 export interface IClassRoomExercise {
@@ -135,8 +139,11 @@ export default class ClassService extends ClientService<any> {
     })) as ApiResponse<IClassRoom[]>
   }
 
-  GetClassesByUserId = async (config: FetchOptions = {}): Promise<ApiResponse<IClass[]>> => {
-    const urlParams = `/GetClassesByUserId`
+  GetClassByEnrollmentId = async (
+    enrollmentId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IClass[]>> => {
+    const urlParams = `/GetClassByEnrollmentId?enrollmentId=${enrollmentId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

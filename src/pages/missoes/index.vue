@@ -487,7 +487,7 @@ async function fetchGoalData() {
         const [profileResponse, badgeResponse, classResponse] = await Promise.all([
             $httpClient.user.GetProfileData(user.enrollmentId ?? 0),
             $httpClient.badge.GetBadges(),
-            $httpClient.class.GetClassesByUserId(),
+            $httpClient.class.GetClassByEnrollmentId(user.enrollmentId ?? 0),
         ])
 
         if (profileResponse.result) {
@@ -497,11 +497,9 @@ async function fetchGoalData() {
         allBadges.value = badgeResponse.result?.length ?? 0
         let courseId = 0
 
-        classResponse.result?.forEach(c => {
-            if (c.id > 0) {
-                courseId = c.id
-            }
-        })
+        if (classResponse.result) {
+            courseId = classResponse.result.courseId ?? 0
+        }
 
         if (courseId > 0) {
             const goalsResponse = await $httpClient.badge.GetGoalsWithBadgesByCourseId(courseId)
