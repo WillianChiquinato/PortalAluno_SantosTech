@@ -1,5 +1,10 @@
 import { useUserStore } from '~/infra/store/userStore'
 
+type UserSessionData = {
+  userId: number
+  enrollmentId: number | null
+}
+
 function applyThemeFromConfig(enabled: boolean) {
   if (!import.meta.client) {
     return
@@ -9,22 +14,38 @@ function applyThemeFromConfig(enabled: boolean) {
   localStorage.setItem('portal-theme', enabled ? 'dark' : 'light')
 }
 
-export function getUserIdFromSession() {
+export function getUserIdFromSession(): UserSessionData | null {
   const userData = useUserStore()
 
+  const storedEnrollmentId = import.meta.client
+    ? Number(localStorage.getItem('enrollmentId') ?? '0') || null
+    : null
+
   if (userData.userId && userData.userId > 0) {
-    return userData.userId
+    const enrollmentId = userData.enrollmentId ?? storedEnrollmentId
+    if (enrollmentId && userData.enrollmentId !== enrollmentId) {
+      userData.setEnrollmentId(enrollmentId)
+    }
+    return {
+      userId: userData.userId,
+      enrollmentId,
+    }
   }
 
   const loggedUser = getLoggedUser()
-  const recoveredId = Number(loggedUser?.id)
-
-  if (!Number.isFinite(recoveredId) || recoveredId <= 0) {
+  if (!loggedUser) {
     return null
   }
 
-  userData.setUserId(recoveredId)
-  return recoveredId
+  const enrollmentId = loggedUser.enrollmentsId ?? storedEnrollmentId ?? null
+
+  userData.setUserId(loggedUser.id)
+  userData.setEnrollmentId(enrollmentId)
+
+  return {
+    userId: loggedUser.id,
+    enrollmentId,
+  }
 }
 
 export function useLoadingConfigurations() {

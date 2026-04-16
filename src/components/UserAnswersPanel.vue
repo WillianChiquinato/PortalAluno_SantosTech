@@ -2,7 +2,8 @@
     <section class="panel p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ink-500">Area do aluno</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ink-500">Area do aluno (Todos os
+                    Cursos)</p>
                 <h3 class="text-lg font-semibold">{{ title }}</h3>
                 <p class="mt-1 text-sm text-ink-500">Acompanhe o historico de respostas sem sair da tela atual.</p>
             </div>

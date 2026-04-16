@@ -433,18 +433,26 @@ async function activateGoal(goal: IGoalRewardsData) {
     }
 }
 
-async function fetchActivedGoalsUserData() {
+async function fetchActivedGoalsUserData(courseId?: number) {
     loadingPush()
 
     try {
-        const response = await $httpClient.badge.GetActivatedGoalsByUserId()
+        const user = getUserIdFromSession()
+
+        if (!user) {
+            toast.error('Sessao invalida', 'Faca login novamente para carregar suas missões.', 3500)
+            await navigateTo('/')
+            return
+        }
+
+        const response = await $httpClient.badge.GetActivatedGoalsByUserAndCourseId(courseId ?? 0)
 
         if (response.result) {
             activatedGoals.value = response.result
             activatedGoalIds.value = response.result.map((item) => item.goalRewardId ?? 0)
 
             setTimeout(() => {
-                toast.success('Missões ativadas', 'As missões foram carregadas com sucesso.', 3000)
+                toast.success('Missões carregadas', 'As missões foram carregadas com sucesso.', 3000)
             }, 600)
 
             for (const activeGoal of response.result) {
@@ -468,16 +476,16 @@ async function fetchGoalData() {
     loadingPush()
 
     try {
-        const userId = getUserIdFromSession()
+        const user = getUserIdFromSession()
 
-        if (!userId) {
+        if (!user) {
             toast.error('Sessao invalida', 'Faca login novamente para carregar suas missões.', 3500)
             await navigateTo('/')
             return
         }
 
         const [profileResponse, badgeResponse, classResponse] = await Promise.all([
-            $httpClient.user.GetProfileData(userId),
+            $httpClient.user.GetProfileData(user.enrollmentId ?? 0),
             $httpClient.badge.GetBadges(),
             $httpClient.class.GetClassesByUserId(),
         ])
@@ -498,6 +506,8 @@ async function fetchGoalData() {
         if (courseId > 0) {
             const goalsResponse = await $httpClient.badge.GetGoalsWithBadgesByCourseId(courseId)
             goals.value = goalsResponse.result ?? []
+
+            await fetchActivedGoalsUserData(courseId);
         } else {
             console.warn('Nenhum courseId disponivel. Missões nao carregadas.')
             goals.value = []
@@ -524,7 +534,6 @@ async function evaluateProgress(GoalRewardId: number, RewardType: number) {
 
 onMounted(async () => {
     await fetchGoalData();
-    await fetchActivedGoalsUserData();
 })
 </script>
 

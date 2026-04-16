@@ -8,6 +8,7 @@ export interface IAuth {
   email: string
   role: number
   profilePictureUrl: string
+  enrollmentsId?: number
 }
 
 export interface IOAuthProvider {
@@ -51,18 +52,14 @@ export default class AuthService extends ClientService<any> {
     })) as ApiResponse<IAuth>
   }
 
-  GetProviders = async (
-    config: FetchOptions = {},
-  ): Promise<ApiResponse<IOAuthProvider[]>> => {
+  GetProviders = async (config: FetchOptions = {}): Promise<ApiResponse<IOAuthProvider[]>> => {
     return (await this.fetchInstance(`${this.address}/providers`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IOAuthProvider[]>
   }
 
-  GetConfigsByUserId = async (
-    config: FetchOptions = {},
-  ): Promise<ApiResponse<IAuthConfigUser>> => {
+  GetConfigsByUserId = async (config: FetchOptions = {}): Promise<ApiResponse<IAuthConfigUser>> => {
     return (await this.fetchInstance(`${this.address}/GetConfigs`, {
       method: 'GET',
       ...config,

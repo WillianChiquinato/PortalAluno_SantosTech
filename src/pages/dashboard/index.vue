@@ -161,7 +161,8 @@
 
                 <div class="space-y-2">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Medalhas</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Medalhas (De todos os
+                            cursos)</p>
                         <span class="chip shrink-0">{{ unlockedMedals ?? 0 }} desbloqueadas</span>
                     </div>
 
@@ -249,7 +250,8 @@
             <div class="panel p-4 sm:p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Area do aluno</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Area do aluno (Todos os
+                            Cursos)</p>
                         <h3 class="text-lg font-semibold">Respostas do usuario</h3>
                         <p class="mt-1 text-xs text-ink-500">Painel rapido para acompanhar respostas sem sair do
                             dashboard.</p>
@@ -509,7 +511,7 @@ const stats = computed<Array<{
 }>>(() => {
     const allExercises = tasks.value.flatMap(group => group.exercises);
     return [
-        { label: 'Pontuação Total', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
+        { label: 'Pontuação Geral', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
         { label: `Módulo atual - (${currentModule.value?.totalPhases ?? 0} fases)`, value: currentModule.value?.name ?? 'Indisponível', helper: currentModule.value?.description ?? 'Módulo Indisponível', status: 'progress' },
         { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `${tasks.value.length > 0 ? `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}` : 'Aguardando tarefas disponíveis'}`, status: 'warning' },
     ]
@@ -575,16 +577,6 @@ const answeredCount = computed(() => {
     }).length
 })
 const allQuestionsAnswered = computed(() => quizQuestions.value.length > 0 && answeredCount.value === quizQuestions.value.length)
-const hasAnswerForCurrentQuestion = computed(() => {
-    if (!currentQuestion.value) return false
-    const answer = selectedAnswers.value[currentQuestion.value.id]
-    return answer !== null && answer !== undefined
-})
-
-const highlights = [
-    { label: 'Ranking diario', value: '#4', helper: 'Subiu 2 posicoes hoje' },
-    { label: 'Medalhas novas', value: '2', helper: 'CSS Sprint + UI Forge' },
-]
 
 const showAnswersPanel = ref(false)
 const newAnswersCount = ref(0)
@@ -1201,7 +1193,7 @@ async function openGlobalRanking() {
                     name: entry.name?.trim() ? entry.name : `Aluno ${entry.userId}`,
                     totalPoints: entry.totalPoints,
                     avatarUrl: entry.profilePictureUrl?.trim() ? entry.profilePictureUrl : profileDefault,
-                    isCurrentUser: currentUserId === entry.userId,
+                    isCurrentUser: currentUserId?.userId === entry.userId,
                 }
             })
     } catch (error) {
@@ -1324,7 +1316,7 @@ async function fetchRankingUser() {
 
         if (response.result != null) {
             const rankingList = response.result;
-            const positionIndex = rankingList.findIndex(r => r.userId === userId);
+            const positionIndex = rankingList.findIndex(r => r.userId === userId.userId);
 
             if (positionIndex !== -1) {
                 const userPosition = positionIndex + 1;
@@ -1360,15 +1352,15 @@ async function fetchUserProfile() {
     loadingPush();
 
     try {
-        const userId = getUserIdFromSession();
+        const userEnrollment = getUserIdFromSession();
 
-        if (!userId) {
+        if (!userEnrollment) {
             toast.error('Sessão inválida', 'Faça login novamente para carregar seu perfil.', 4000)
             await navigateTo('/')
             return;
         }
 
-        const response = await $httpClient.user.GetProfileData(userId);
+        const response = await $httpClient.user.GetProfileData(userEnrollment.enrollmentId ?? 0);
 
         if (response.result != null) {
             profile.value = response.result;
@@ -1411,15 +1403,15 @@ async function fetchBadgeData() {
 
 async function currentStatsUser() {
     try {
-        const userId = getUserIdFromSession();
+        const user = getUserIdFromSession();
 
-        if (!userId) {
+        if (!user) {
             toast.error('Sessão inválida', 'Faça login novamente para carregar os dados da fase atual.', 4000)
             await navigateTo('/')
             return;
         }
 
-        const response = await $httpClient.phase.GetCurrentModuleUser();
+        const response = await $httpClient.phase.GetCurrentModuleUser(user.enrollmentId ?? 0);
 
         if (response.result != null) {
             currentModule.value = response.result;
@@ -1484,7 +1476,7 @@ async function getAnswersPreview() {
 async function bootstrapDashboard() {
     const userId = getUserIdFromSession();
 
-    if (userId == null || userId <= 0) {
+    if (userId == null) {
         return;
     }
 

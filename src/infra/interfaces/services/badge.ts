@@ -70,10 +70,11 @@ export default class BadgeService extends ClientService<any> {
     })) as ApiResponse<IGoalRewardsData[]>
   }
 
-  GetActivatedGoalsByUserId = async (
+  GetActivatedGoalsByUserAndCourseId = async (
+    courseId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IActivatedGoalUser[]>> => {
-    let urlParams = `/GetActivatedGoalsByUserId`
+    let urlParams = `/GetActivatedGoalsByUserAndCourseId?courseId=${courseId}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

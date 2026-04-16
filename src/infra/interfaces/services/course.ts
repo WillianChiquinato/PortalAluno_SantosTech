@@ -28,6 +28,18 @@ export interface ICourseAvailable {
   updatedAt: string
 }
 
+export interface IUserCourse {
+  id: number
+  className: string
+  classStartedAt: string
+  classFinishedAt: string
+  courseName: string
+  courseDescription: string
+  courseDuration: number
+  courseLevel: string
+  createdAt: string
+}
+
 export default class CourseService extends ClientService<any> {
   constructor() {
     super('Course', 'api/Course')
@@ -47,5 +59,12 @@ export default class CourseService extends ClientService<any> {
       method: 'GET',
       ...options,
     })) as ApiResponse<ICourseAvailable[]>
+  }
+
+  GetUserCourses = async (options?: FetchOptions): Promise<ApiResponse<IUserCourse[]>> => {
+    return (await this.fetchInstance(`${this.address}/GetUserCourses`, {
+      method: 'GET',
+      ...options,
+    })) as ApiResponse<IUserCourse[]>
   }
 }

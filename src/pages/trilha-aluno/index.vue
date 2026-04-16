@@ -785,22 +785,6 @@ function resetQuizState() {
     taskResult.value = null
 }
 
-function getUserIdFromSession(): number | null {
-    if (userData.userId && userData.userId > 0) {
-        return userData.userId
-    }
-
-    const loggedUser = getLoggedUser()
-    const recoveredUserId = Number(loggedUser?.id)
-
-    if (!Number.isFinite(recoveredUserId) || recoveredUserId <= 0) {
-        return null
-    }
-
-    userData.setUserId(recoveredUserId)
-    return recoveredUserId
-}
-
 async function startExerciseQuiz(task: ExerciseCardTask) {
     if (task.isCompletedAnswer) {
         return
@@ -1182,13 +1166,15 @@ async function fetchIslandByUserAndCurrentModule() {
     loadingPush();
 
     try {
-        const userId = getUserIdFromSession()
+        const user = getUserIdFromSession();
 
-        if (!userId) {
-            return
+        if (!user) {
+            toast.error('Sessão inválida', 'Faça login novamente para carregar os dados da fase atual.', 4000)
+            await navigateTo('/')
+            return;
         }
 
-        const responsePhase = await $httpClient.phase.GetCurrentModuleUser();
+        const responsePhase = await $httpClient.phase.GetCurrentModuleUser(user.enrollmentId ?? 0);
 
         if (responsePhase.result != null) {
             await fetchCurrentModuleIslands(responsePhase.result.id);

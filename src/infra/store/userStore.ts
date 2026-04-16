@@ -5,6 +5,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     userId: null as number | null,
     userEmail: null as string | null,
+    enrollmentId: null as number | null,
     configurationsLoaded: false,
     darkModeEnabled: false,
     receiveEmailNotifications: false,
@@ -16,6 +17,7 @@ export const useUserStore = defineStore('user', {
   getters: {
     getUserId: (state) => state.userId,
     getUserEmail: (state) => state.userEmail,
+    getEnrollmentId: (state) => state.enrollmentId,
     getConfigurationsLoaded: (state) => state.configurationsLoaded,
     getDarkModeEnabled: (state) => state.darkModeEnabled,
     getReceiveEmailNotifications: (state) => state.receiveEmailNotifications,
@@ -27,6 +29,11 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUserId(id: number | null) {
       this.userId = id
+    },
+    setEnrollmentId(id: number | null) {
+      this.enrollmentId = id
+      if (id !== null) localStorage.setItem('enrollmentId', String(id))
+      else localStorage.removeItem('enrollmentId')
     },
     setUserEmail(email: string | null) {
       this.userEmail = email
@@ -52,6 +59,8 @@ export const useUserStore = defineStore('user', {
     clearUserId() {
       this.userId = null
       this.userEmail = null
+      this.enrollmentId = null
+      localStorage.removeItem('enrollmentId')
       this.configurationsLoaded = false
     },
   },

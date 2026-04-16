@@ -519,7 +519,7 @@ async function loadUserData() {
     }, 70);
 
     setTimeout(async () => {
-      await navigateTo('/dashboard')
+      await navigateTo('/user-courses')
     }, 600)
   } catch (error) {
     const err = error as { error?: string }

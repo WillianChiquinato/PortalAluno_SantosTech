@@ -71,10 +71,10 @@ export default class UserService extends ClientService<any> {
   }
 
   GetProfileData = async (
-    userId: number,
+    enrollmentId: number,
     config: FetchOptions = {},
   ): Promise<ApiResponse<IUserProfileData>> => {
-    return (await this.fetchInstance(`${this.address}/GetProfileData?userid=${userId}`, {
+    return (await this.fetchInstance(`${this.address}/GetProfileData?enrollmentId=${enrollmentId}`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IUserProfileData>
