@@ -630,16 +630,23 @@ function mapAnswerToPanelItem(answer: IAnswerByUser, exerciseTitle: string): Use
     }
 }
 
-function toggleAnswersPanel() {
+async function toggleAnswersPanel() {
     showAnswersPanel.value = !showAnswersPanel.value
 
     // Quando o usuario abre o painel, consideramos que visualizou novas respostas.
     if (showAnswersPanel.value) {
         newAnswersCount.value = 0
+        await UpdateLastSeenAnswers();
     }
 }
 
-const unlockedMedals = computed(() => badgeSlots.value.filter((badge) => badge.unlocked).length);
+async function UpdateLastSeenAnswers() {
+    try {
+        await $httpClient.user.UpdateLastSeen();
+    } catch (error) {
+        console.error('Erro ao atualizar última visualização de respostas:', error)
+    }
+}
 
 function getTaskStatus(termAt: string): string {
     const dueDate = new Date(termAt)

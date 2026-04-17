@@ -15,6 +15,11 @@ export interface IUser {
   updatedAt: Date
 }
 
+export interface IUserLastSeen {
+  id: number
+  lastSeenAt: Date
+}
+
 export interface IUpdateUserProfileRequest {
   // [SEC] id and role removed — backend extracts userId from JWT token
   name: string
@@ -90,6 +95,16 @@ export default class UserService extends ClientService<any> {
       ...config,
     })) as ApiResponse<IUpdateUserProfileRequest>
   }
+
+  UpdateLastSeen = async (
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IUserLastSeen>> => {
+    return (await this.fetchInstance(`${this.address}/UpdateLastSeen`, {
+      method: 'PATCH',
+      ...config,
+    })) as ApiResponse<IUserLastSeen>
+  }
+
 
   SendEmailVerify = async (
     email: string,
