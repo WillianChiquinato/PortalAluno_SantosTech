@@ -181,10 +181,84 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Nota por exercícios (Todos os cursos)</p>
+                        <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} categorias</span>
+                    </div>
+
+                    <div v-if="exerciseCategoryGrades.length === 0"
+                        class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-xs text-ink-500">
+                        Nenhuma categoria de exercício respondida ainda.
+                    </div>
+
+                    <div v-else class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                        <div v-for="cat in exerciseCategoryGrades" :key="cat.categoryName"
+                            class="relative flex flex-col items-center gap-2 rounded-xl border p-3 text-center transition-shadow hover:shadow-md"
+                            :class="{
+                                'border-emerald-200 bg-emerald-50': cat.categoryNotice === 'A',
+                                'border-green-200 bg-green-50': cat.categoryNotice === 'B',
+                                'border-yellow-200 bg-yellow-50': cat.categoryNotice === 'C',
+                                'border-orange-200 bg-orange-50': cat.categoryNotice === 'D',
+                                'border-red-200 bg-red-50': cat.categoryNotice === 'F',
+                            }">
+                            <div class="flex w-full flex-col items-center gap-2"
+                                :class="{ 'blur-[2px] opacity-65': isCategoryInProgress(cat) }">
+                                <span
+                                    class="flex h-16 w-16 items-center justify-center rounded-full border text-3xl font-black leading-none"
+                                    :class="{
+                                        'border-emerald-500 text-emerald-600': cat.categoryNotice === 'A',
+                                        'border-green-500 text-green-600': cat.categoryNotice === 'B',
+                                        'border-yellow-500 text-yellow-700': cat.categoryNotice === 'C',
+                                        'border-orange-500 text-orange-600': cat.categoryNotice === 'D',
+                                        'border-red-500 text-red-600': cat.categoryNotice === 'F',
+                                    }">{{ cat.categoryNotice }}</span>
+
+                                <p class="w-full truncate text-xs font-semibold text-ink-800">{{ cat.categoryName }}</p>
+
+                                <div class="w-full rounded-full bg-slate-200 h-1.5 overflow-hidden">
+                                    <div class="h-1.5 rounded-full transition-all duration-500" :class="{
+                                        'bg-emerald-500': cat.categoryNotice === 'A',
+                                        'bg-green-500': cat.categoryNotice === 'B',
+                                        'bg-yellow-400': cat.categoryNotice === 'C',
+                                        'bg-orange-400': cat.categoryNotice === 'D',
+                                        'bg-red-500': cat.categoryNotice === 'F',
+                                    }"
+                                        :style="{ width: cat.totalAnswered > 0 ? `${Math.round((cat.totalCorrect / cat.totalAnswered) * 100)}%` : '0%' }">
+                                    </div>
+                                </div>
+
+                                <p class="text-[10px] text-ink-500">
+                                    {{ cat.totalCorrect }}/{{ cat.totalAnswered }} acertos
+                                </p>
+
+                                <span
+                                    class="rounded-full border border-slate-300 px-2 py-0.5 text-[10px] font-semibold text-ink-600">
+                                    {{ resolveCategoryStatus(cat) }}
+                                </span>
+
+                                <p class="text-[10px] text-ink-500">
+                                    Ultima resposta:
+                                    {{ hasInvalidDate(cat.lastUpdatedAnswerAt) ? 'Sem registro' :
+                                        formatDate(cat.lastUpdatedAnswerAt, 'pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                                    }}
+                                </p>
+                            </div>
+
+                            <div v-if="isCategoryInProgress(cat)"
+                                class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 px-3 backdrop-blur-[1px]">
+                                <p class="text-center text-[11px] font-semibold leading-snug text-amber-800">
+                                    Alcance 10 respostas nessa categoria para desbloquear.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
+        <section class=" grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
             <div class="space-y-1">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex items-center">
@@ -210,7 +284,8 @@
                 </div>
                 <div v-else class="panel p-5">
                     <p class="text-sm font-semibold">Nenhuma tarefa diária disponível.</p>
-                    <p class="text-xs text-ink-500 mt-1">Quando novas atividades forem liberadas, elas aparecerão aqui.
+                    <p class="text-xs text-ink-500 mt-1">Quando novas atividades forem liberadas, elas
+                        aparecerão aqui.
                     </p>
                 </div>
             </div>
@@ -444,7 +519,7 @@ import ExercisesCard from '~/components/ExercisesCard.vue'
 import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersPanel.vue'
 
 import { isEmailValid } from '#imports'
-import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask } from '~/infra/interfaces/services/exercise'
+import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask, IExerciseCategoryGrade } from '~/infra/interfaces/services/exercise'
 import type { IPointAwardResult } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
@@ -578,6 +653,8 @@ const answeredCount = computed(() => {
 })
 const allQuestionsAnswered = computed(() => quizQuestions.value.length > 0 && answeredCount.value === quizQuestions.value.length)
 
+const exerciseCategoryGrades = ref<IExerciseCategoryGrade[]>([])
+
 const showAnswersPanel = ref(false)
 const newAnswersCount = ref(0)
 const userAnswersPreview = ref<IAnswersByUserIdResponse | null>(null)
@@ -628,6 +705,28 @@ function mapAnswerToPanelItem(answer: IAnswerByUser, exerciseTitle: string): Use
         status: mapAnswerStatus(answer.isCorrect),
         answeredAt: answer.answeredAt,
     }
+}
+
+function resolveCategoryStatus(category: IExerciseCategoryGrade): string {
+    const rawStatus = (category.status ?? '').trim().toLowerCase()
+
+    if (rawStatus === 'em progresso' || rawStatus === 'em_progresso' || rawStatus === 'inprogress') {
+        return 'Em progresso'
+    }
+
+    if (rawStatus === 'desbloqueado') {
+        return 'Desbloqueado'
+    }
+
+    if (rawStatus === 'nao iniciado' || rawStatus === 'não iniciado' || rawStatus === 'nao_iniciado' || rawStatus === 'not started') {
+        return 'Não Iniciado'
+    }
+
+    return category.totalAnswered > 0 ? 'Desbloqueado' : 'Não Iniciado'
+}
+
+function isCategoryInProgress(category: IExerciseCategoryGrade): boolean {
+    return resolveCategoryStatus(category) === 'Em progresso'
 }
 
 async function toggleAnswersPanel() {
@@ -1467,6 +1566,17 @@ async function getAImotivacionalMessage() {
     }
 }
 
+async function fetchExerciseCategoryGrades() {
+    try {
+        const response = await $httpClient.exercise.GetExercisesAnsweredCategorieByUser();
+        if (response.result != null) {
+            exerciseCategoryGrades.value = response.result;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar notas por categoria:', error)
+    }
+}
+
 async function getAnswersPreview() {
     try {
         const response = await $httpClient.answers.GetAnswersByUserId();
@@ -1495,6 +1605,7 @@ async function bootstrapDashboard() {
         fetchClassRoomSpotlight(),
         currentModule.value?.id ? randomDailyTasks() : Promise.resolve(),
         getAImotivacionalMessage(),
+        fetchExerciseCategoryGrades(),
         answersPreviewPromise,
     ]);
 

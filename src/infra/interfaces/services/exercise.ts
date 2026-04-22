@@ -92,6 +92,15 @@ export interface DailyTaskGroupView {
   highlightLabel?: string
 }
 
+export interface IExerciseCategoryGrade {
+  categoryName: string
+  totalAnswered: number
+  totalCorrect: number
+  categoryNotice: string
+  lastUpdatedAnswerAt: string
+  status?: string
+}
+
 export interface ExerciseVerifyAnswerResponse {
   existingAnswers: boolean
 }
@@ -146,5 +155,14 @@ export default class ExerciseService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<ExerciseVerifyAnswerResponse>
+  }
+
+  GetExercisesAnsweredCategorieByUser = async (
+    options?: FetchOptions,
+  ): Promise<ApiResponse<IExerciseCategoryGrade[]>> => {
+    return (await this.fetchInstance(`${this.address}/GetExercisesAnsweredCategorieByUser`, {
+      method: 'GET',
+      ...options,
+    })) as ApiResponse<IExerciseCategoryGrade[]>
   }
 }
