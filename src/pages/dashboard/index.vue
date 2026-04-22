@@ -184,7 +184,8 @@
 
                 <div class="space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Nota por exercícios (Todos os cursos)</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Nota por exercícios
+                            (Todos os cursos)</p>
                         <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} categorias</span>
                     </div>
 
@@ -241,7 +242,10 @@
                                 <p class="text-[10px] text-ink-500">
                                     Ultima resposta:
                                     {{ hasInvalidDate(cat.lastUpdatedAnswerAt) ? 'Sem registro' :
-                                        formatDate(cat.lastUpdatedAnswerAt, 'pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                                        formatDate(cat.lastUpdatedAnswerAt, 'pt-BR', {
+                                            dateStyle: 'short', timeStyle:
+                                                'short'
+                                        })
                                     }}
                                 </p>
                             </div>
@@ -254,6 +258,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <RankingAvailable @click="openAvailableRanking" />
                 </div>
             </div>
         </section>
@@ -315,7 +321,7 @@
                     <p class="text-sm font-semibold">Ranking Global</p>
                     <p class="text-xs text-ink-500">Clique abaixo para ver o ranking completo.</p>
                     <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto cursor-pointer"
-                        @click="openGlobalRanking">Ver
+                        @click="openRanking">Ver
                         Ranking</button>
                 </div>
             </div>
@@ -439,8 +445,8 @@
             <div class="global-ranking-content">
                 <div class="global-ranking-header">
                     <div>
-                        <p class="global-ranking-title">Ranking Global de Alunos</p>
-                        <p class="global-ranking-subtitle">Pontuação geral da plataforma.</p>
+                        <p class="global-ranking-title">Ranking Global por Pontos</p>
+                        <p class="global-ranking-subtitle">Compare sua pontuação com o topo e a média da plataforma.</p>
                     </div>
 
                     <button type="button" class="image-viewer-close" @click="closeGlobalRanking"
@@ -450,6 +456,15 @@
                 </div>
 
                 <div class="global-ranking-body">
+                    <div v-if="!isGlobalRankingLoading && currentUserRankingEntry" class="global-ranking-compare">
+                        <div v-for="card in pointRankingComparisonCards" :key="card.label"
+                            class="global-ranking-compare-card">
+                            <p class="global-ranking-compare-label">{{ card.label }}</p>
+                            <p class="global-ranking-compare-value">{{ card.value }}</p>
+                            <p class="global-ranking-compare-helper">{{ card.helper }}</p>
+                        </div>
+                    </div>
+
                     <p v-if="isGlobalRankingLoading" class="text-sm text-ink-500">Carregando ranking...</p>
 
                     <p v-else-if="globalRanking.length === 0" class="text-sm text-ink-500">
@@ -474,6 +489,116 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </Transition>
+
+    <Transition name="image-viewer-fade">
+        <div v-if="showGradeRanking" class="grade-ranking-overlay" @click.self="closeGradeRanking">
+            <div class="grade-ranking-content">
+                <div class="grade-ranking-header">
+                    <div>
+                        <p class="grade-ranking-title">Ranking por Nota</p>
+                        <p class="grade-ranking-subtitle">
+                            Desempenho por categoria
+                            <template v-if="!isGradeRankingLoading"> · <strong>{{ categoryRankings.length }}</strong> {{
+                                categoryRankings.length === 1 ? 'categoria' : 'categorias' }}</template>
+                        </p>
+                    </div>
+
+                    <button type="button" class="grade-ranking-close" @click="closeGradeRanking"
+                        aria-label="Fechar ranking por nota">
+                        <i class="pi pi-times"></i>
+                    </button>
+                </div>
+
+                <div class="grade-ranking-body">
+                    <!-- loading -->
+                    <div v-if="isGradeRankingLoading" class="grade-ranking-loading">
+                        <i class="pi pi-spinner pi-spin"></i>
+                        Carregando ranking por nota...
+                    </div>
+
+                    <template v-else-if="categoryRankings.length > 0">
+                        <!-- summary cards -->
+                        <div v-if="currentUserCategorySummary" class="grade-ranking-summary">
+                            <article class="grade-ranking-summary-card grade-ranking-summary-card--best">
+                                <p class="grade-ranking-summary-label">Melhor categoria</p>
+                                <p class="grade-ranking-summary-value">{{
+                                    currentUserCategorySummary.bestCategory.category }}</p>
+                                <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.bestCategory.percent
+                                }}% · #{{ currentUserCategorySummary.bestCategory.position }}º lugar</p>
+                            </article>
+
+                            <article class="grade-ranking-summary-card">
+                                <p class="grade-ranking-summary-label">Média geral</p>
+                                <p class="grade-ranking-summary-value">{{ currentUserCategorySummary.avgPercent }}%</p>
+                                <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.categoriesCount }} {{
+                                    currentUserCategorySummary.categoriesCount === 1 ? 'categoria respondida' :
+                                        'categorias respondidas' }}</p>
+                            </article>
+
+                            <article class="grade-ranking-summary-card">
+                                <p class="grade-ranking-summary-label">Top 1 em</p>
+                                <p class="grade-ranking-summary-value">{{ currentUserCategorySummary.topOneCount }}</p>
+                                <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.topOneCount === 1 ?
+                                    'categoria' : 'categorias' }} lideradas</p>
+                            </article>
+                        </div>
+
+                        <!-- category tabs -->
+                        <div class="grade-ranking-tabs" role="tablist">
+                            <button v-for="cat in categoryRankings" :key="cat.category" type="button" role="tab"
+                                class="grade-ranking-tab"
+                                :class="{ 'grade-ranking-tab--active': selectedGradeCategory === cat.category }"
+                                :aria-selected="selectedGradeCategory === cat.category"
+                                @click="selectedGradeCategory = cat.category">
+                                {{ cat.category }}
+                                <span class="grade-ranking-tab-badge">{{ cat.rankings.length }}</span>
+                            </button>
+                        </div>
+
+                        <!-- ranked list for selected category -->
+                        <div v-if="activeCategoryRankingList.length > 0" class="grade-ranking-list">
+                            <div v-for="(entry, index) in activeCategoryRankingList"
+                                :key="`grade-${selectedGradeCategory}-${entry.userId}`" class="grade-ranking-row"
+                                :class="{
+                                    'grade-ranking-row-highlight': currentUserCategorySummary?.userId === entry.userId,
+                                    'grade-ranking-row-first': index === 0,
+                                }">
+                                <div class="grade-ranking-position">
+                                    <span v-if="index === 0" class="grade-ranking-medal">🥇</span>
+                                    <span v-else-if="index === 1" class="grade-ranking-medal">🥈</span>
+                                    <span v-else-if="index === 2" class="grade-ranking-medal">🥉</span>
+                                    <span v-else class="grade-ranking-position-num">{{ index + 1 }}º</span>
+                                </div>
+
+                                <img :src="entry.profilePictureUrl?.trim() || profileDefault"
+                                    :alt="`Avatar de ${entry.name}`" class="grade-ranking-avatar" />
+
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-semibold text-slate-900">{{ entry.name }}</p>
+                                    <p class="text-[11px] text-slate-500">
+                                        {{ entry.totalAnswers }} {{ entry.totalAnswers === 1 ? 'resposta' : 'respostas'
+                                        }}
+                                    </p>
+                                </div>
+
+                                <div class="grade-ranking-score-block">
+                                    <p class="grade-ranking-score">{{ Math.round(entry.percentAvailable) }}%</p>
+                                    <div class="grade-ranking-bar-track">
+                                        <div class="grade-ranking-bar-fill"
+                                            :style="{ width: `${Math.min(entry.percentAvailable, 100)}%` }"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p v-else class="grade-ranking-empty">Nenhum aluno nesta categoria ainda.</p>
+                    </template>
+
+                    <p v-else class="grade-ranking-empty">Nenhuma categoria encontrada no ranking por nota.</p>
                 </div>
             </div>
         </div>
@@ -520,10 +645,11 @@ import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersP
 
 import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask, IExerciseCategoryGrade } from '~/infra/interfaces/services/exercise'
-import type { IPointAwardResult } from '~/infra/interfaces/services/point'
+import type { IPointAwardResult, IPointCategoryRanking } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
+import RankingAvailable from '~/components/RankingAvailable.vue'
 
 const messageMotivacional = ref('')
 const isDashboardHydrating = ref(true)
@@ -555,11 +681,14 @@ const userData = useUserStore()
 const profile = ref<IUserProfileData | undefined>();
 const userBadges = ref<IBadge[] | undefined>();
 const badgeSlots = ref<(IBadge & { unlocked: boolean })[]>([]);
+const unlockedMedals = computed(() => badgeSlots.value.filter((badge) => badge.unlocked).length)
 
 const currentModule = ref<ICurrentModuleUser | null>(null);
 const ranking = ref<{ position: number; points: number; pointsToNext: number } | null>(null);
 const showGlobalRanking = ref(false)
+const showGradeRanking = ref(false)
 const isGlobalRankingLoading = ref(false)
+const isGradeRankingLoading = ref(false)
 const globalRanking = ref<Array<{
     position: number
     userId: number
@@ -568,6 +697,86 @@ const globalRanking = ref<Array<{
     avatarUrl: string
     isCurrentUser: boolean
 }>>([])
+const categoryRankings = ref<IPointCategoryRanking[]>([])
+const selectedGradeCategory = ref<string>('')
+
+const activeCategoryRanking = computed(() =>
+    categoryRankings.value.find((c) => c.category === selectedGradeCategory.value) ?? null
+)
+const activeCategoryRankingList = computed(() => {
+    if (!activeCategoryRanking.value) return []
+    return [...activeCategoryRanking.value.rankings].sort((a, b) => b.percentAvailable - a.percentAvailable)
+})
+const currentUserCategorySummary = computed(() => {
+    const userId = getUserIdFromSession()?.userId
+    if (!userId || !categoryRankings.value.length) return null
+
+    const participated: Array<{ category: string; percent: number; totalAnswers: number; position: number }> = []
+
+    for (const cat of categoryRankings.value) {
+        const sorted = [...cat.rankings].sort((a, b) => b.percentAvailable - a.percentAvailable)
+        const idx = sorted.findIndex((r) => r.userId === userId)
+        if (idx === -1) continue
+        participated.push({
+            category: cat.category,
+            percent: Math.round(sorted[idx].percentAvailable),
+            totalAnswers: sorted[idx].totalAnswers,
+            position: idx + 1,
+        })
+    }
+
+    if (!participated.length) return null
+
+    const avgPercent = Math.round(participated.reduce((s, c) => s + c.percent, 0) / participated.length)
+    const bestCategory = participated.reduce((best, c) => (c.percent > best.percent ? c : best))
+    const topOneCount = participated.filter((c) => c.position === 1).length
+
+    return { userId, avgPercent, bestCategory, categoriesCount: participated.length, topOneCount }
+})
+
+const currentUserRankingEntry = computed(() => {
+    return globalRanking.value.find((entry) => entry.isCurrentUser) ?? null
+})
+const topRankingEntry = computed(() => {
+    return globalRanking.value.length > 0 ? globalRanking.value[0] : null
+})
+const averageRankingPoints = computed(() => {
+    if (!globalRanking.value.length) {
+        return 0
+    }
+
+    const totalPoints = globalRanking.value.reduce((sum, entry) => sum + entry.totalPoints, 0)
+    return Math.round(totalPoints / globalRanking.value.length)
+})
+const pointRankingComparisonCards = computed<Array<{ label: string; value: string; helper: string }>>(() => {
+    const currentUser = currentUserRankingEntry.value
+    const topUser = topRankingEntry.value
+
+    if (!currentUser || !topUser) {
+        return []
+    }
+
+    const distanceToTop = Math.max(topUser.totalPoints - currentUser.totalPoints, 0)
+    const averageDelta = currentUser.totalPoints - averageRankingPoints.value
+
+    return [
+        {
+            label: 'Sua pontuação',
+            value: `${currentUser.totalPoints} pts`,
+            helper: `Posição atual: #${currentUser.position}`,
+        },
+        {
+            label: 'Distância para o Top 1',
+            value: `${distanceToTop} pts`,
+            helper: distanceToTop === 0 ? 'Você está liderando o ranking.' : `Faltam ${distanceToTop} pts para assumir a liderança.`,
+        },
+        {
+            label: 'Comparação com a média',
+            value: `${averageDelta >= 0 ? '+' : ''}${averageDelta} pts`,
+            helper: `Média global: ${averageRankingPoints.value} pts`,
+        },
+    ]
+})
 const rankingMessage = computed(() => {
     if (!ranking.value) return 'Ranking indisponível';
 
@@ -1279,7 +1488,11 @@ function closeGlobalRanking() {
     showGlobalRanking.value = false
 }
 
-async function openGlobalRanking() {
+function closeGradeRanking() {
+    showGradeRanking.value = false
+}
+
+async function openRanking() {
     showGlobalRanking.value = true
     isGlobalRankingLoading.value = true
 
@@ -1308,6 +1521,29 @@ async function openGlobalRanking() {
         toast.error('Erro', 'Não foi possível carregar o ranking global. Tente novamente mais tarde.', 4000)
     } finally {
         isGlobalRankingLoading.value = false
+    }
+}
+
+async function openAvailableRanking() {
+    showGradeRanking.value = true
+    isGradeRankingLoading.value = true
+
+    try {
+        const rankingResponse = await $httpClient.point.GetAvailableRankingPerCategory()
+        categoryRankings.value = rankingResponse.result ?? []
+        console.log("Result: ", categoryRankings.value);
+
+
+        if (categoryRankings.value.length > 0) {
+            selectedGradeCategory.value = categoryRankings.value[0].category
+        }
+        isGradeRankingLoading.value = false
+    } catch (error) {
+        console.error('Erro ao carregar ranking por nota:', error)
+        categoryRankings.value = []
+        toast.error('Erro', 'Não foi possível carregar o ranking por nota. Tente novamente mais tarde.', 4000)
+    } finally {
+        isGradeRankingLoading.value = false
     }
 }
 
@@ -1421,7 +1657,9 @@ async function fetchRankingUser() {
         const response = await $httpClient.point.GetRanking();
 
         if (response.result != null) {
-            const rankingList = response.result;
+            const rankingList = response.result
+                .slice()
+                .sort((a, b) => b.totalPoints - a.totalPoints)
             const positionIndex = rankingList.findIndex(r => r.userId === userId.userId);
 
             if (positionIndex !== -1) {
@@ -1766,6 +2004,303 @@ onBeforeUnmount(() => {
     max-height: calc(100vh - 10rem);
 }
 
+.global-ranking-compare {
+    display: grid;
+    gap: 0.65rem;
+    margin-bottom: 0.95rem;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+}
+
+.global-ranking-compare-card {
+    border: 1px solid #fecdd3;
+    background: linear-gradient(160deg, #fff7f9 0%, #fff 85%);
+    border-radius: 0.8rem;
+    padding: 0.7rem;
+}
+
+.global-ranking-compare-label {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9f1239;
+}
+
+.global-ranking-compare-value {
+    margin: 0.2rem 0 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #be123c;
+}
+
+.global-ranking-compare-helper {
+    margin: 0.2rem 0 0;
+    font-size: 0.7rem;
+    line-height: 1.3;
+    color: #64748b;
+}
+
+.grade-ranking-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.82));
+    backdrop-filter: blur(5px);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 1250;
+}
+
+.grade-ranking-content {
+    width: min(760px, 100%);
+    max-height: calc(100vh - 2rem);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 24px 54px rgba(15, 23, 42, 0.38);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.grade-ranking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid #cbd5e1;
+    background: linear-gradient(115deg, #e0f2fe 0%, #dbeafe 45%, #e2e8f0 100%);
+}
+
+.grade-ranking-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.grade-ranking-subtitle {
+    margin-top: 0.12rem;
+    font-size: 0.86rem;
+    color: #475569;
+}
+
+.grade-ranking-close {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 1px solid #94a3b8;
+    background: rgba(255, 255, 255, 0.84);
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.grade-ranking-body {
+    padding: 0.95rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 10rem);
+}
+
+.grade-ranking-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+    justify-content: center;
+    font-size: 0.88rem;
+    color: #64748b;
+}
+
+.grade-ranking-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.grade-ranking-summary-card {
+    border: 1px solid #bfdbfe;
+    border-radius: 0.85rem;
+    padding: 0.72rem 0.85rem;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.grade-ranking-summary-card--best {
+    border-color: #6366f1;
+    background: linear-gradient(145deg, #eef2ff, #e0e7ff);
+}
+
+.grade-ranking-summary-label {
+    margin: 0;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #3b82f6;
+}
+
+.grade-ranking-summary-value {
+    margin: 0.2rem 0 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grade-ranking-summary-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+.grade-ranking-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+}
+
+.grade-ranking-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.grade-ranking-tab:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.grade-ranking-tab--active {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.grade-ranking-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    background: #bfdbfe;
+    color: #1d4ed8;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0 0.25rem;
+}
+
+.grade-ranking-tab--active .grade-ranking-tab-badge {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.grade-ranking-list {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.grade-ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.8rem;
+    padding: 0.55rem 0.7rem;
+    background: rgba(248, 250, 252, 0.9);
+    transition: border-color 0.15s ease;
+}
+
+.grade-ranking-row-first {
+    border-color: #fbbf24;
+    background: linear-gradient(95deg, #fffbeb, #fef9c3);
+}
+
+.grade-ranking-row-highlight {
+    border-color: #60a5fa;
+    background: linear-gradient(90deg, rgba(191, 219, 254, 0.55), rgba(224, 242, 254, 0.55));
+}
+
+.grade-ranking-position {
+    min-width: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grade-ranking-medal {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.grade-ranking-position-num {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1e3a8a;
+}
+
+.grade-ranking-avatar {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    border: 1px solid #93c5fd;
+    object-fit: cover;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.grade-ranking-score-block {
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 3.5rem;
+}
+
+.grade-ranking-score {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #1e40af;
+    line-height: 1;
+}
+
+.grade-ranking-bar-track {
+    margin-top: 0.25rem;
+    height: 3px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    overflow: hidden;
+}
+
+.grade-ranking-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #60a5fa, #6366f1);
+    transition: width 0.4s ease;
+}
+
+.grade-ranking-empty {
+    padding: 1.25rem 0;
+    text-align: center;
+    font-size: 0.88rem;
+    color: #94a3b8;
+}
+
 .global-ranking-row {
     display: flex;
     align-items: center;
@@ -1882,12 +2417,39 @@ onBeforeUnmount(() => {
     }
 }
 
+@keyframes ranking-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 10px 24px rgba(244, 63, 94, 0.22);
+    }
+
+    50% {
+        box-shadow: 0 14px 30px rgba(244, 63, 94, 0.34);
+    }
+}
+
+@keyframes ranking-shine {
+    0% {
+        transform: translateX(-170%) rotate(24deg);
+    }
+
+    100% {
+        transform: translateX(330%) rotate(24deg);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .dashboard-skeleton-block {
         animation: none;
     }
 
     .medal-idle {
+        animation: none;
+    }
+
+    .ranking-cta,
+    .ranking-cta__shine {
         animation: none;
     }
 }

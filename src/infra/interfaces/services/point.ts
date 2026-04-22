@@ -9,6 +9,19 @@ export interface IPointRanking {
   profilePictureUrl?: string | null
 }
 
+export interface IPointCategoryRanking {
+  category: string
+  rankings: IRankingCategory[]
+}
+
+export interface IRankingCategory {
+  userId: number
+  name: string
+  profilePictureUrl?: string | null
+  percentAvailable: number
+  totalAnswers: number
+}
+
 export interface IAddPointsForUser {
   exerciseId: number
 }
@@ -29,6 +42,15 @@ export default class PointService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<IPointRanking[]>
+  }
+
+  GetAvailableRankingPerCategory = async (
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IPointCategoryRanking[]>> => {
+    return (await this.fetchInstance(`${this.address}/GetAvailableRankingPerCategory`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IPointCategoryRanking[]>
   }
 
   AddPointsForUser = async (
