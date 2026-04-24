@@ -107,15 +107,15 @@
             <div
                 class="relative h-51 bg-linear-to-r from-brand-600 via-brand-500 to-accent-500 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
                 <img :src="profile?.coverPictureUrl !== null && profile?.coverPictureUrl !== '' ? profile?.coverPictureUrl : backgroundDefault"
-                    alt="Capa do perfil" class="h-full w-full object-cover brightness-75" />
+                    :alt="t('dashboardProfileCoverAlt')" class="h-full w-full object-cover brightness-75" />
                 <button type="button" class="preview-btn preview-btn-cover" @click="openImagePreview('cover')">
                     <i class="pi pi-images"></i>
-                    <span>Ver capa</span>
+                    <span>{{ t('dashboardViewCover') }}</span>
                 </button>
                 <div class="absolute -bottom-6 right-8 h-20 w-20 rounded-full bg-white/20 blur-2xl"></div>
                 <div
                     class="absolute left-4 top-3 z-10 box-border border-2 border-white/30 bg-loading/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-loading/90 backdrop-blur-sm sm:left-8 sm:top-4 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
-                    Perfil do aluno
+                    {{ t('dashboardStudentProfile') }}
                 </div>
             </div>
 
@@ -127,33 +127,32 @@
                             <img :src="profile?.profilePictureUrl !== null && profile?.profilePictureUrl !== '' ? profile?.profilePictureUrl : profileDefault"
                                 class="relative h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow-md sm:h-25 sm:w-25" />
                             <button type="button" class="preview-btn preview-btn-profile"
-                                @click="openImagePreview('profile')" aria-label="Abrir foto de perfil">
+                                @click="openImagePreview('profile')" :aria-label="t('dashboardOpenProfilePhoto')">
                                 <i class="pi pi-search"></i>
                             </button>
                         </div>
 
                         <div class="min-w-0 space-y-1">
                             <h2 class="max-w-37.5 truncate text-base font-semibold sm:max-w-none sm:text-xl">{{
-                                profile?.name ?? 'Nome não disponível' }}</h2>
+                                profile?.name ?? t('dashboardNameUnavailable') }}</h2>
                             <p class="max-w-37.5 truncate text-xs text-ink-500 sm:max-w-none sm:text-sm">{{
-                                profile?.class?.name ?? 'Turma não disponível' }} • Nível {{ profile?.levelUser ??
-                                    'Nível não disponível' }}</p>
+                                profile?.class?.name ?? t('dashboardClassUnavailable') }} • {{ t('dashboardLevelLabel')
+                                }} {{ profile?.levelUser ??
+                                    t('dashboardLevelUnavailable') }}</p>
                         </div>
                     </div>
 
                     <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
                         <button
                             class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
-                            @click="openUploadCoverAndPicture">Editar
-                            Fotos</button>
+                            @click="openUploadCoverAndPicture">{{ t('dashboardEditPhotos') }}</button>
                         <button
                             class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
-                            @click="openEditAttributes">Editar
-                            Perfil</button>
+                            @click="openEditAttributes">{{ t('dashboardEditProfile') }}</button>
                     </div>
                 </div>
 
-                <p class="text-xs text-ink-700 sm:text-sm">{{ profile?.bio ?? 'Bio não disponível' }}</p>
+                <p class="text-xs text-ink-700 sm:text-sm">{{ profile?.bio ?? t('dashboardBioUnavailable') }}</p>
 
                 <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     <StatCard v-for="stat in stats" :key="stat.label" v-bind="stat" />
@@ -161,9 +160,9 @@
 
                 <div class="space-y-2">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Medalhas (De todos os
-                            cursos)</p>
-                        <span class="chip shrink-0">{{ unlockedMedals ?? 0 }} desbloqueadas</span>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
+                            t('dashboardBadgesAllCourses') }}</p>
+                        <span class="chip shrink-0">{{ unlockedMedals ?? 0 }} {{ t('dashboardUnlockedLabel') }}</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -184,14 +183,15 @@
 
                 <div class="space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Nota por exercícios
-                            (Todos os cursos)</p>
-                        <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} categorias</span>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
+                            t('dashboardExerciseGradesAllCourses') }}</p>
+                        <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} {{ t('dashboardCategoriesLabel')
+                            }}</span>
                     </div>
 
                     <div v-if="exerciseCategoryGrades.length === 0"
                         class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-xs text-ink-500">
-                        Nenhuma categoria de exercício respondida ainda.
+                        {{ t('dashboardNoExerciseCategoryYet') }}
                     </div>
 
                     <div v-else class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -231,7 +231,8 @@
                                 </div>
 
                                 <p class="text-[10px] text-ink-500">
-                                    {{ cat.totalCorrect }}/{{ cat.totalAnswered }} acertos
+                                    {{ cat.totalCorrect }}/{{ cat.totalAnswered }} {{ t('dashboardCorrectAnswersLabel')
+                                    }}
                                 </p>
 
                                 <span
@@ -240,8 +241,8 @@
                                 </span>
 
                                 <p class="text-[10px] text-ink-500">
-                                    Ultima resposta:
-                                    {{ hasInvalidDate(cat.lastUpdatedAnswerAt) ? 'Sem registro' :
+                                    {{ t('dashboardLastAnswerLabel') }}:
+                                    {{ hasInvalidDate(cat.lastUpdatedAnswerAt) ? t('dashboardNoRecord') :
                                         formatDate(cat.lastUpdatedAnswerAt, 'pt-BR', {
                                             dateStyle: 'short', timeStyle:
                                                 'short'
@@ -253,13 +254,14 @@
                             <div v-if="isCategoryInProgress(cat)"
                                 class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 px-3 backdrop-blur-[1px]">
                                 <p class="text-center text-[11px] font-semibold leading-snug text-amber-800">
-                                    Alcance 10 respostas nessa categoria para desbloquear.
+                                    {{ t('dashboardCategoryUnlockHint') }}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <RankingAvailable @click="openAvailableRanking" />
+                    <RankingAvailable :disabled="!canOpenGradeRanking"
+                        :disabled-reason="t('dashboardRankingUnavailableReason')" @click="openAvailableRanking" />
                 </div>
             </div>
         </section>
@@ -269,7 +271,7 @@
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex items-center">
                         <h3 class="text-lg font-semibold leading-none sm:text-xl">
-                            Tarefas diarias
+                            {{ t('dashboardDailyTasksTitle') }}
                         </h3>
 
                         <div class="h-14 w-14 sm:h-20 sm:w-20">
@@ -279,7 +281,7 @@
                     </div>
 
                     <span class="chip self-start sm:self-center">
-                        {{ dailyTasksCards.length }} pendentes
+                        {{ dailyTasksCards.length }} {{ t('dashboardPendingLabel') }}
                     </span>
                 </div>
                 <div v-if="dailyTasksCards.length" class="space-y-3">
@@ -289,9 +291,8 @@
                         @select="openDailyTask(task)" />
                 </div>
                 <div v-else class="panel p-5">
-                    <p class="text-sm font-semibold">Nenhuma tarefa diária disponível.</p>
-                    <p class="text-xs text-ink-500 mt-1">Quando novas atividades forem liberadas, elas
-                        aparecerão aqui.
+                    <p class="text-sm font-semibold">{{ t('dashboardNoDailyTasksTitle') }}</p>
+                    <p class="text-xs text-ink-500 mt-1">{{ t('dashboardNoDailyTasksDescription') }}
                     </p>
                 </div>
             </div>
@@ -306,9 +307,9 @@
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold">Resumo rapido</h3>
+                            <h3 class="text-lg font-semibold">{{ t('dashboardQuickSummaryTitle') }}</h3>
                             <p class="text-xs text-ink-500">
-                                Seu ritmo sempre avançando...
+                                {{ t('dashboardQuickSummaryDescription') }}
                             </p>
                         </div>
                     </div>
@@ -318,11 +319,10 @@
                     <p>{{ messageMotivacional }}</p>
                 </div>
                 <div class="panel mt-2 flex flex-col gap-2 bg-red-50 p-4">
-                    <p class="text-sm font-semibold">Ranking Global</p>
-                    <p class="text-xs text-ink-500">Clique abaixo para ver o ranking completo.</p>
+                    <p class="text-sm font-semibold">{{ t('dashboardGlobalRankingTitle') }}</p>
+                    <p class="text-xs text-ink-500">{{ t('dashboardGlobalRankingDescription') }}</p>
                     <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto cursor-pointer"
-                        @click="openRanking">Ver
-                        Ranking</button>
+                        @click="openRanking">{{ t('dashboardViewRanking') }}</button>
                 </div>
             </div>
         </section>
@@ -331,16 +331,15 @@
             <div class="panel p-4 sm:p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Area do aluno (Todos os
-                            Cursos)</p>
-                        <h3 class="text-lg font-semibold">Respostas do usuario</h3>
-                        <p class="mt-1 text-xs text-ink-500">Painel rapido para acompanhar respostas sem sair do
-                            dashboard.</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
+                            t('dashboardStudentAreaAllCourses') }}</p>
+                        <h3 class="text-lg font-semibold">{{ t('dashboardUserAnswersTitle') }}</h3>
+                        <p class="mt-1 text-xs text-ink-500">{{ t('dashboardUserAnswersDescription') }}</p>
                     </div>
 
                     <button type="button" class="relative btn-primary h-10 px-4 text-xs text-ink-900 cursor-pointer"
                         @click="toggleAnswersPanel">
-                        {{ showAnswersPanel ? 'Fechar respostas' : 'Abrir respostas' }}
+                        {{ showAnswersPanel ? t('dashboardCloseAnswers') : t('dashboardOpenAnswers') }}
                         <span v-if="newAnswersCount > 0"
                             class="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full border border-white bg-brand-600 px-1 text-[10px] font-semibold text-white">
                             {{ newAnswersCount }}
@@ -349,7 +348,7 @@
                 </div>
 
                 <p v-if="newAnswersCount > 0" class="mt-3 text-xs font-semibold text-brand-600">
-                    Voce possui {{ newAnswersCount }} resposta(s) nova(s).
+                    {{ t('dashboardYouHavePrefix') }} {{ newAnswersCount }} {{ t('dashboardNewAnswersSuffix') }}
                 </p>
             </div>
 
@@ -357,38 +356,43 @@
                 enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0"
                 leave-active-class="duration-200 ease-in transition-all" leave-from-class="opacity-100 translate-y-0"
                 leave-to-class="opacity-0 -translate-y-2">
-                <UserAnswersPanel v-if="showAnswersPanel" title="Respostas do usuario"
+                <UserAnswersPanel v-if="showAnswersPanel" :title="t('dashboardUserAnswersTitle')"
                     :answers="userAnswersPanelItems" />
             </Transition>
         </section>
     </div>
 
     <NewUploadCover @back="closeUploadCoverAndPicture" @save="saveCoverAndProfile"
-        v-model:visible="showUploadCoverAndPicture" :name="'Editar fotos do perfil'" accept="image/*" />
+        v-model:visible="showUploadCoverAndPicture" :name="t('dashboardEditProfilePhotosModal')" accept="image/*" />
 
-    <CreatedEditModal :name="'Editar atributos do perfil'" @back="closeEditAttributes" @save="UpdateUserProfile"
-        v-model:visible="showEditAttributes">
-        <p class="text-sm text-ink-500">Atualize as informações básicas do seu perfil.</p>
+    <CreatedEditModal :name="t('dashboardEditProfileAttributesModal')" @back="closeEditAttributes"
+        @save="UpdateUserProfile" v-model:visible="showEditAttributes">
+        <p class="text-sm text-ink-500">{{ t('dashboardUpdateBasicInfo') }}</p>
 
         <div class="space-y-3">
             <div class="panel border-red-100/80 p-3">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Nome</label>
-                <input v-model="profile!.name" type="text" class="input w-full" placeholder="Digite seu nome" />
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
+                    t('dashboardNameLabel') }}</label>
+                <input v-model="profile!.name" type="text" class="input w-full"
+                    :placeholder="t('dashboardTypeYourName')" />
 
             </div>
 
             <div class="panel border-red-100/80 p-3">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Email</label>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
+                    t('dashboardEmailLabel') }}</label>
                 <input v-model="profile!.email" type="email" class="input w-full"
                     :class="isEmailValid(profile!.email) ? 'border-green-500' : 'border-red-500'"
-                    placeholder="Digite seu email" />
-                <p v-if="!isEmailValid(profile!.email)" class="text-xs text-red-500">Email inválido</p>
+                    :placeholder="t('dashboardTypeYourEmail')" />
+                <p v-if="!isEmailValid(profile!.email)" class="text-xs text-red-500">{{ t('dashboardInvalidEmail') }}
+                </p>
             </div>
 
             <div class="panel border-red-100/80 p-3">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Senha</label>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
+                    t('dashboardPasswordLabel') }}</label>
                 <input v-model="editPassword" :type="showPassword ? 'text' : 'password'" class="input w-full"
-                    placeholder="Digite uma nova senha (opcional)" />
+                    :placeholder="t('dashboardTypeNewPasswordOptional')" />
 
                 <button type="button"
                     class="absolute right-4 top-8 text-ink-500 text-xl hover:text-ink-700 hover:scale-110"
@@ -398,19 +402,20 @@
             </div>
 
             <div class="panel border-red-100/80 p-3">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">Bio</label>
-                <textarea v-model="profile!.bio" class="input w-full" placeholder="Fale um pouco sobre você"
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
+                    t('dashboardBioLabel') }}</label>
+                <textarea v-model="profile!.bio" class="input w-full" :placeholder="t('dashboardBioPlaceholder')"
                     rows="4"></textarea>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1">
                 <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                     @click="closeEditAttributes">
-                    Voltar
+                    {{ t('dashboardBack') }}
                 </button>
                 <button type="button" class="text-ink-900 btn-primary h-9 px-4 text-xs cursor-pointer"
                     @click="UpdateUserProfile" :disabled="!isEmailValid(profile!.email)">
-                    Salvar alterações
+                    {{ t('dashboardSaveChanges') }}
                 </button>
             </div>
         </div>
@@ -430,7 +435,7 @@
                 <div class="image-viewer-header">
                     <p class="image-viewer-title">{{ imageViewerTitle }}</p>
                     <button type="button" class="image-viewer-close" @click="closeImagePreview"
-                        aria-label="Fechar visualizador de imagem">
+                        :aria-label="t('dashboardCloseImageViewer')">
                         <i class="pi pi-times"></i>
                     </button>
                 </div>
@@ -445,12 +450,12 @@
             <div class="global-ranking-content">
                 <div class="global-ranking-header">
                     <div>
-                        <p class="global-ranking-title">Ranking Global por Pontos</p>
-                        <p class="global-ranking-subtitle">Compare sua pontuação com o topo e a média da plataforma.</p>
+                        <p class="global-ranking-title">{{ t('dashboardGlobalRankingTitle') }}</p>
+                        <p class="global-ranking-subtitle">{{ t('dashboardGlobalRankingSubtitle') }}</p>
                     </div>
 
                     <button type="button" class="image-viewer-close" @click="closeGlobalRanking"
-                        aria-label="Fechar ranking global">
+                        :aria-label="t('dashboardCloseGlobalRanking')">
                         <i class="pi pi-times"></i>
                     </button>
                 </div>
@@ -465,10 +470,10 @@
                         </div>
                     </div>
 
-                    <p v-if="isGlobalRankingLoading" class="text-sm text-ink-500">Carregando ranking...</p>
+                    <p v-if="isGlobalRankingLoading" class="text-sm text-ink-500">{{ t('dashboardLoadingRanking') }}</p>
 
                     <p v-else-if="globalRanking.length === 0" class="text-sm text-ink-500">
-                        Nenhum aluno encontrado no ranking.
+                        {{ t('dashboardNoStudentsInRanking') }}
                     </p>
 
                     <div v-else class="space-y-2">
@@ -481,7 +486,7 @@
 
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-semibold text-ink-900">{{ entry.name }}</p>
-                                <p class="text-xs text-ink-500">Aluno</p>
+                                <p class="text-xs text-ink-500">{{ t('dashboardStudentLabel') }}</p>
                             </div>
 
                             <div class="text-right">
@@ -499,16 +504,17 @@
             <div class="grade-ranking-content">
                 <div class="grade-ranking-header">
                     <div>
-                        <p class="grade-ranking-title">Ranking por Nota</p>
+                        <p class="grade-ranking-title">{{ t('dashboardRankingByGradeTitle') }}</p>
                         <p class="grade-ranking-subtitle">
-                            Desempenho por categoria
+                            {{ t('dashboardPerformanceByCategory') }}
                             <template v-if="!isGradeRankingLoading"> · <strong>{{ categoryRankings.length }}</strong> {{
-                                categoryRankings.length === 1 ? 'categoria' : 'categorias' }}</template>
+                                categoryRankings.length === 1 ? t('dashboardCategorySingular') :
+                                    t('dashboardCategoryPlural') }}</template>
                         </p>
                     </div>
 
                     <button type="button" class="grade-ranking-close" @click="closeGradeRanking"
-                        aria-label="Fechar ranking por nota">
+                        :aria-label="t('dashboardCloseRankingByGrade')">
                         <i class="pi pi-times"></i>
                     </button>
                 </div>
@@ -517,33 +523,36 @@
                     <!-- loading -->
                     <div v-if="isGradeRankingLoading" class="grade-ranking-loading">
                         <i class="pi pi-spinner pi-spin"></i>
-                        Carregando ranking por nota...
+                        {{ t('dashboardLoadingRankingByGrade') }}
                     </div>
 
                     <template v-else-if="categoryRankings.length > 0">
                         <!-- summary cards -->
                         <div v-if="currentUserCategorySummary" class="grade-ranking-summary">
                             <article class="grade-ranking-summary-card grade-ranking-summary-card--best">
-                                <p class="grade-ranking-summary-label">Melhor categoria</p>
+                                <p class="grade-ranking-summary-label">{{ t('dashboardBestCategory') }}</p>
                                 <p class="grade-ranking-summary-value">{{
                                     currentUserCategorySummary.bestCategory.category }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.bestCategory.percent
-                                }}% · #{{ currentUserCategorySummary.bestCategory.position }}º lugar</p>
+                                    }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
+                                    t('dashboardPlace') }}</p>
                             </article>
 
                             <article class="grade-ranking-summary-card">
-                                <p class="grade-ranking-summary-label">Média geral</p>
+                                <p class="grade-ranking-summary-label">{{ t('dashboardOverallAverage') }}</p>
                                 <p class="grade-ranking-summary-value">{{ currentUserCategorySummary.avgPercent }}%</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.categoriesCount }} {{
-                                    currentUserCategorySummary.categoriesCount === 1 ? 'categoria respondida' :
-                                        'categorias respondidas' }}</p>
+                                    currentUserCategorySummary.categoriesCount === 1 ?
+                                        t('dashboardAnsweredCategorySingular') :
+                                        t('dashboardAnsweredCategoryPlural') }}</p>
                             </article>
 
                             <article class="grade-ranking-summary-card">
-                                <p class="grade-ranking-summary-label">Top 1 em</p>
+                                <p class="grade-ranking-summary-label">{{ t('dashboardTopOneIn') }}</p>
                                 <p class="grade-ranking-summary-value">{{ currentUserCategorySummary.topOneCount }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.topOneCount === 1 ?
-                                    'categoria' : 'categorias' }} lideradas</p>
+                                    t('dashboardCategorySingular') : t('dashboardCategoryPlural') }} {{
+                                    t('dashboardLedLabel') }}</p>
                             </article>
                         </div>
 
@@ -559,18 +568,34 @@
                             </button>
                         </div>
 
+                        <div class="grade-ranking-prize-note">
+                            <p>
+                                {{ t('dashboardOnlyUnlockedCompetePrefix') }} <strong>{{ t('dashboardUnlockedStatus')
+                                    }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
+                            </p>
+                            <p>
+                                {{ t('dashboardParticipatingInCategory') }}: <strong>{{ eligibleEntriesCount }}</strong>
+                                {{ t('notificationsOutOf') }} {{
+                                    activeCategoryRankingList.length }}
+                            </p>
+                        </div>
+
                         <!-- ranked list for selected category -->
                         <div v-if="activeCategoryRankingList.length > 0" class="grade-ranking-list">
                             <div v-for="(entry, index) in activeCategoryRankingList"
                                 :key="`grade-${selectedGradeCategory}-${entry.userId}`" class="grade-ranking-row"
                                 :class="{
                                     'grade-ranking-row-highlight': currentUserCategorySummary?.userId === entry.userId,
-                                    'grade-ranking-row-first': index === 0,
+                                    'grade-ranking-row-first': index === 0 && isRankingEntryEligible(entry),
+                                    'grade-ranking-row-ineligible': !isRankingEntryEligible(entry),
                                 }">
                                 <div class="grade-ranking-position">
-                                    <span v-if="index === 0" class="grade-ranking-medal">🥇</span>
-                                    <span v-else-if="index === 1" class="grade-ranking-medal">🥈</span>
-                                    <span v-else-if="index === 2" class="grade-ranking-medal">🥉</span>
+                                    <span v-if="isRankingEntryEligible(entry) && index === 0"
+                                        class="grade-ranking-medal">🥇</span>
+                                    <span v-else-if="isRankingEntryEligible(entry) && index === 1"
+                                        class="grade-ranking-medal">🥈</span>
+                                    <span v-else-if="isRankingEntryEligible(entry) && index === 2"
+                                        class="grade-ranking-medal">🥉</span>
                                     <span v-else class="grade-ranking-position-num">{{ index + 1 }}º</span>
                                 </div>
 
@@ -580,8 +605,16 @@
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate text-sm font-semibold text-slate-900">{{ entry.name }}</p>
                                     <p class="text-[11px] text-slate-500">
-                                        {{ entry.totalAnswers }} {{ entry.totalAnswers === 1 ? 'resposta' : 'respostas'
+                                        {{ entry.totalAnswers }} {{ entry.totalAnswers === 1 ?
+                                            t('dashboardAnswerSingular') : t('dashboardAnswerPlural')
                                         }}
+                                    </p>
+                                    <span class="grade-ranking-status"
+                                        :class="isRankingEntryEligible(entry) ? 'grade-ranking-status--eligible' : 'grade-ranking-status--inprogress'">
+                                        {{ resolveRankingStatus(entry.status) }}
+                                    </span>
+                                    <p v-if="!isRankingEntryEligible(entry)" class="grade-ranking-helper">
+                                        {{ t('dashboardNotEligibleForPrizeYet') }}
                                     </p>
                                 </div>
 
@@ -595,10 +628,10 @@
                             </div>
                         </div>
 
-                        <p v-else class="grade-ranking-empty">Nenhum aluno nesta categoria ainda.</p>
+                        <p v-else class="grade-ranking-empty">{{ t('dashboardNoStudentsInCategoryYet') }}</p>
                     </template>
 
-                    <p v-else class="grade-ranking-empty">Nenhuma categoria encontrada no ranking por nota.</p>
+                    <p v-else class="grade-ranking-empty">{{ t('dashboardNoCategoryFoundRankingByGrade') }}</p>
                 </div>
             </div>
         </div>
@@ -607,7 +640,7 @@
     <!-- Floating notification bell -->
     <button type="button"
         class="fixed right-6 top-5 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg border border-slate-200 text-ink-600 transition-all duration-200 hover:scale-105 hover:border-brand-300 hover:text-brand-600 hover:shadow-brand-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-brand-500/60 dark:hover:text-brand-400"
-        aria-label="Abrir notificações" @click="showNotificationPanel = true">
+        :aria-label="t('dashboardOpenNotifications')" @click="showNotificationPanel = true">
         <i class="pi pi-bell text-base"></i>
         <span v-if="notificationUnreadCount > 0"
             class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-brand-600 px-1 text-[10px] font-bold text-white dark:border-slate-900">
@@ -645,14 +678,16 @@ import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersP
 
 import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask, IExerciseCategoryGrade } from '~/infra/interfaces/services/exercise'
-import type { IPointAwardResult, IPointCategoryRanking } from '~/infra/interfaces/services/point'
+import type { IPointAwardResult, IPointCategoryRanking, IRankingCategory } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
 import RankingAvailable from '~/components/RankingAvailable.vue'
+import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const messageMotivacional = ref('')
 const isDashboardHydrating = ref(true)
+const { t, locale } = usePortalI18n()
 
 const showNotificationPanel = ref(false)
 const { unreadCount: notificationUnreadCount } = useNotifications()
@@ -660,7 +695,7 @@ const { unreadCount: notificationUnreadCount } = useNotifications()
 const showUploadCoverAndPicture = ref(false)
 const showImageViewer = ref(false)
 const imageViewerSrc = ref('')
-const imageViewerTitle = ref('Visualizar imagem')
+const imageViewerTitle = ref('')
 
 //Password.
 const showPassword = ref(false)
@@ -705,7 +740,19 @@ const activeCategoryRanking = computed(() =>
 )
 const activeCategoryRankingList = computed(() => {
     if (!activeCategoryRanking.value) return []
-    return [...activeCategoryRanking.value.rankings].sort((a, b) => b.percentAvailable - a.percentAvailable)
+    return [...activeCategoryRanking.value.rankings].sort((a, b) => {
+        const aIsEligible = isRankingEntryEligible(a)
+        const bIsEligible = isRankingEntryEligible(b)
+
+        if (aIsEligible !== bIsEligible) {
+            return aIsEligible ? -1 : 1
+        }
+
+        return b.percentAvailable - a.percentAvailable
+    })
+})
+const eligibleEntriesCount = computed(() => {
+    return activeCategoryRankingList.value.filter((entry) => isRankingEntryEligible(entry)).length
 })
 const currentUserCategorySummary = computed(() => {
     const userId = getUserIdFromSession()?.userId
@@ -715,12 +762,15 @@ const currentUserCategorySummary = computed(() => {
 
     for (const cat of categoryRankings.value) {
         const sorted = [...cat.rankings].sort((a, b) => b.percentAvailable - a.percentAvailable)
-        const idx = sorted.findIndex((r) => r.userId === userId)
+        const eligibleRankings = sorted.filter((rankingEntry) => isRankingEntryEligible(rankingEntry))
+        const idx = eligibleRankings.findIndex((r) => r.userId === userId)
         if (idx === -1) continue
+
+        const userRankingEntry = eligibleRankings[idx]
         participated.push({
             category: cat.category,
-            percent: Math.round(sorted[idx].percentAvailable),
-            totalAnswers: sorted[idx].totalAnswers,
+            percent: Math.round(userRankingEntry.percentAvailable),
+            totalAnswers: userRankingEntry.totalAnswers,
             position: idx + 1,
         })
     }
@@ -761,30 +811,30 @@ const pointRankingComparisonCards = computed<Array<{ label: string; value: strin
 
     return [
         {
-            label: 'Sua pontuação',
+            label: t('dashboardYourScoreLabel'),
             value: `${currentUser.totalPoints} pts`,
-            helper: `Posição atual: #${currentUser.position}`,
+            helper: `${t('dashboardCurrentPositionLabel')}: #${currentUser.position}`,
         },
         {
-            label: 'Distância para o Top 1',
+            label: t('dashboardDistanceToTop1Label'),
             value: `${distanceToTop} pts`,
-            helper: distanceToTop === 0 ? 'Você está liderando o ranking.' : `Faltam ${distanceToTop} pts para assumir a liderança.`,
+            helper: distanceToTop === 0 ? t('dashboardLeadingRankingHelper') : `${t('dashboardMissingPointsPrefix')} ${distanceToTop} pts ${t('dashboardTakeLeadSuffix')}`,
         },
         {
-            label: 'Comparação com a média',
+            label: t('dashboardComparisonWithAverageLabel'),
             value: `${averageDelta >= 0 ? '+' : ''}${averageDelta} pts`,
-            helper: `Média global: ${averageRankingPoints.value} pts`,
+            helper: `${t('dashboardGlobalAverageLabel')}: ${averageRankingPoints.value} pts`,
         },
     ]
 })
 const rankingMessage = computed(() => {
-    if (!ranking.value) return 'Ranking indisponível';
+    if (!ranking.value) return t('dashboardRankingUnavailable');
 
     if (ranking.value.position === 1) {
-        return 'Você está no Top 1. Continue dominando!';
+        return t('dashboardTopOneMessage');
     }
 
-    return `Você está Top ${ranking.value.position}. Ganhe +${ranking.value.pointsToNext} pontos para chegar ao Top ${ranking.value.position - 1}.`;
+    return `${t('dashboardYouAreTopPrefix')} ${ranking.value.position}. ${t('dashboardGainPointsPrefix')} +${ranking.value.pointsToNext} ${t('dashboardPointsWord')} ${t('dashboardReachTopPrefix')} ${ranking.value.position - 1}.`;
 });
 
 const stats = computed<Array<{
@@ -795,9 +845,9 @@ const stats = computed<Array<{
 }>>(() => {
     const allExercises = tasks.value.flatMap(group => group.exercises);
     return [
-        { label: 'Pontuação Geral', value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
-        { label: `Módulo atual - (${currentModule.value?.totalPhases ?? 0} fases)`, value: currentModule.value?.name ?? 'Indisponível', helper: currentModule.value?.description ?? 'Módulo Indisponível', status: 'progress' },
-        { label: 'Tarefas Diárias', value: `${tasks.value.length > 0 ? 'Liberado' : 'Sem tarefas disponíveis'}`, helper: `${tasks.value.length > 0 ? `Entregar até ${formatDate(getLatestTermAt(allExercises), 'pt-BR', { dateStyle: 'short' })}` : 'Aguardando tarefas disponíveis'}`, status: 'warning' },
+        { label: t('dashboardOverallScore'), value: String(profile.value?.pointsQuantity ?? 0), helper: rankingMessage.value, status: 'success' },
+        { label: `${t('dashboardCurrentModuleLabel')} - (${currentModule.value?.totalPhases ?? 0} ${t('dashboardPhasesLabel')})`, value: currentModule.value?.name ?? t('dashboardUnavailable'), helper: currentModule.value?.description ?? t('dashboardModuleUnavailable'), status: 'progress' },
+        { label: t('dashboardDailyTasksStatLabel'), value: `${tasks.value.length > 0 ? t('dashboardReleased') : t('dashboardNoTasksAvailable')}`, helper: `${tasks.value.length > 0 ? `${t('dashboardDeliverUntil')} ${formatDate(getLatestTermAt(allExercises), locale.value, { dateStyle: 'short' })}` : t('dashboardWaitingTasks')}`, status: 'warning' },
     ]
 })
 
@@ -863,6 +913,9 @@ const answeredCount = computed(() => {
 const allQuestionsAnswered = computed(() => quizQuestions.value.length > 0 && answeredCount.value === quizQuestions.value.length)
 
 const exerciseCategoryGrades = ref<IExerciseCategoryGrade[]>([])
+const canOpenGradeRanking = computed(() => {
+    return exerciseCategoryGrades.value.some((category) => resolveCategoryStatus(category) === 'Desbloqueado')
+})
 
 const showAnswersPanel = ref(false)
 const newAnswersCount = ref(0)
@@ -882,14 +935,14 @@ const userAnswersPanelItems = computed<UserAnswerItem[]>(() => {
 
 function mapAnswerStatus(isCorrect: boolean | null | undefined): UserAnswerItem['status'] {
     if (isCorrect === true) {
-        return 'Correta'
+        return t('dashboardAnswerStatusCorrect') as UserAnswerItem['status']
     }
 
     if (isCorrect === false) {
-        return 'Incorreta'
+        return t('dashboardAnswerStatusIncorrect') as UserAnswerItem['status']
     }
 
-    return 'Pendente'
+    return t('dashboardAnswerStatusPending') as UserAnswerItem['status']
 }
 
 function mapAnswerContent(answerText: string | null, selectedOption: string): string {
@@ -900,16 +953,16 @@ function mapAnswerContent(answerText: string | null, selectedOption: string): st
     }
 
     if (selectedOption.trim()) {
-        return `Opcao selecionada: ${selectedOption}`
+        return `${t('dashboardSelectedOptionPrefix')}: ${selectedOption}`
     }
 
-    return 'Resposta enviada.'
+    return t('dashboardAnswerSent')
 }
 
 function mapAnswerToPanelItem(answer: IAnswerByUser, exerciseTitle: string): UserAnswerItem {
     return {
         id: answer.id,
-        question: `${exerciseTitle} - Questao #${answer.questionId}`,
+        question: `${exerciseTitle} - ${t('dashboardQuestionLabel')} #${answer.questionId}`,
         answer: mapAnswerContent(answer.answerText, answer.selectedOption),
         status: mapAnswerStatus(answer.isCorrect),
         answeredAt: answer.answeredAt,
@@ -920,22 +973,44 @@ function resolveCategoryStatus(category: IExerciseCategoryGrade): string {
     const rawStatus = (category.status ?? '').trim().toLowerCase()
 
     if (rawStatus === 'em progresso' || rawStatus === 'em_progresso' || rawStatus === 'inprogress') {
-        return 'Em progresso'
+        return t('dashboardStatusInProgress')
     }
 
     if (rawStatus === 'desbloqueado') {
-        return 'Desbloqueado'
+        return t('dashboardUnlockedStatus')
     }
 
     if (rawStatus === 'nao iniciado' || rawStatus === 'não iniciado' || rawStatus === 'nao_iniciado' || rawStatus === 'not started') {
-        return 'Não Iniciado'
+        return t('dashboardStatusNotStarted')
     }
 
-    return category.totalAnswered > 0 ? 'Desbloqueado' : 'Não Iniciado'
+    return category.totalAnswered > 0 ? t('dashboardUnlockedStatus') : t('dashboardStatusNotStarted')
 }
 
 function isCategoryInProgress(category: IExerciseCategoryGrade): boolean {
-    return resolveCategoryStatus(category) === 'Em progresso'
+    return resolveCategoryStatus(category) === t('dashboardStatusInProgress')
+}
+
+function resolveRankingStatus(status: string | null | undefined): 'Desbloqueado' | 'Em progresso' | 'Não iniciado' {
+    const rawStatus = (status ?? '').trim().toLowerCase()
+
+    if (rawStatus === 'desbloqueado') {
+        return t('dashboardUnlockedStatus') as 'Desbloqueado'
+    }
+
+    if (rawStatus === 'em progresso' || rawStatus === 'em_progresso' || rawStatus === 'inprogress') {
+        return t('dashboardStatusInProgress') as 'Em progresso'
+    }
+
+    if (rawStatus === 'nao iniciado' || rawStatus === 'não iniciado' || rawStatus === 'nao_iniciado' || rawStatus === 'not started') {
+        return t('dashboardStatusNotStarted') as 'Não iniciado'
+    }
+
+    return t('dashboardStatusInProgress') as 'Em progresso'
+}
+
+function isRankingEntryEligible(entry: IRankingCategory): boolean {
+    return resolveRankingStatus(entry.status) === 'Desbloqueado'
 }
 
 async function toggleAnswersPanel() {
@@ -963,10 +1038,10 @@ function getTaskStatus(termAt: string): string {
     const dueStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
     const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    if (dueStart.getTime() < nowStart.getTime()) return 'Atrasada'
-    if (dueStart.getTime() === nowStart.getTime()) return 'Vence hoje'
+    if (dueStart.getTime() < nowStart.getTime()) return t('dashboardTaskLate')
+    if (dueStart.getTime() === nowStart.getTime()) return t('dashboardTaskDueToday')
 
-    return 'Em aberto'
+    return t('dashboardTaskOpen')
 }
 
 function hasInvalidDate(dateValue: string): boolean {
@@ -1065,8 +1140,8 @@ function buildTargetLimitedCountdown(targetLimited: number | string | null | und
     return {
         deadline,
         expired,
-        dueText: expired ? 'Tempo encerrado' : `Termina hoje em ${formatCountdown(remainingMs)}`,
-        status: expired ? 'Atrasada' : 'Vence hoje',
+        dueText: expired ? t('dashboardTimeExpired') : `${t('dashboardEndsTodayIn')} ${formatCountdown(remainingMs)}`,
+        status: expired ? t('dashboardTaskLate') : t('dashboardTaskDueToday'),
     }
 }
 
@@ -1103,15 +1178,15 @@ function getLatestTermAt(exercises: IDailyExercise[]): string {
 }
 
 function getGroupStatus(exercises: IDailyExercise[]): string {
-    if (!exercises.length) return 'Em aberto'
+    if (!exercises.length) return t('dashboardTaskOpen')
 
-    if (exercises.every((exercise) => exercise.isCompletedAnswer)) return 'Concluída'
+    if (exercises.every((exercise) => exercise.isCompletedAnswer)) return t('dashboardTaskCompleted')
 
     const statuses = exercises.map((exercise) => getTaskStatus(exercise.termAt))
 
-    if (statuses.includes('Atrasada')) return 'Atrasada'
-    if (statuses.includes('Vence hoje')) return 'Vence hoje'
-    return 'Em aberto'
+    if (statuses.includes(t('dashboardTaskLate'))) return t('dashboardTaskLate')
+    if (statuses.includes(t('dashboardTaskDueToday'))) return t('dashboardTaskDueToday')
+    return t('dashboardTaskOpen')
 }
 
 function mapExerciseToTaskCard(exercise: IDailyExercise, phaseId?: number): ExerciseCardTask {
@@ -1146,12 +1221,12 @@ function mapClassRoomExerciseToTaskCard(
     const due = countdown
         ? countdown.dueText
         : hasInvalidDate(exercise.termAt)
-            ? 'Sem prazo definido'
-            : formatDate(exercise.termAt, 'pt-BR', { dateStyle: 'short' })
+            ? t('dashboardNoDeadlineDefined')
+            : formatDate(exercise.termAt, locale.value, { dateStyle: 'short' })
 
     const status = exercise.isCompletedAnswer
-        ? 'Concluída'
-        : countdown?.status ?? 'Em aberto'
+        ? t('dashboardTaskCompleted')
+        : countdown?.status ?? t('dashboardTaskOpen')
 
     return {
         id: exercise.id,
@@ -1184,8 +1259,8 @@ function mapClassRoomToSpotlight(room: IClassRoom): DailyTaskGroupView {
     const isCompleted = mappedExercises.length > 0 && mappedExercises.every((exercise) => exercise.isCompletedAnswer)
     const isExpired = !isCompleted && Boolean(roomCountdown?.expired)
 
-    const due = roomCountdown?.dueText ?? 'Sem prazo definido'
-    const status = isCompleted ? 'Concluída' : isExpired ? 'Atrasada' : roomCountdown?.status ?? 'Destaque'
+    const due = roomCountdown?.dueText ?? t('dashboardNoDeadlineDefined')
+    const status = isCompleted ? t('dashboardTaskCompleted') : isExpired ? t('dashboardTaskLate') : roomCountdown?.status ?? t('dashboardHighlight')
 
     return {
         id: `class-room-${room.id}`,
@@ -1194,12 +1269,12 @@ function mapClassRoomToSpotlight(room: IClassRoom): DailyTaskGroupView {
         due,
         points: String(mappedExercises.reduce((total, exercise) => total + Number(exercise.points), 0)),
         status,
-        description: `Atividades da ${room.className} com ${mappedExercises.length} exercício(s).`,
+        description: `${t('dashboardActivitiesOf')} ${room.className} ${t('dashboardWithCountPrefix')} ${mappedExercises.length} ${t('dashboardExercisePlural')}.`,
         termAt: roomCountdown?.deadline.toISOString() ?? new Date().toISOString(),
         disabled: mappedExercises.length === 0 || isCompleted || isExpired,
         exercises: mappedExercises,
         highlighted: true,
-        highlightLabel: roomCountdown ? 'Tempo restante' : 'Nova sala',
+        highlightLabel: roomCountdown ? t('dashboardRemainingTime') : t('dashboardNewRoom'),
     }
 }
 
@@ -1359,7 +1434,7 @@ function markExerciseCompletedLocally(exerciseId: number) {
 
     if (allExercisesCompleted) {
         selectedDailyTask.value.disabled = true
-        selectedDailyTask.value.status = 'Concluída'
+        selectedDailyTask.value.status = t('dashboardTaskCompleted')
     }
 
     if (selectedTask.value?.id === exerciseId) {
@@ -1371,7 +1446,7 @@ async function finishExercise() {
     if (!selectedTask.value) return
 
     if (!allQuestionsAnswered.value) {
-        toast.warn('Responda todas as questões', 'Preencha todas as respostas antes de finalizar o exercício.', 3000)
+        toast.warn(t('dashboardAnswerAllQuestionsTitle'), t('dashboardAnswerAllQuestionsDescription'), 3000)
         return
     }
 
@@ -1413,7 +1488,7 @@ async function finishExercise() {
         var responseAnswer = await $httpClient.exercise.SubmitExerciseAnswers(payloadSubmitExercise);
 
         if (responseAnswer.success) {
-            toast.info('Exercicio Enviado com Sucesso')
+            toast.info(t('dashboardExerciseSentSuccess'))
 
             if (payloadSubmitExercise[0]?.submissionData.selectedOption !== -1) {
                 var payloadUserPoints = {
@@ -1424,16 +1499,16 @@ async function finishExercise() {
                 const awardResult = pointsResponse.result as IPointAwardResult | undefined
 
                 if (!pointsResponse.success || !awardResult) {
-                    toast.error('Erro', pointsResponse.errors?.[0] ?? 'Nao foi possivel contabilizar os pontos do exercicio.', 3500)
+                    toast.error(t('dashboardErrorTitle'), pointsResponse.errors?.[0] ?? t('dashboardCouldNotCountPoints'), 3500)
                 } else {
                     if (taskResult.value) {
                         taskResult.value.gainedPoints = awardResult.pointsAwarded
                     }
 
                     if (awardResult.alreadyAwarded) {
-                        toast.info('Pontos ja contabilizados', awardResult.message, 3500)
+                        toast.info(t('dashboardPointsAlreadyCountedTitle'), awardResult.message, 3500)
                     } else if (awardResult.pointsAwarded > 0) {
-                        toast.success('Parabens!', awardResult.message, 3500)
+                        toast.success(t('dashboardCongratsTitle'), awardResult.message, 3500)
 
                         if (profile.value) {
                             profile.value.pointsQuantity = (profile.value.pointsQuantity ?? 0) + awardResult.pointsAwarded
@@ -1443,14 +1518,14 @@ async function finishExercise() {
                             ranking.value.points += awardResult.pointsAwarded
                         }
                     } else {
-                        toast.info('Pontuacao atualizada', awardResult.message, 3500)
+                        toast.info(t('dashboardScoreUpdatedTitle'), awardResult.message, 3500)
                     }
                 }
             }
         }
     } catch (error) {
         console.error('Erro ao resgatar pontos do exercício:', error)
-        toast.error('Erro', 'Não foi possível resgatar os pontos do exercício. Tente novamente mais tarde.', 3500)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotRedeemExercisePoints'), 3500)
     } finally {
         markExerciseCompletedLocally(finishedExerciseId)
     }
@@ -1471,10 +1546,10 @@ function openImagePreview(type: 'cover' | 'profile') {
 
     if (type === 'cover') {
         imageViewerSrc.value = coverUrl ? coverUrl : backgroundDefault
-        imageViewerTitle.value = 'Capa do perfil'
+        imageViewerTitle.value = t('dashboardProfileCoverAlt')
     } else {
         imageViewerSrc.value = profileUrl ? profileUrl : profileDefault
-        imageViewerTitle.value = 'Foto de perfil'
+        imageViewerTitle.value = t('dashboardProfilePhotoAlt')
     }
 
     showImageViewer.value = true
@@ -1518,13 +1593,18 @@ async function openRanking() {
     } catch (error) {
         console.error('Erro ao carregar ranking global:', error)
         globalRanking.value = []
-        toast.error('Erro', 'Não foi possível carregar o ranking global. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadGlobalRanking'), 4000)
     } finally {
         isGlobalRankingLoading.value = false
     }
 }
 
 async function openAvailableRanking() {
+    if (!canOpenGradeRanking.value) {
+        toast.warn(t('dashboardRankingUnavailable'), t('dashboardRankingUnavailableReason'), 3500)
+        return
+    }
+
     showGradeRanking.value = true
     isGradeRankingLoading.value = true
 
@@ -1541,7 +1621,7 @@ async function openAvailableRanking() {
     } catch (error) {
         console.error('Erro ao carregar ranking por nota:', error)
         categoryRankings.value = []
-        toast.error('Erro', 'Não foi possível carregar o ranking por nota. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadRankingByGrade'), 4000)
     } finally {
         isGradeRankingLoading.value = false
     }
@@ -1568,7 +1648,7 @@ async function UpdateUserProfile() {
         const userId = getUserIdFromSession();
 
         if (!userId) {
-            toast.error('Sessão inválida', 'Faça login novamente para atualizar seu perfil.', 4000)
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToUpdateProfile'), 4000)
             loadingPop();
             return;
         }
@@ -1586,16 +1666,16 @@ async function UpdateUserProfile() {
         var response = await $httpClient.user.UpdateProfile(payloadUpdateUser);
 
         if (response.result == null) {
-            toast.error('Erro', 'Não foi possível atualizar os dados do perfil. Tente novamente mais tarde.', 4000)
+            toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotUpdateProfileData'), 4000)
             return;
         }
 
         closeEditAttributes();
         editPassword.value = ''
-        toast.success('Perfil atualizado', 'Seus dados do perfil foram atualizados com sucesso.', 3000);
+        toast.success(t('dashboardProfileUpdatedTitle'), t('dashboardProfileUpdatedDescription'), 3000);
     } catch (error) {
         console.error('Erro ao atualizar perfil do usuário:', error)
-        toast.error('Erro', 'Não foi possível atualizar os dados do perfil. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotUpdateProfileData'), 4000)
     } finally {
         loadingPop();
     }
@@ -1610,7 +1690,7 @@ function fileToDataUrl(file: File): Promise<string> {
         }
 
         reader.onerror = () => {
-            reject(new Error('Falha ao converter arquivo para base64.'))
+            reject(new Error(t('dashboardFailedToConvertFile')))
         }
 
         reader.readAsDataURL(file)
@@ -1624,7 +1704,7 @@ async function saveCoverAndProfile(payload: UploadProfileImagesPayload) {
         }
 
         if (!profile.value) {
-            toast.error('Erro', 'Não foi possível carregar os dados do perfil para salvar as imagens.', 4000)
+            toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadProfileToSaveImages'), 4000)
             return
         }
 
@@ -1640,7 +1720,7 @@ async function saveCoverAndProfile(payload: UploadProfileImagesPayload) {
         closeUploadCoverAndPicture()
     } catch (error) {
         console.error('Erro ao salvar imagens do perfil:', error)
-        toast.error('Erro', 'Não foi possível salvar as imagens de capa e perfil.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotSaveCoverAndProfileImages'), 4000)
     }
 }
 
@@ -1649,7 +1729,7 @@ async function fetchRankingUser() {
         const userId = getUserIdFromSession();
 
         if (!userId) {
-            toast.error('Sessão inválida', 'Faça login novamente para carregar seu ranking.', 4000)
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToLoadRanking'), 4000)
             await navigateTo('/')
             return null;
         }
@@ -1687,7 +1767,7 @@ async function fetchRankingUser() {
         return null;
     } catch (error) {
         console.error('Erro ao carregar ranking do usuário:', error)
-        toast.error('Erro', 'Não foi possível carregar os dados do ranking. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadRankingData'), 4000)
         return null;
     }
 }
@@ -1699,7 +1779,7 @@ async function fetchUserProfile() {
         const userEnrollment = getUserIdFromSession();
 
         if (!userEnrollment) {
-            toast.error('Sessão inválida', 'Faça login novamente para carregar seu perfil.', 4000)
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToLoadProfile'), 4000)
             await navigateTo('/')
             return;
         }
@@ -1713,7 +1793,7 @@ async function fetchUserProfile() {
         }
     } catch (error) {
         console.error('Erro ao carregar perfil do usuário:', error)
-        toast.error('Erro', 'Não foi possível carregar os dados do perfil. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadProfileData'), 4000)
     } finally {
         loadingPop();
     }
@@ -1741,7 +1821,7 @@ async function fetchBadgeData() {
         }
     } catch (error) {
         console.error('Erro ao carregar badges do usuário:', error)
-        toast.error('Erro', 'Não foi possível carregar os dados das badges. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadBadgesData'), 4000)
     }
 }
 
@@ -1750,7 +1830,7 @@ async function currentStatsUser() {
         const user = getUserIdFromSession();
 
         if (!user) {
-            toast.error('Sessão inválida', 'Faça login novamente para carregar os dados da fase atual.', 4000)
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToLoadCurrentPhase'), 4000)
             await navigateTo('/')
             return;
         }
@@ -1763,7 +1843,7 @@ async function currentStatsUser() {
         }
     } catch (error) {
         console.error('Erro ao carregar fase atual do usuário:', error)
-        toast.error('Erro', 'Não foi possível carregar os dados da fase atual. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadCurrentPhaseData'), 4000)
     }
 }
 
@@ -1774,7 +1854,7 @@ async function randomDailyTasks() {
         const userId = getUserIdFromSession();
 
         if (!userId) {
-            toast.error('Sessão inválida', 'Faça login novamente para carregar as tarefas diárias.', 4000)
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToLoadDailyTasks'), 4000)
             await navigateTo('/')
             return;
         }
@@ -1786,7 +1866,7 @@ async function randomDailyTasks() {
         }
     } catch (error) {
         console.error('Erro ao carregar tarefas diárias:', error)
-        toast.error('Erro', 'Não foi possível carregar as tarefas diárias. Tente novamente mais tarde.', 4000)
+        toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadDailyTasks'), 4000)
     } finally {
         loadingPop();
     }
@@ -1806,7 +1886,7 @@ async function getAImotivacionalMessage() {
 
 async function fetchExerciseCategoryGrades() {
     try {
-        const response = await $httpClient.exercise.GetExercisesAnsweredCategorieByUser();
+        const response = await $httpClient.exercise.GetExercisesAnsweredCategoriesByUser();
         if (response.result != null) {
             exerciseCategoryGrades.value = response.result;
         }
@@ -2211,6 +2291,24 @@ onBeforeUnmount(() => {
     color: #fff;
 }
 
+.grade-ranking-prize-note {
+    margin-bottom: 0.75rem;
+    border: 1px solid #dbeafe;
+    border-radius: 0.75rem;
+    background: #eff6ff;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.72rem;
+    color: #1e3a8a;
+}
+
+.grade-ranking-prize-note p {
+    margin: 0;
+}
+
+.grade-ranking-prize-note p+p {
+    margin-top: 0.2rem;
+}
+
 .grade-ranking-list {
     display: grid;
     gap: 0.45rem;
@@ -2235,6 +2333,12 @@ onBeforeUnmount(() => {
 .grade-ranking-row-highlight {
     border-color: #60a5fa;
     background: linear-gradient(90deg, rgba(191, 219, 254, 0.55), rgba(224, 242, 254, 0.55));
+}
+
+.grade-ranking-row-ineligible {
+    border-style: dashed;
+    border-color: #cbd5e1;
+    background: rgba(241, 245, 249, 0.9);
 }
 
 .grade-ranking-position {
@@ -2277,6 +2381,37 @@ onBeforeUnmount(() => {
     font-weight: 800;
     color: #1e40af;
     line-height: 1;
+}
+
+.grade-ranking-status {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.3rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.grade-ranking-status--eligible {
+    border-color: #86efac;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.grade-ranking-status--inprogress {
+    border-color: #fde68a;
+    background: #fef9c3;
+    color: #92400e;
+}
+
+.grade-ranking-helper {
+    margin: 0.2rem 0 0;
+    font-size: 0.66rem;
+    color: #92400e;
 }
 
 .grade-ranking-bar-track {

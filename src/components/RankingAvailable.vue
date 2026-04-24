@@ -1,7 +1,8 @@
 <template>
     <div class="flex justify-center text-center">
-        <button type="button" class="ranking-cta group" aria-label="Abrir ranking global por notas"
-            @click="$emit('click')">
+        <button type="button" class="ranking-cta group" :class="{ 'ranking-cta--disabled': disabled }"
+            :disabled="disabled" :aria-disabled="disabled" :title="disabled ? disabledReason : undefined"
+            :aria-label="disabled ? disabledReason : 'Abrir ranking global por notas'" @click="handleClick">
             <span class="ranking-cta__shine" aria-hidden="true"></span>
             <i class="pi pi-trophy ranking-cta__icon" aria-hidden="true"></i>
             <span>Ranking Global por Notas</span>
@@ -11,9 +12,28 @@
 </template>
 
 <script setup lang="ts">
-defineEmits<{
+const props = withDefaults(
+    defineProps<{
+        disabled?: boolean
+        disabledReason?: string
+    }>(),
+    {
+        disabled: false,
+        disabledReason: 'Você ainda não possui nota disponível para participar do ranking.',
+    },
+)
+
+const emit = defineEmits<{
     (event: 'click'): void
 }>()
+
+function handleClick() {
+    if (props.disabled) {
+        return
+    }
+
+    emit('click')
+}
 </script>
 
 <style scoped lang="scss">
@@ -44,6 +64,19 @@ defineEmits<{
     box-shadow: 0 2px 10px rgba(244, 63, 94, 0.28);
 }
 
+.ranking-cta--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    animation: none;
+    box-shadow: none;
+}
+
+.ranking-cta--disabled:hover {
+    transform: none;
+    border-color: #fda4af;
+    box-shadow: none;
+}
+
 .ranking-cta:active {
     transform: translateY(0) scale(0.99);
 }
@@ -67,6 +100,10 @@ defineEmits<{
     transform: translateX(2px);
 }
 
+.ranking-cta--disabled .ranking-cta__arrow {
+    transform: none;
+}
+
 .ranking-cta__shine {
     position: absolute;
     inset: -180% auto;
@@ -76,6 +113,10 @@ defineEmits<{
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.68), transparent);
     animation: ranking-shine 2.4s linear infinite;
     pointer-events: none;
+}
+
+.ranking-cta--disabled .ranking-cta__shine {
+    display: none;
 }
 
 @keyframes ranking-pulse {

@@ -157,10 +157,10 @@ export default class ExerciseService extends ClientService<any> {
     })) as ApiResponse<ExerciseVerifyAnswerResponse>
   }
 
-  GetExercisesAnsweredCategorieByUser = async (
+  GetExercisesAnsweredCategoriesByUser = async (
     options?: FetchOptions,
   ): Promise<ApiResponse<IExerciseCategoryGrade[]>> => {
-    return (await this.fetchInstance(`${this.address}/GetExercisesAnsweredCategorieByUser`, {
+    return (await this.fetchInstance(`${this.address}/GetExercisesAnsweredCategoriesByUser`, {
       method: 'GET',
       ...options,
     })) as ApiResponse<IExerciseCategoryGrade[]>

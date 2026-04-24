@@ -20,6 +20,7 @@ export interface IRankingCategory {
   profilePictureUrl?: string | null
   percentAvailable: number
   totalAnswers: number
+  status?: string | null
 }
 
 export interface IAddPointsForUser {
