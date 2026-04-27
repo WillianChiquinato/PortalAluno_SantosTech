@@ -186,7 +186,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
                             t('dashboardExerciseGradesAllCourses') }}</p>
                         <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} {{ t('dashboardCategoriesLabel')
-                            }}</span>
+                        }}</span>
                     </div>
 
                     <div v-if="exerciseCategoryGrades.length === 0"
@@ -470,6 +470,42 @@
                         </div>
                     </div>
 
+                    <section v-if="!isGlobalRankingLoading && activePointsRankingEvent" class="global-ranking-event">
+                        <div class="global-ranking-event-head">
+                            <div>
+                                <p class="global-ranking-event-kicker">Evento de premiacao</p>
+                                <h4 class="global-ranking-event-title">{{ activePointsRankingEvent.eventName }}</h4>
+                                <p class="global-ranking-event-meta">{{ activePointsRankingEvent.eventType }} · {{
+                                    formatRankingEventWindow(activePointsRankingEvent) }}</p>
+                            </div>
+
+                            <span class="global-ranking-event-status"
+                                :class="pointsRankingEventIsClosed ? 'global-ranking-event-status--closed' : 'global-ranking-event-status--open'">
+                                {{ pointsRankingEventIsClosed ? 'Encerrado' : pointsRankingEventRemainingLabel }}
+                            </span>
+                        </div>
+
+                        <p v-if="pointsRankingEventAwards.length === 0" class="global-ranking-event-empty">
+                            Nenhuma recompensa cadastrada para este evento.
+                        </p>
+
+                        <div v-else class="global-ranking-awards">
+                            <article v-for="award in pointsRankingEventAwards"
+                                :key="`${activePointsRankingEvent.eventName}-${award.awardPositionRanking}-${award.awardName}`"
+                                class="global-ranking-award-card">
+                                <span class="global-ranking-award-position">#{{ award.awardPositionRanking }}</span>
+
+                                <img :src="award.awardPictureUrl?.trim() || profileDefault"
+                                    :alt="`Premio ${award.awardName}`" class="global-ranking-award-image" />
+
+                                <div class="min-w-0">
+                                    <p class="global-ranking-award-name">{{ award.awardName }}</p>
+                                    <p class="global-ranking-award-description">{{ award.awardDescription }}</p>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+
                     <p v-if="isGlobalRankingLoading" class="text-sm text-ink-500">{{ t('dashboardLoadingRanking') }}</p>
 
                     <p v-else-if="globalRanking.length === 0" class="text-sm text-ink-500">
@@ -513,8 +549,8 @@
                         </p>
                     </div>
 
-                    <button type="button" class="grade-ranking-close" @click="closeGradeRanking"
-                        :aria-label="t('dashboardCloseRankingByGrade')">
+                    <button type="button" class="grade-ranking-close" :disabled="isGradeRankingLoading"
+                        @click="closeGradeRanking" :aria-label="t('dashboardCloseRankingByGrade')">
                         <i class="pi pi-times"></i>
                     </button>
                 </div>
@@ -534,8 +570,8 @@
                                 <p class="grade-ranking-summary-value">{{
                                     currentUserCategorySummary.bestCategory.category }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.bestCategory.percent
-                                    }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
-                                    t('dashboardPlace') }}</p>
+                                }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
+                                        t('dashboardPlace') }}</p>
                             </article>
 
                             <article class="grade-ranking-summary-card">
@@ -552,7 +588,7 @@
                                 <p class="grade-ranking-summary-value">{{ currentUserCategorySummary.topOneCount }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.topOneCount === 1 ?
                                     t('dashboardCategorySingular') : t('dashboardCategoryPlural') }} {{
-                                    t('dashboardLedLabel') }}</p>
+                                        t('dashboardLedLabel') }}</p>
                             </article>
                         </div>
 
@@ -571,7 +607,7 @@
                         <div class="grade-ranking-prize-note">
                             <p>
                                 {{ t('dashboardOnlyUnlockedCompetePrefix') }} <strong>{{ t('dashboardUnlockedStatus')
-                                    }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
+                                }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
                             </p>
                             <p>
                                 {{ t('dashboardParticipatingInCategory') }}: <strong>{{ eligibleEntriesCount }}</strong>
@@ -579,6 +615,42 @@
                                     activeCategoryRankingList.length }}
                             </p>
                         </div>
+
+                        <section v-if="activeRankingEvent" class="grade-ranking-event">
+                            <div class="grade-ranking-event-head">
+                                <div>
+                                    <p class="grade-ranking-event-kicker">Evento de premiacao</p>
+                                    <h4 class="grade-ranking-event-title">{{ activeRankingEvent.eventName }}</h4>
+                                    <p class="grade-ranking-event-meta">{{ activeRankingEvent.eventType }} · {{
+                                        formatRankingEventWindow(activeRankingEvent) }}</p>
+                                </div>
+
+                                <span class="grade-ranking-event-status"
+                                    :class="rankingEventIsClosed ? 'grade-ranking-event-status--closed' : 'grade-ranking-event-status--open'">
+                                    {{ rankingEventIsClosed ? 'Encerrado' : rankingEventRemainingLabel }}
+                                </span>
+                            </div>
+
+                            <p v-if="rankingEventAwards.length === 0" class="grade-ranking-event-empty">
+                                Nenhuma recompensa cadastrada para este evento.
+                            </p>
+
+                            <div v-else class="grade-ranking-awards">
+                                <article v-for="award in rankingEventAwards"
+                                    :key="`${activeRankingEvent.eventName}-${award.awardPositionRanking}-${award.awardName}`"
+                                    class="grade-ranking-award-card">
+                                    <span class="grade-ranking-award-position">#{{ award.awardPositionRanking }}</span>
+
+                                    <img :src="award.awardPictureUrl?.trim() || profileDefault"
+                                        :alt="`Premio ${award.awardName}`" class="grade-ranking-award-image" />
+
+                                    <div class="min-w-0">
+                                        <p class="grade-ranking-award-name">{{ award.awardName }}</p>
+                                        <p class="grade-ranking-award-description">{{ award.awardDescription }}</p>
+                                    </div>
+                                </article>
+                            </div>
+                        </section>
 
                         <!-- ranked list for selected category -->
                         <div v-if="activeCategoryRankingList.length > 0" class="grade-ranking-list">
@@ -678,7 +750,7 @@ import UserAnswersPanel, { type UserAnswerItem } from '~/components/UserAnswersP
 
 import { isEmailValid } from '#imports'
 import type { DailyTaskGroupView, IDailyExercise, IDailyTaskGroup, IQuizQuestionOption, ISubmitExerciseAnswer, ExerciseCardTask, IExerciseCategoryGrade } from '~/infra/interfaces/services/exercise'
-import type { IPointAwardResult, IPointCategoryRanking, IRankingCategory } from '~/infra/interfaces/services/point'
+import type { IPointAwardResult, IPointCategoryRanking, IRankingCategory, IRankingEvent } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
@@ -734,6 +806,143 @@ const globalRanking = ref<Array<{
 }>>([])
 const categoryRankings = ref<IPointCategoryRanking[]>([])
 const selectedGradeCategory = ref<string>('')
+
+const rankingPointsEventSource = ref<IRankingEvent[] | null>(null)
+const rankingEventSource = ref<IRankingEvent[] | null>(null)
+const activePointsRankingEvent = computed(() => {
+    const events = rankingPointsEventSource.value ?? []
+
+    if (!events.length) {
+        return null
+    }
+
+    const activeEvent = events.find((event) => {
+        const startAt = new Date(event.startTime).getTime()
+        const endAt = new Date(event.endTime).getTime()
+
+        if (Number.isNaN(startAt) || Number.isNaN(endAt)) {
+            return false
+        }
+
+        return startAt <= nowTick.value && endAt >= nowTick.value
+    })
+
+    return activeEvent ?? events[0]
+})
+const pointsRankingEventAwards = computed(() => {
+    const event = activePointsRankingEvent.value
+
+    if (!event?.eventRankingAwards?.length) {
+        return []
+    }
+
+    return [...event.eventRankingAwards].sort(
+        (first, second) => first.awardPositionRanking - second.awardPositionRanking,
+    )
+})
+const pointsRankingEventIsClosed = computed(() => {
+    const event = activePointsRankingEvent.value
+
+    if (!event) {
+        return false
+    }
+
+    const endAt = new Date(event.endTime).getTime()
+
+    if (Number.isNaN(endAt)) {
+        return false
+    }
+
+    return endAt < nowTick.value
+})
+const pointsRankingEventRemainingLabel = computed(() => {
+    const event = activePointsRankingEvent.value
+
+    if (!event) {
+        return ''
+    }
+
+    const endAt = new Date(event.endTime).getTime()
+
+    if (Number.isNaN(endAt)) {
+        return 'Periodo indefinido'
+    }
+
+    const remainingMs = endAt - nowTick.value
+
+    if (remainingMs <= 0) {
+        return 'Encerrado'
+    }
+
+    return `Termina em ${formatRemainingDuration(remainingMs)}`
+})
+const activeRankingEvent = computed(() => {
+    const events = rankingEventSource.value ?? []
+
+    if (!events.length) {
+        return null
+    }
+
+    const activeEvent = events.find((event) => {
+        const startAt = new Date(event.startTime).getTime()
+        const endAt = new Date(event.endTime).getTime()
+
+        if (Number.isNaN(startAt) || Number.isNaN(endAt)) {
+            return false
+        }
+
+        return startAt <= nowTick.value && endAt >= nowTick.value
+    })
+
+    return activeEvent ?? events[0]
+})
+const rankingEventAwards = computed(() => {
+    const event = activeRankingEvent.value
+
+    if (!event?.eventRankingAwards?.length) {
+        return []
+    }
+
+    return [...event.eventRankingAwards].sort(
+        (first, second) => first.awardPositionRanking - second.awardPositionRanking,
+    )
+})
+const rankingEventIsClosed = computed(() => {
+    const event = activeRankingEvent.value
+
+    if (!event) {
+        return false
+    }
+
+    const endAt = new Date(event.endTime).getTime()
+
+    if (Number.isNaN(endAt)) {
+        return false
+    }
+
+    return endAt < nowTick.value
+})
+const rankingEventRemainingLabel = computed(() => {
+    const event = activeRankingEvent.value
+
+    if (!event) {
+        return ''
+    }
+
+    const endAt = new Date(event.endTime).getTime()
+
+    if (Number.isNaN(endAt)) {
+        return 'Periodo indefinido'
+    }
+
+    const remainingMs = endAt - nowTick.value
+
+    if (remainingMs <= 0) {
+        return 'Encerrado'
+    }
+
+    return `Termina em ${formatRemainingDuration(remainingMs)}`
+})
 
 const activeCategoryRanking = computed(() =>
     categoryRankings.value.find((c) => c.category === selectedGradeCategory.value) ?? null
@@ -1052,6 +1261,43 @@ function hasInvalidDate(dateValue: string): boolean {
     }
 
     return Number.isNaN(new Date(dateValue).getTime())
+}
+
+function formatRemainingDuration(remainingMs: number): string {
+    const totalMinutes = Math.max(0, Math.floor(remainingMs / 60000))
+    const days = Math.floor(totalMinutes / (60 * 24))
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60)
+    const minutes = totalMinutes % 60
+
+    if (days > 0) {
+        return `${days}d ${String(hours).padStart(2, '0')}h`
+    }
+
+    if (hours > 0) {
+        return `${hours}h ${String(minutes).padStart(2, '0')}min`
+    }
+
+    return `${minutes}min`
+}
+
+function formatRankingEventWindow(event: IRankingEvent): string {
+    const startAt = new Date(event.startTime)
+    const endAt = new Date(event.endTime)
+
+    if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
+        return 'Periodo indefinido'
+    }
+
+    const startLabel = formatDate(startAt, locale.value, {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    })
+    const endLabel = formatDate(endAt, locale.value, {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    })
+
+    return `${startLabel} ate ${endLabel}`
 }
 
 function toTodayDeadline(targetLimited: number | string | null | undefined): Date | null {
@@ -1564,6 +1810,10 @@ function closeGlobalRanking() {
 }
 
 function closeGradeRanking() {
+    if (isGradeRankingLoading.value) {
+        return
+    }
+
     showGradeRanking.value = false
 }
 
@@ -1573,7 +1823,9 @@ async function openRanking() {
 
     try {
         const currentUserId = getUserIdFromSession()
-        const rankingResponse = await $httpClient.point.GetRanking()
+        const rankingResponse = await $httpClient.point.GetRankingPoints()
+        const currentEventRewardsResponse = await $httpClient.point.GetRankingEvent(2)
+        rankingPointsEventSource.value = currentEventRewardsResponse.result ?? []
 
         const rankingList = rankingResponse.result ?? []
 
@@ -1593,6 +1845,7 @@ async function openRanking() {
     } catch (error) {
         console.error('Erro ao carregar ranking global:', error)
         globalRanking.value = []
+        rankingPointsEventSource.value = []
         toast.error(t('dashboardErrorTitle'), t('dashboardCouldNotLoadGlobalRanking'), 4000)
     } finally {
         isGlobalRankingLoading.value = false
@@ -1611,8 +1864,9 @@ async function openAvailableRanking() {
     try {
         const rankingResponse = await $httpClient.point.GetAvailableRankingPerCategory()
         categoryRankings.value = rankingResponse.result ?? []
-        console.log("Result: ", categoryRankings.value);
 
+        const currentEventRewardsResponse = await $httpClient.point.GetRankingEvent(1)
+        rankingEventSource.value = currentEventRewardsResponse.result ?? []
 
         if (categoryRankings.value.length > 0) {
             selectedGradeCategory.value = categoryRankings.value[0].category
@@ -1734,7 +1988,7 @@ async function fetchRankingUser() {
             return null;
         }
 
-        const response = await $httpClient.point.GetRanking();
+        const response = await $httpClient.point.GetRankingPoints();
 
         if (response.result != null) {
             const rankingList = response.result
@@ -2121,6 +2375,129 @@ onBeforeUnmount(() => {
     color: #64748b;
 }
 
+.global-ranking-event {
+    border: 1px solid #fecdd3;
+    border-radius: 0.85rem;
+    background: linear-gradient(160deg, #fff7f9 0%, #fff 85%);
+    padding: 0.72rem;
+    margin-bottom: 0.9rem;
+}
+
+.global-ranking-event-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.global-ranking-event-kicker {
+    margin: 0;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #be123c;
+}
+
+.global-ranking-event-title {
+    margin: 0.12rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.global-ranking-event-meta {
+    margin: 0.18rem 0 0;
+    font-size: 0.71rem;
+    color: #64748b;
+}
+
+.global-ranking-event-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.global-ranking-event-status--open {
+    border-color: #fb7185;
+    background: #ffe4e6;
+    color: #9f1239;
+}
+
+.global-ranking-event-status--closed {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.global-ranking-event-empty {
+    margin: 0.55rem 0 0;
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.global-ranking-awards {
+    margin-top: 0.65rem;
+    display: grid;
+    gap: 0.52rem;
+}
+
+.global-ranking-award-card {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid #fecdd3;
+    border-radius: 0.75rem;
+    background: #fff;
+    padding: 0.45rem 0.52rem;
+}
+
+.global-ranking-award-position {
+    min-width: 2rem;
+    text-align: center;
+    border-radius: 999px;
+    background: #ffe4e6;
+    color: #9f1239;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.22rem 0.34rem;
+}
+
+.global-ranking-award-image {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.6rem;
+    object-fit: cover;
+    border: 1px solid #fecdd3;
+    background: #fff;
+}
+
+.global-ranking-award-name {
+    margin: 0;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.global-ranking-award-description {
+    margin: 0.15rem 0 0;
+    font-size: 0.68rem;
+    line-height: 1.25;
+    color: #64748b;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .grade-ranking-overlay {
     position: fixed;
     inset: 0;
@@ -2238,38 +2615,61 @@ onBeforeUnmount(() => {
 }
 
 .grade-ranking-tabs {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    align-items: flex-end;
+    gap: 0.32rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+    padding: 0.2rem 0.1rem 0;
     margin-bottom: 0.85rem;
+}
+
+.grade-ranking-tabs::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: #cbd5e1;
 }
 
 .grade-ranking-tab {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 0.65rem 0.65rem 0 0;
+    padding: 0.46rem 0.78rem 0.4rem;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #475569;
-    background: #f8fafc;
+    background: rgba(226, 232, 240, 0.65);
     cursor: pointer;
-    transition: all 0.18s ease;
+    position: relative;
+    z-index: 1;
+    transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .grade-ranking-tab:hover {
-    border-color: #93c5fd;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: rgba(219, 234, 254, 0.95);
+    color: #1e3a8a;
+    transform: translateY(-1px);
 }
 
 .grade-ranking-tab--active {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    border-color: #cbd5e1;
+    border-bottom-color: #f8fafc;
+    background: #f8fafc;
     color: #1d4ed8;
-    font-weight: 700;
+    box-shadow: 0 -1px 0 #3b82f6 inset;
+    transform: translateY(0);
 }
 
 .grade-ranking-tab-badge {
@@ -2279,15 +2679,15 @@ onBeforeUnmount(() => {
     min-width: 1.15rem;
     height: 1.15rem;
     border-radius: 999px;
-    background: #bfdbfe;
-    color: #1d4ed8;
+    background: #e2e8f0;
+    color: #334155;
     font-size: 0.62rem;
     font-weight: 700;
     padding: 0 0.25rem;
 }
 
 .grade-ranking-tab--active .grade-ranking-tab-badge {
-    background: #3b82f6;
+    background: #2563eb;
     color: #fff;
 }
 
@@ -2307,6 +2707,147 @@ onBeforeUnmount(() => {
 
 .grade-ranking-prize-note p+p {
     margin-top: 0.2rem;
+}
+
+.grade-ranking-event {
+    border: 1px solid #dbeafe;
+    border-radius: 0.8rem;
+    background: linear-gradient(145deg, #f8fbff, #eff6ff);
+    padding: 0.7rem;
+    margin-bottom: 0.75rem;
+}
+
+.grade-ranking-event-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.7rem;
+}
+
+.grade-ranking-event-kicker {
+    margin: 0;
+    font-size: 0.63rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #2563eb;
+}
+
+.grade-ranking-event-title {
+    margin: 0.1rem 0 0;
+    font-size: 0.93rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.grade-ranking-event-meta {
+    margin: 0.18rem 0 0;
+    font-size: 0.7rem;
+    color: #475569;
+}
+
+.grade-ranking-event-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.grade-ranking-event-status--open {
+    border-color: #86efac;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.grade-ranking-event-status--closed {
+    border-color: #fecaca;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.grade-ranking-event-empty {
+    margin: 0.55rem 0 0;
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.grade-ranking-awards {
+    margin-top: 0.65rem;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.grade-ranking-award-card {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.75rem;
+    background: #fff;
+    padding: 0.45rem 0.52rem;
+}
+
+.grade-ranking-award-position {
+    min-width: 2rem;
+    text-align: center;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.22rem 0.34rem;
+}
+
+.grade-ranking-award-image {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.6rem;
+    object-fit: cover;
+    border: 1px solid #bfdbfe;
+    background: #fff;
+}
+
+.grade-ranking-award-name {
+    margin: 0;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.grade-ranking-award-description {
+    margin: 0.15rem 0 0;
+    font-size: 0.68rem;
+    line-height: 1.25;
+    color: #64748b;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .global-ranking-event-head {
+        flex-direction: column;
+    }
+
+    .global-ranking-event-status {
+        width: max-content;
+    }
+
+    .grade-ranking-event-head {
+        flex-direction: column;
+    }
+
+    .grade-ranking-event-status {
+        width: max-content;
+    }
 }
 
 .grade-ranking-list {

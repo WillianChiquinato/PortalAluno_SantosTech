@@ -33,13 +33,29 @@ export interface IPointAwardResult {
   message: string
 }
 
+export interface IRankingEvent {
+  eventName: string
+  eventType: string
+  durationMinutes: number
+  startTime: string
+  endTime: string
+  eventRankingAwards: IRankingEventAward[]
+}
+
+export interface IRankingEventAward {
+  awardName: string
+  awardPositionRanking: number
+  awardDescription: string
+  awardPictureUrl?: string | null
+}
+
 export default class PointService extends ClientService<any> {
   constructor() {
     super('Point', 'api/Point')
   }
 
-  GetRanking = async (config: FetchOptions = {}): Promise<ApiResponse<IPointRanking[]>> => {
-    return (await this.fetchInstance(`${this.address}/GetRanking`, {
+  GetRankingPoints = async (config: FetchOptions = {}): Promise<ApiResponse<IPointRanking[]>> => {
+    return (await this.fetchInstance(`${this.address}/GetRankingPoints`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IPointRanking[]>
@@ -63,5 +79,12 @@ export default class PointService extends ClientService<any> {
       body: payload,
       ...config,
     })) as ApiResponse<IPointAwardResult>
+  }
+
+  GetRankingEvent = async (eventType: number, config: FetchOptions = {}): Promise<ApiResponse<IRankingEvent[]>> => {
+    return (await this.fetchInstance(`${this.address}/GetRankingEvent?eventType=${eventType}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IRankingEvent[]>
   }
 }
