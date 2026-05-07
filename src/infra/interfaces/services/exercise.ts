@@ -105,6 +105,12 @@ export interface ExerciseVerifyAnswerResponse {
   existingAnswers: boolean
 }
 
+export interface MaterialReference {
+  id: number
+  materialTitle: string
+  materialDescription: string
+}
+
 export default class ExerciseService extends ClientService<any> {
   constructor() {
     super('Exercise', 'api/Exercise')
@@ -164,5 +170,17 @@ export default class ExerciseService extends ClientService<any> {
       method: 'GET',
       ...options,
     })) as ApiResponse<IExerciseCategoryGrade[]>
+  }
+
+  GetMaterialsReferenceForExercise = async (
+    exerciseId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<MaterialReference[]>> => {
+    const urlParams = `/GetMaterialsReferenceForExercise?exerciseId=${exerciseId}`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<MaterialReference[]>
   }
 }

@@ -35,7 +35,7 @@
             </div>
         </section>
 
-        <section class="panel p-3 sm:p-4">
+        <section class="panel p-3 sm:p-4 flex items-center justify-between">
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" class="chip cursor-pointer transition"
                     :class="selectedTab === 'all' ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
@@ -47,6 +47,12 @@
                     @click="selectedTab = 'active'">
                     Minhas missões
                 </button>
+            </div>
+
+            <div class="flex">
+                <span class="text-xs text-ink-500">
+                    {{ selectedTab === 'all' ? `${goals.length} missão${goals.length !== 1 ? 's' : ''} disponível${goals.length !== 1 ? 's' : ''}` : `${activatedGoalsDetailed.length} missão${activatedGoalsDetailed.length !== 1 ? 's' : ''} ativa${activatedGoalsDetailed.length !== 1 ? 's' : ''}` }}
+                </span>
             </div>
         </section>
 
@@ -363,7 +369,6 @@ async function ResetPageGoals() {
     showRewardAnimation.value = false
     redeemedGoalData.value = null
     await fetchGoalData()
-    await fetchActivedGoalsUserData()
 }
 
 async function redeemGoal(goal: IActivatedGoalUser) {
@@ -424,7 +429,7 @@ async function activateGoal(goal: IGoalRewardsData) {
 
         activatedGoalIds.value = [...activatedGoalIds.value, goalRewardId]
         toast.success('Desafio ativado', `${goal.goalName} foi ativado com sucesso.`, 3000)
-        await fetchActivedGoalsUserData()
+        await fetchGoalData()
     } catch (error) {
         console.error('Erro ao ativar desafio:', error)
         toast.error('Erro', 'Nao foi possivel ativar o desafio agora.', 3500)

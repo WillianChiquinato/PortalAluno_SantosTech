@@ -50,9 +50,9 @@
     <nav v-else class="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-md">
         <div class="relative flex h-16 items-center justify-around">
             <NuxtLink v-for="item in navItems.slice(0, 5)" :key="item.path" :to="item.path"
-                class="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200" :class="isActive(item.path)
+                class="flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200" :class="[isActive(item.path)
                     ? 'text-brand-600 scale-105'
-                    : 'text-slate-500'">
+                    : 'text-slate-500', item.isActive ? '' : 'pointer-events-none opacity-50']">
                 <span class="relative inline-flex">
                     <i :class="[item.icon, 'text-lg']"></i>
                 </span>
@@ -82,7 +82,7 @@
                             @click="handleReturnToAdminPortal">
                             <i class="pi pi-arrow-left text-lg"></i> Voltar ao portal
                         </button>
-                        <NuxtLink to="/videos" class="block text-base font-medium text-black"
+                        <NuxtLink to="/videos" class="block text-base font-medium text-black pointer-events-none opacity-50"
                             @click="showMobileMenu = false">
                             <i class="pi pi-video text-lg"></i> {{ t('navVideos') }}
                         </NuxtLink>
@@ -141,7 +141,7 @@ const navItems = computed(() => [
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
     { label: t('navMaterial'), short: t('navMaterialShort'), icon: 'pi pi-folder', path: '/materiais', note: t('navMaterialNote'), isActive: true },
-    { label: t('navVideos'), short: t('navVideosShort'), icon: 'pi pi-video', path: '/videos', note: t('navVideosNote'), isActive: true },
+    { label: t('navVideos'), short: t('navVideosShort'), icon: 'pi pi-video', path: '/videos', note: t('navVideosNote'), isActive: false },
 ])
 
 const overflowNavItems = computed(() => navItems.value.slice(5))

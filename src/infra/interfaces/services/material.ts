@@ -18,8 +18,11 @@ export default class MaterialService extends ClientService<any> {
     super('Material', 'api/Material')
   }
 
-  GetAllMaterials = async (config: FetchOptions = {}): Promise<ApiResponse<IMaterial[]>> => {
-    let urlParams = `/GetAllMaterials`
+  GetAllMaterialsByCourse = async (
+    userEnrollment: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IMaterial[]>> => {
+    let urlParams = `/GetAllMaterialsByCourse?userEnrollment=${userEnrollment}`
 
     return (await this.fetchInstance(`${this.address}${urlParams}`, {
       method: 'GET',

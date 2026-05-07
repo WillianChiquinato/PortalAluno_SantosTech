@@ -47,6 +47,7 @@
 import MaterialCard from '@/components/MaterialCard.vue'
 import type { IMaterial } from '~/infra/interfaces/services/material';
 
+const { t, locale } = usePortalI18n()
 const materials = ref<IMaterial[]>([]);
 const selectedType = ref<'all' | string>('all');
 
@@ -81,7 +82,15 @@ async function fetchMaterials() {
     loadingPush();
 
     try {
-        const response = await $httpClient.material.GetAllMaterials()
+        const userEnrollment = getUserIdFromSession();
+
+        if (!userEnrollment) {
+            toast.error(t('dashboardInvalidSessionTitle'), t('dashboardLoginAgainToLoadProfile'), 4000)
+            await navigateTo('/')
+            return;
+        }
+
+        const response = await $httpClient.material.GetAllMaterialsByCourse(userEnrollment.enrollmentId ?? 0);
 
         if (response.success) {
             materials.value = response.result;

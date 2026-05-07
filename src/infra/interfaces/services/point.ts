@@ -23,6 +23,25 @@ export interface IRankingCategory {
   status?: string | null
 }
 
+export interface IHistoryRankingWinner {
+  userId: number
+  userName: string
+  userProfilePictureUrl?: string | null
+  awardId: number
+  awardName: string
+  awardDescription: string
+  awardPictureUrl?: string | null
+  rankingPosition: number
+}
+
+export interface IHistoryRankingEvent {
+  eventId: number
+  eventName: string
+  eventType: string
+  recordedAt: string
+  winners: IHistoryRankingWinner[]
+}
+
 export interface IAddPointsForUser {
   exerciseId: number
 }
@@ -81,10 +100,26 @@ export default class PointService extends ClientService<any> {
     })) as ApiResponse<IPointAwardResult>
   }
 
-  GetRankingEvent = async (eventType: number, config: FetchOptions = {}): Promise<ApiResponse<IRankingEvent[]>> => {
+  GetRankingEvent = async (
+    eventType: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IRankingEvent[]>> => {
     return (await this.fetchInstance(`${this.address}/GetRankingEvent?eventType=${eventType}`, {
       method: 'GET',
       ...config,
     })) as ApiResponse<IRankingEvent[]>
+  }
+
+  GetHistoryRanking = async (
+    eventType: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IHistoryRankingEvent[]>> => {
+    return (await this.fetchInstance(
+      `${this.address}/GetHistoryRanking?eventType=${eventType}`,
+      {
+        method: 'GET',
+        ...config,
+      },
+    )) as ApiResponse<IHistoryRankingEvent[]>
   }
 }

@@ -186,7 +186,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
                             t('dashboardExerciseGradesAllCourses') }}</p>
                         <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} {{ t('dashboardCategoriesLabel')
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <div v-if="exerciseCategoryGrades.length === 0"
@@ -224,7 +224,7 @@
                                         'bg-green-500': cat.categoryNotice === 'B',
                                         'bg-yellow-400': cat.categoryNotice === 'C',
                                         'bg-orange-400': cat.categoryNotice === 'D',
-                                        'bg-red-500': cat.categoryNotice === 'F',
+                                        'bg-red-400': cat.categoryNotice === 'F',
                                     }"
                                         :style="{ width: cat.totalAnswered > 0 ? `${Math.round((cat.totalCorrect / cat.totalAnswered) * 100)}%` : '0%' }">
                                     </div>
@@ -253,7 +253,7 @@
 
                             <div v-if="isCategoryInProgress(cat)"
                                 class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 px-3 backdrop-blur-[1px]">
-                                <p class="text-center text-[11px] font-semibold leading-snug text-amber-800">
+                                <p class="text-center text-[11px] font-semibold leading-snug text-ink-900/90">
                                     {{ t('dashboardCategoryUnlockHint') }}
                                 </p>
                             </div>
@@ -301,9 +301,9 @@
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
 
-                        <div class="w-10 h-10">
-                            <BaseLottie :animation-data="warningStatus" :loop="true" :autoplay="true"
-                                class="w-12 h-12" />
+                        <div
+                            class="w-12 h-12 border-1 border-yellow rounded-[20%] bg-red-50 flex items-center justify-center">
+                            <BaseLottie :animation-data="starsAnim" :loop="true" :autoplay="true" class="w-14 h-14" />
                         </div>
 
                         <div>
@@ -318,11 +318,16 @@
                 <div class="max-w-xl space-y-3 text-sm leading-relaxed text-ink-500 text-justify">
                     <p>{{ messageMotivacional }}</p>
                 </div>
-                <div class="panel mt-2 flex flex-col gap-2 bg-red-50 p-4">
+                <div class="panel mt-2 flex flex-col gap-2 bg-slate-50 p-4">
                     <p class="text-sm font-semibold">{{ t('dashboardGlobalRankingTitle') }}</p>
                     <p class="text-xs text-ink-500">{{ t('dashboardGlobalRankingDescription') }}</p>
-                    <button class="btn-primary mt-2 h-9 w-full px-4 text-xs text-ink-900 sm:w-auto cursor-pointer"
-                        @click="openRanking">{{ t('dashboardViewRanking') }}</button>
+                    <div class="mt-2">
+                        <RankingPoints @click="openRanking" @open-historico-pontos="openHistoricoPontos">
+                            <template #historico-pontos-content>
+                                <!-- Histórico de pontos será preenchido dinamicamente -->
+                            </template>
+                        </RankingPoints>
+                    </div>
                 </div>
             </div>
         </section>
@@ -521,7 +526,7 @@
                                 class="global-ranking-avatar" />
 
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-semibold text-ink-900">{{ entry.name }}</p>
+                                <p class="truncate text-sm font-semibold text-slate-900">{{ entry.name }}</p>
                                 <p class="text-xs text-ink-500">{{ t('dashboardStudentLabel') }}</p>
                             </div>
 
@@ -570,7 +575,7 @@
                                 <p class="grade-ranking-summary-value">{{
                                     currentUserCategorySummary.bestCategory.category }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.bestCategory.percent
-                                }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
+                                    }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
                                         t('dashboardPlace') }}</p>
                             </article>
 
@@ -607,7 +612,7 @@
                         <div class="grade-ranking-prize-note">
                             <p>
                                 {{ t('dashboardOnlyUnlockedCompetePrefix') }} <strong>{{ t('dashboardUnlockedStatus')
-                                }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
+                                    }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
                             </p>
                             <p>
                                 {{ t('dashboardParticipatingInCategory') }}: <strong>{{ eligibleEntriesCount }}</strong>
@@ -728,7 +733,7 @@ import BaseLottie from '@/components/BaseLottie.vue'
 import StatCard from '@/components/StatCard.vue'
 import TaskCard from '@/components/TaskCard.vue'
 import NotificationPanel from '@/components/NotificationPanel.vue'
-import warningStatus from '@/assets/lottie/Warning Status.json'
+import starsAnim from '@/assets/lottie/StarsAnimation.json'
 import TaskList from '~/assets/lottie/TaskList.json'
 import BadgeUnlocked from '~/assets/lottie/Badges.json'
 import Locked from '~/assets/lottie/lockBadge.json'
@@ -755,6 +760,7 @@ import { formatDate } from '~/utils/Format'
 import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestionSource, type QuizQuestion } from '~/utils/taskQuestionBank'
 import type { IAnswersByUserIdResponse, IAnswerByUser } from '~/infra/interfaces/services/answers'
 import RankingAvailable from '~/components/RankingAvailable.vue'
+import RankingPoints from '~/components/RankingPoints.vue'
 import { usePortalI18n } from '~/composables/usePortalI18n'
 
 const messageMotivacional = ref('')
@@ -1815,6 +1821,12 @@ function closeGradeRanking() {
     }
 
     showGradeRanking.value = false
+}
+
+async function openHistoricoPontos() {
+    console.log('Abrindo histórico de pontos - implemente a busca do backend aqui')
+    // Aqui você fará a chamada para buscar o histórico de pontos
+    // await $httpClient.point.GetHistoricoPontos() ou similar
 }
 
 async function openRanking() {
