@@ -136,8 +136,8 @@
                                             : island.status === 'Concluído' ? 'btn-primary cursor-pointer' : 'btn-primary cursor-pointer'"
                                         :disabled="island.status === 'Não Iniciado' || island.status === 'Desconhecido'"
                                         @click="enterIsland(island)">
-                                        {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status ===
-                                        'Concluído' ? 'Revisar ilha' : 'Entrar na ilha' }}
+                                        {{ island.status === 'Não Iniciado' || island.status === 'Desconhecido' ? 'Ilha bloqueada' : island.status === 'Concluído' ? 'Revisar ilha' : 'Entrar na ilha'
+                                        }}
                                     </button>
                                 </div>
 
@@ -319,26 +319,59 @@
             </Transition>
         </section>
 
-        <section class="panel relative overflow-hidden p-6 z-10">
-            <div class="absolute inset-0 bg-slate-100/70 backdrop-blur-sm"></div>
-            <div class="absolute -top-10 right-10 h-28 w-28 rounded-full bg-white/60 blur-2xl"></div>
-            <div class="absolute -bottom-12 left-6 h-28 w-28 rounded-full bg-red-100/60 blur-2xl"></div>
+        <NuxtLink :to="finalChallengeEntryRoute"
+            class="panel group relative z-10 block overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <div
+                class="relative overflow-hidden bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 px-6 py-6 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl"></div>
+                <div class="absolute -bottom-8 left-8 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
 
-            <div class="relative z-10 flex flex-col items-center gap-3 text-center">
-                <h3 class="text-lg font-semibold">Desafio final do módulo</h3>
+                <div class="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="space-y-3 text-tag-100">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Encerramento do
+                            módulo</p>
+                        <div>
+                            <h3 class="text-2xl font-semibold">Desafio final do módulo</h3>
+                            <p class="mt-2 max-w-2xl text-sm text-tag-100/85">
+                                {{ hasCurrentUserTeam
+                                    ? 'Acesse a arena do desafio final, acompanhe o ranking dos clãs e veja o barco da sua equipe avançando em tempo real.'
+                                    : 'Antes de entrar na arena, escolha um clã existente ou cadastre a sua equipe em uma tela dedicada.' }}
+                            </p>
+                            <div v-if="currentUserTeam"
+                                class="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-3 py-2 text-sm text-tag-100 backdrop-blur-sm">
+                                <span class="h-3 w-3 rounded-full"
+                                    :style="{ backgroundColor: currentUserTeam.clanColor }"></span>
+                                <span class="font-semibold">{{ currentUserTeam.clanName }}</span>
+                                <span class="text-tag-100/75">• {{ currentUserTeam.boatName }}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div
-                    class="grid h-24 w-24 place-items-center rounded-full border-2 border-slate-300 bg-white/80 shadow-sm">
-                    <span class="text-5xl leading-none">🔒</span>
+                    <div
+                        class="flex items-center gap-4 self-start rounded-2xl border border-white/25 bg-white/10 p-4 text-tag-100 backdrop-blur-sm">
+                        <div
+                            class="grid h-18 w-18 place-items-center rounded-2xl border border-white/30 bg-white/10 shadow-sm">
+                            <span class="text-4xl leading-none">🏴‍☠️</span>
+                        </div>
+
+                        <div>
+                            <span class="chip !border-white/30 !bg-white/15 !text-tag-100">
+                                {{ hasCurrentUserTeam ? 'Disponível agora' : 'Clã obrigatório' }}
+                            </span>
+                            <p class="mt-3 text-sm font-semibold">
+                                {{ hasCurrentUserTeam ? 'Seu barco está pronto' : 'Escolher ou cadastrar clã' }}
+                            </p>
+                            <p class="text-xs text-tag-100/75">
+                                {{ hasCurrentUserTeam ? 'Veja a prévia do seu clã e entre direto na arena' : 'Veja os clãs disponíveis e faça sua inscrição antes de começar' }}
+                            </p>
+                        </div>
+
+                        <i
+                            class="pi pi-arrow-right text-lg transition-transform duration-300 group-hover:translate-x-1"></i>
+                    </div>
                 </div>
-
-                <span class="chip !border-slate-300 !bg-white/80 !text-ink-700">Em breve</span>
             </div>
-
-            <p class="max-w-lg text-sm text-ink-500">
-                O desafio mestre está sendo preparado e será liberado em uma próxima atualização.
-            </p>
-        </section>
+        </NuxtLink>
     </div>
 
     <ExercisesCard :visible="showTaskQuizModal" :task="selectedTask" :daily-task="selectedDailyTask"
@@ -354,7 +387,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ExercisesCard from '~/components/ExercisesCard.vue';
 import BlipPopover from '~/components/UI/BlipPopover.vue'
 import SelectedExerciseRepeat from '~/components/Modals/SelectedExerciseRepeat.vue'
@@ -363,13 +396,25 @@ import { buildTaskQuestions, buildTaskQuestionsFromOptions, type ExerciseQuestio
 import type { ExerciseCardTask, IQuizQuestionOption, ISubmitExerciseAnswer } from '~/infra/interfaces/services/exercise'
 import type { IPointAwardResult } from '~/infra/interfaces/services/point'
 import { formatDate } from '~/utils/Format'
-import { getLoggedUser } from '~/composables/useAuth'
-import { useUserStore } from '~/infra/store/userStore'
+import { getUserIdFromSession } from '~/composables/useLoadingConfigurations'
+import type { IFinalChallengerTeams } from '~/infra/interfaces/services/finalChallenge';
 
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
-const userData = useUserStore()
+const teams = ref<IFinalChallengerTeams[]>([]);
+
+const currentUserTeam = computed(() => {
+    return teams.value.find((team) => team.members.some((member) => member.isCurrentUser)) ?? null
+})
+
+const hasCurrentUserTeam = computed(() => {
+    return currentUserTeam.value !== null
+})
+
+const finalChallengeEntryRoute = computed(() => {
+    return hasCurrentUserTeam.value ? '/desafio-final' : '/desafio-final/equipes'
+})
 
 type DailyTaskSummary = {
     id: number | string
@@ -393,6 +438,8 @@ const currentQuestionIndex = ref(0)
 const taskResult = ref<{ correct: number; total: number; accuracy: number; gainedPoints: number } | null>(null)
 
 const activeBlipId = ref<number | null>(null)
+const currentModuleId = ref<number | null>(null)
+const currentClassId = ref<number | null>(null)
 
 function toggleBlip(id: number) {
     const blip = islands.value.flatMap(island => island.blips).find(blip => blip.containerExercise.id === id);
@@ -1177,7 +1224,16 @@ async function fetchIslandByUserAndCurrentModule() {
         const responsePhase = await $httpClient.phase.GetCurrentModuleUser(user.enrollmentId ?? 0);
 
         if (responsePhase.result != null) {
-            await fetchCurrentModuleIslands(responsePhase.result.id);
+            const moduleId = responsePhase.result.id
+            const classId = responsePhase.result.class.id
+
+            currentModuleId.value = moduleId;
+            currentClassId.value = classId;
+
+            await Promise.all([
+                fetchCurrentModuleIslands(moduleId),
+                fetchTeamForPlayerRelationship(classId, moduleId),
+            ])
         }
     } catch (error) {
         console.error('Erro ao buscar progresso do aluno nas ilhas:', error);
@@ -1201,6 +1257,31 @@ async function fetchCurrentModuleIslands(phaseId: number) {
     } catch (error) {
         console.error('Erro ao buscar ilhas do módulo atual:', error);
         toast.error('Ocorreu um erro ao carregar as ilhas. Tente novamente mais tarde.');
+    }
+}
+
+async function fetchTeamForPlayerRelationship(classId: number, moduleId: number) {
+    if (!classId || !moduleId) {
+        teams.value = []
+        return
+    }
+
+    try {
+        const response = await $httpClient.finalChallenge.GetTeamForPlayerRelationship(
+            classId,
+            moduleId,
+        );
+
+        if (response.success && response.result) {
+            teams.value = Array.isArray(response.result) ? response.result : [response.result]
+        } else {
+            teams.value = []
+            toast.error('Não foi possível carregar os dados do time.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar dados do time:', error);
+        teams.value = []
+        toast.error('Ocorreu um erro ao carregar os dados do time. Tente novamente mais tarde.');
     }
 }
 

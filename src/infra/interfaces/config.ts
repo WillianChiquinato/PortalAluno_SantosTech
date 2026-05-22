@@ -5,6 +5,7 @@ import type BadgeService from "./services/badge";
 import type ClassService from "./services/class";
 import type CourseService from "./services/course";
 import type ExerciseService from "./services/exercise";
+import type FinalChallengeService from "./services/finalChallenge";
 import type MaterialService from "./services/material";
 import type NotificationService from "./services/notification";
 import type PhaseService from "./services/phase";
@@ -27,5 +28,6 @@ export interface IClientHttp {
 	auth: AuthService;
 	answers: AnswersService;
 	progress: ProgressService;
+	finalChallenge: FinalChallengeService;
 	AI: AiService;
 }

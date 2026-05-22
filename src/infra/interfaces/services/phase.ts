@@ -7,6 +7,10 @@ export interface ICurrentModuleUser {
   name: string
   description: string
   totalPhases: number
+  class: {
+    id: number
+    name: string
+  }
 }
 
 export default class PhaseService extends ClientService<any> {

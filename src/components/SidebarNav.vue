@@ -82,7 +82,8 @@
                             @click="handleReturnToAdminPortal">
                             <i class="pi pi-arrow-left text-lg"></i> Voltar ao portal
                         </button>
-                        <NuxtLink to="/videos" class="block text-base font-medium text-black pointer-events-none opacity-50"
+                        <NuxtLink to="/videos"
+                            class="block text-base font-medium text-black pointer-events-none opacity-50"
                             @click="showMobileMenu = false">
                             <i class="pi pi-video text-lg"></i> {{ t('navVideos') }}
                         </NuxtLink>

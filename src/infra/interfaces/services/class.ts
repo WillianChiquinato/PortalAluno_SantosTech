@@ -150,4 +150,16 @@ export default class ClassService extends ClientService<any> {
       ...config,
     })) as ApiResponse<IClass[]>
   }
+
+  GetClassOfFinalChallengeByEnrollmentId = async (
+    enrollmentId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IClass>> => {
+    const urlParams = `/GetClassByEnrollmentId?enrollmentId=${enrollmentId}`
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IClass>
+  }
 }

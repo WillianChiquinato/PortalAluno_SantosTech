@@ -1,42 +1,43 @@
-import { defineNuxtPlugin } from "nuxt/app";
-import type { IClientHttp } from "~/infra/interfaces/config";
-import AiService from "~/infra/interfaces/services/ai";
-import AnswersService from "~/infra/interfaces/services/answers";
-import AuthService from "~/infra/interfaces/services/auth";
-import BadgeService from "~/infra/interfaces/services/badge";
-import ClassService from "~/infra/interfaces/services/class";
-import CourseService from "~/infra/interfaces/services/course";
-import ExerciseService from "~/infra/interfaces/services/exercise";
-import MaterialService from "~/infra/interfaces/services/material";
-import NotificationService from "~/infra/interfaces/services/notification";
-import PhaseService from "~/infra/interfaces/services/phase";
-import PointService from "~/infra/interfaces/services/point";
-import ProgressService from "~/infra/interfaces/services/progress";
-import UserService from "~/infra/interfaces/services/user";
-import VideoService from "~/infra/interfaces/services/video";
+import { defineNuxtPlugin } from 'nuxt/app'
+import type { IClientHttp } from '~/infra/interfaces/config'
+import AiService from '~/infra/interfaces/services/ai'
+import AnswersService from '~/infra/interfaces/services/answers'
+import AuthService from '~/infra/interfaces/services/auth'
+import BadgeService from '~/infra/interfaces/services/badge'
+import ClassService from '~/infra/interfaces/services/class'
+import CourseService from '~/infra/interfaces/services/course'
+import ExerciseService from '~/infra/interfaces/services/exercise'
+import FinalChallengeService from '~/infra/interfaces/services/finalChallenge'
+import MaterialService from '~/infra/interfaces/services/material'
+import NotificationService from '~/infra/interfaces/services/notification'
+import PhaseService from '~/infra/interfaces/services/phase'
+import PointService from '~/infra/interfaces/services/point'
+import ProgressService from '~/infra/interfaces/services/progress'
+import UserService from '~/infra/interfaces/services/user'
+import VideoService from '~/infra/interfaces/services/video'
 
-export default defineNuxtPlugin(()=>{
-
+export default defineNuxtPlugin(() => {
   const httpClientServices: IClientHttp = {
-		user: new UserService(),
-		badge: new BadgeService(),
-		class: new ClassService(),
-		point: new PointService(),
-		phase: new PhaseService(),
-		video: new VideoService(),
-		material: new MaterialService(),
-		notification: new NotificationService(),
-		course: new CourseService(),
-		exercise: new ExerciseService(),
-		auth: new AuthService(),
-		answers: new AnswersService(),
-		progress: new ProgressService(),
-		AI: new AiService(),
-	};
+    user: new UserService(),
+    badge: new BadgeService(),
+    class: new ClassService(),
+    point: new PointService(),
+    finalChallenge: new FinalChallengeService(),
+    phase: new PhaseService(),
+    video: new VideoService(),
+    material: new MaterialService(),
+    notification: new NotificationService(),
+    course: new CourseService(),
+    exercise: new ExerciseService(),
+    auth: new AuthService(),
+    answers: new AnswersService(),
+    progress: new ProgressService(),
+    AI: new AiService(),
+  }
 
   return {
-		provide: {
-			httpClient: httpClientServices,
-		},
-	};
+    provide: {
+      httpClient: httpClientServices,
+    },
+  }
 })
