@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type {
   IFinalChallengeClan,
   IFinalChallengeFeedItem,
+  IFinalChallengeRankingEntry,
   IFinalChallengeSnapshot,
   IFinalChallengeTask,
 } from '~/infra/interfaces/services/finalChallenge'
@@ -212,17 +213,53 @@ function formatRelativeRank(rank: number) {
 export function useFinalChallenge(eventId?: number) {
   const { $httpClient } = useNuxtApp()
   const snapshot = ref<IFinalChallengeSnapshot | null>(null)
+  const ranking = ref<IFinalChallengeRankingEntry[]>([])
+  const clanTasks = ref<IFinalChallengeTask[]>([])
+  const resolvedEventId = ref<number | null>(typeof eventId === 'number' ? eventId : null)
   const isLoading = ref(true)
   const isRefreshing = ref(false)
   let refreshTimer: ReturnType<typeof setInterval> | null = null
 
   const clans = computed<IFinalChallengeClan[]>(() => snapshot.value?.clans ?? [])
-  const tasks = computed<IFinalChallengeTask[]>(() => snapshot.value?.tasks ?? [])
+  const tasks = computed<IFinalChallengeTask[]>(() => clanTasks.value)
   const feed = computed<IFinalChallengeFeedItem[]>(() => snapshot.value?.feed ?? [])
   const currentClan = computed(() => clans.value.find((clan) => clan.isCurrentUserClan) ?? null)
-  const leaderboard = computed(() =>
-    [...clans.value].sort((left, right) => right.totalScore - left.totalScore),
-  )
+  const leaderboard = computed<IFinalChallengeClan[]>(() => {
+    if (ranking.value.length > 0) {
+      return ranking.value
+        .map((entry) => ({
+          clanId: entry.clanId,
+          name: entry.clanName,
+          motto: entry.motto,
+          color: entry.color,
+          boatName: entry.boatName,
+          membersCount: entry.membersCount,
+          solvedCount: entry.solvedCount,
+          totalScore: entry.totalScore,
+          averageAiScore: entry.averageAiScore,
+          averageResolutionSeconds: entry.averageResolutionSeconds,
+          progressPercent: entry.progressPercent,
+          distanceToFinishPercent: entry.distanceToFinishPercent,
+          currentCheckpoint: entry.currentCheckpoint,
+          x: 0,
+          y: 0,
+          isCurrentUserClan: entry.clanId === currentClan.value?.clanId,
+          streak: 0,
+        }))
+        .sort((left, right) => {
+          const leftRank =
+            ranking.value.find((entry) => entry.clanId === left.clanId)?.rank ??
+            Number.MAX_SAFE_INTEGER
+          const rightRank =
+            ranking.value.find((entry) => entry.clanId === right.clanId)?.rank ??
+            Number.MAX_SAFE_INTEGER
+
+          return leftRank - rightRank
+        })
+    }
+
+    return [...clans.value].sort((left, right) => right.totalScore - left.totalScore)
+  })
 
   const countdownLabel = computed(() => {
     if (!snapshot.value) {
@@ -264,6 +301,37 @@ export function useFinalChallenge(eventId?: number) {
     ]
   })
 
+  async function ensureEventId() {
+    if (typeof resolvedEventId.value === 'number') {
+      return resolvedEventId.value
+    }
+
+    const response = await $httpClient.finalChallenge.GetActivityEvent()
+
+    if (!response?.success || !response.result?.id) {
+      throw new Error(response?.errors?.join(', ') || 'Evento ativo indisponivel.')
+    }
+
+    resolvedEventId.value = response.result.id
+    return resolvedEventId.value
+  }
+
+  async function loadClanTasks(eventId: number, clanId?: number) {
+    if (!clanId) {
+      clanTasks.value = snapshot.value?.tasks ?? []
+      return
+    }
+
+    const response = await $httpClient.finalChallenge.GetClanTasks(eventId, clanId)
+
+    if (!response?.success || !Array.isArray(response.result)) {
+      clanTasks.value = snapshot.value?.tasks ?? []
+      return
+    }
+
+    clanTasks.value = response.result
+  }
+
   async function loadSnapshot(options?: { silent?: boolean }) {
     const silent = options?.silent ?? false
 
@@ -274,13 +342,28 @@ export function useFinalChallenge(eventId?: number) {
     }
 
     try {
-      const response = await $httpClient.finalChallenge.GetLiveSnapshot(eventId)
+      const currentEventId = await ensureEventId()
+      const [snapshotResponse, rankingResponse] = await Promise.all([
+        $httpClient.finalChallenge.GetLiveSnapshot(currentEventId),
+        $httpClient.finalChallenge.GetRankingToFinalChallenge(currentEventId),
+      ])
 
-      if (!response?.success || !response.result) {
-        throw new Error(response?.errors?.join(', ') || 'Snapshot vazio.')
+      if (!snapshotResponse?.success || !snapshotResponse.result) {
+        throw new Error(snapshotResponse?.errors?.join(', ') || 'Snapshot vazio.')
       }
 
-      snapshot.value = response.result
+      snapshot.value = snapshotResponse.result
+      resolvedEventId.value = snapshotResponse.result.event.eventId
+      ranking.value =
+        rankingResponse?.success && Array.isArray(rankingResponse.result)
+          ? rankingResponse.result
+          : []
+
+      const currentUserClanId = snapshotResponse.result.clans.find(
+        (clan) => clan.isCurrentUserClan,
+      )?.clanId
+
+      await loadClanTasks(currentEventId, currentUserClanId)
     } catch (error) {
       console.error('Erro ao carregar desafio final:', error)
     } finally {

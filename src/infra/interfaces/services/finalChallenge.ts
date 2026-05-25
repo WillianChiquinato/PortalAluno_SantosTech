@@ -59,6 +59,23 @@ export interface IFinalChallengeClan {
   streak: number
 }
 
+export interface IFinalChallengeRankingEntry {
+  clanId: number
+  clanName: string
+  motto: string
+  color: string
+  boatName: string
+  membersCount: number
+  solvedCount: number
+  totalScore: number
+  averageAiScore: number
+  averageResolutionSeconds: number
+  progressPercent: number
+  distanceToFinishPercent: number
+  currentCheckpoint: string
+  rank: number
+}
+
 export interface IFinalChallengeTask {
   challengeId: number
   title: string
@@ -112,9 +129,33 @@ export interface ISubmitFinalChallengeResult {
   message: string
 }
 
+export interface IFinalChallengeActivityEvent {
+  id: number
+  rankingEventId: number
+  moduleId: number
+  classId: number
+  title: string
+  status: 'scheduled' | 'active' | 'closed'
+  startsAt: string
+  endsAt: string
+  refreshIntervalSeconds: number
+  updateMode: 'polling' | 'signalr'
+  createdAt: string
+  updatedAt: string
+}
+
 export default class FinalChallengeService extends ClientService<any> {
   constructor() {
     super('FinalChallenge', 'api/FinalChallenge')
+  }
+
+  GetActivityEvent = async (
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IFinalChallengeActivityEvent>> => {
+    return (await this.fetchInstance(`${this.address}/GetActivityEvent`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IFinalChallengeActivityEvent>
   }
 
   GetLiveSnapshot = async (
@@ -137,6 +178,19 @@ export default class FinalChallengeService extends ClientService<any> {
       method: 'GET',
       ...config,
     })) as ApiResponse<IFinalChallengeClan[]>
+  }
+
+  GetRankingToFinalChallenge = async (
+    eventId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IFinalChallengeRankingEntry[]>> => {
+    return (await this.fetchInstance(
+      `${this.address}/GetRankingToFinalChallenge?eventId=${eventId}`,
+      {
+        method: 'GET',
+        ...config,
+      },
+    )) as ApiResponse<IFinalChallengeRankingEntry[]>
   }
 
   GetClanTasks = async (

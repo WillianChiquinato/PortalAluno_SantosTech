@@ -528,10 +528,16 @@ async function fetchTeamForPlayerRelationship() {
     isLoadingTeams.value = true
 
     try {
-        const currentClass = currentClassroom.value
+        const currentClass = currentClassroom.value ?? await fetchCurrentClassroom()
+
+        if (!currentClass?.id || !currentClass?.currentModuleId) {
+            teams.value = []
+            return
+        }
+
         const response = await $httpClient.finalChallenge.GetTeamForPlayerRelationship(
-            currentClass?.id ?? 0,
-            currentClass?.currentModuleId ?? 0,
+            currentClass.id,
+            currentClass.currentModuleId,
         )
 
         if (response.success && response.result) {
@@ -554,6 +560,11 @@ async function submitTeamRegistration() {
 
     if (!user?.userId) {
         toast.error('Sessão inválida', 'Faça login novamente para cadastrar seu clã.', 4000)
+        return
+    }
+
+    if (!currentClassroom.value?.id || !currentClassroom.value?.currentModuleId) {
+        toast.error('Turma indisponível', 'Não foi possível identificar a turma do desafio final.', 4000)
         return
     }
 
@@ -611,8 +622,9 @@ onBeforeMount(async () => {
         return
     }
 
+    await fetchCurrentClassroom()
+
     await Promise.all([
-        fetchCurrentClassroom(),
         fetchTeamForPlayerRelationship(),
         fetchAvailableMembers(),
     ])
