@@ -48,7 +48,7 @@ const { t } = usePortalI18n()
 const { isLoading } = useLoading();
 const { loadConfigurations } = useLoadingConfigurations();
 const { refreshNotifications } = useNotifications();
-let notificationsPollInterval: ReturnType<typeof setInterval> | null = null
+let notificationsPollInterval: number | null = null
 const loggedUserEmail = computed(() => {
     return getLoggedUser()?.email ?? ''
 })

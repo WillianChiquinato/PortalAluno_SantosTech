@@ -503,7 +503,7 @@ async function fetchGoalData() {
         let courseId = 0
 
         if (classResponse.result) {
-            courseId = classResponse.result.courseId ?? 0
+            courseId = classResponse.result[0]?.courseId ?? 0
         }
 
         if (courseId > 0) {
