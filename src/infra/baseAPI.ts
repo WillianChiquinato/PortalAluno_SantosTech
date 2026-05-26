@@ -1,7 +1,8 @@
-import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#imports'
 import { $fetch } from 'ofetch'
 import { clearAuth } from '~/composables/useAuth'
+
+const AUTH_ORIGIN = 'https://auth.santos-tech.com'
 
 export const fetchInstance = $fetch.create({
   onRequest({ options }) {
@@ -23,7 +24,10 @@ export const fetchInstance = $fetch.create({
     if (response.status === 401) {
       clearAuth()
 
-      navigateTo('/')
+      if (import.meta.client) {
+        const redirectUrl = window.location.href
+        window.location.replace(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`)
+      }
     }
 
     console.error('API Error:', response)

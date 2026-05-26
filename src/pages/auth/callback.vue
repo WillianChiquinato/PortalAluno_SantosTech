@@ -55,14 +55,14 @@ onMounted(async () => {
 
     if (errorMessage) {
         toast.error('Acesso nao autorizado', errorMessage, 4500)
-        await navigateTo('/')
+        window.location.replace('https://auth.santos-tech.com')
         return
     }
 
     const isAuthenticated = await checkAuth(true)
     if (!isAuthenticated) {
-        toast.error('Falha na autenticacao', 'Nao foi possivel concluir seu login social.', 4500)
-        await navigateTo('/')
+        toast.error('Falha na autenticacao', 'Nao foi possivel concluir seu login.', 4500)
+        window.location.replace('https://auth.santos-tech.com')
         return
     }
 

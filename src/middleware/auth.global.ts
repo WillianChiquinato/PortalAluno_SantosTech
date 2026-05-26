@@ -1,22 +1,22 @@
 import { checkAuth, verifyToken } from '@/composables/useAuth'
 
+const AUTH_ORIGIN = 'https://auth.santos-tech.com'
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!process.client) {
     return
   }
 
   const publicRoutes = new Set([
-    '/',
     '/auth/callback',
   ])
   const isPublicRoute = publicRoutes.has(to.path)
   const hasValidSession = verifyToken() || (await checkAuth())
 
   if (!hasValidSession && !isPublicRoute) {
-    return navigateTo({
-      path: '/',
-      query: { auth: 'required' },
-    })
+    const redirectUrl = window.location.origin + to.fullPath
+    window.location.replace(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`)
+    return
   }
 
   if (hasValidSession && isPublicRoute) {

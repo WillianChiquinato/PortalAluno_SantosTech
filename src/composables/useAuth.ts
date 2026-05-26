@@ -113,5 +113,8 @@ export async function logout() {
     await $httpClient.auth.Logout()
   } finally {
     clearAuth()
+    if (import.meta.client) {
+      window.location.replace('https://auth.santos-tech.com')
+    }
   }
 }
