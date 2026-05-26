@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  if (hasValidSession && isPublicRoute) {
+  if (hasValidSession && (isPublicRoute || to.path === '/')) {
     return navigateTo('/dashboard')
   }
 })

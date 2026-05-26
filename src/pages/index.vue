@@ -3,10 +3,8 @@
 </template>
 
 <script setup lang="ts">
-// Login is now handled by auth.santos-tech.com.
-// The auth.global middleware redirects here only if session is valid (→ /dashboard).
-// Unauthenticated users are sent directly to auth.santos-tech.com by the middleware.
-onMounted(() => {
-  window.location.replace('https://auth.santos-tech.com')
-})
+// The auth.global middleware handles routing:
+// - Unauthenticated → redirects to auth.santos-tech.com
+// - Authenticated → redirects to /dashboard
+// This page is a fallback shown briefly during the middleware check.
 </script>
