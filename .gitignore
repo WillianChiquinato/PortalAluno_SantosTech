@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 .DS_Store
+bun.lock
+package-lock.json
 dist
 dist-ssr
 coverage
