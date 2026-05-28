@@ -524,6 +524,23 @@ async function fetchCurrentClassroom(): Promise<IClass | null> {
     return null
 }
 
+async function ensureFinalChallengeAccess() {
+    const currentClass = await fetchCurrentClassroom()
+
+    if (currentClass?.id && currentClass.currentModuleId) {
+        return true
+    }
+
+    var responseAcess = await $httpClient.finalChallenge.FinalChallengeAccess(currentClass?.courseId ?? 0)
+    
+    if (responseAcess.result.hasAccess)
+    {
+        
+    }
+    await navigateTo('/trilha-aluno')
+    return false
+}
+
 async function fetchTeamForPlayerRelationship() {
     isLoadingTeams.value = true
 
@@ -622,7 +639,11 @@ onBeforeMount(async () => {
         return
     }
 
-    await fetchCurrentClassroom()
+    const hasAccess = await ensureFinalChallengeAccess()
+
+    if (!hasAccess) {
+        return
+    }
 
     await Promise.all([
         fetchTeamForPlayerRelationship(),

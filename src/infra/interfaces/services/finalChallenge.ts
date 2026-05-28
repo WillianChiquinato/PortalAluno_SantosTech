@@ -144,6 +144,10 @@ export interface IFinalChallengeActivityEvent {
   updatedAt: string
 }
 
+export interface IFinalChallengerAcess {
+  hasAccess: boolean
+}
+
 export default class FinalChallengeService extends ClientService<any> {
   constructor() {
     super('FinalChallenge', 'api/FinalChallenge')
@@ -248,5 +252,12 @@ export default class FinalChallengeService extends ClientService<any> {
       body: structureJoin,
       ...config,
     })) as ApiResponse<void>
+  }
+
+  FinalChallengeAccess = async (courseId: number, config: FetchOptions = {}): Promise<ApiResponse<IFinalChallengerAcess>> => {
+    return (await this.fetchInstance(`${this.address}/FinalChallengeAccess?courseId=${courseId}`, {
+      method: 'GET',
+      ...config,
+    })) as ApiResponse<IFinalChallengerAcess>
   }
 }

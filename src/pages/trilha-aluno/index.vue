@@ -319,25 +319,55 @@
             </Transition>
         </section>
 
-        <NuxtLink :to="finalChallengeEntryRoute"
-            class="panel group relative z-10 block overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div
-                class="relative overflow-hidden bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 px-6 py-6 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]">
-                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl"></div>
-                <div class="absolute -bottom-8 left-8 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
+        <component :is="isFinalChallengeAvailable ? 'NuxtLink' : 'div'"
+            :to="isFinalChallengeAvailable ? finalChallengeEntryRoute : undefined"
+            class="panel group relative z-10 block overflow-hidden p-0 transition-transform duration-300"
+            :class="isFinalChallengeAvailable ? 'hover:-translate-y-1 hover:shadow-lg cursor-pointer' : 'cursor-not-allowed border-0 shadow-[0_20px_60px_rgba(15,23,42,0.12)]'">
+            <div class="relative overflow-hidden px-6 py-6 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]"
+                :class="isFinalChallengeAvailable
+                    ? 'bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500'
+                    : 'bg-[linear-gradient(135deg,#fff7ed_0%,#fef2f2_45%,#e2e8f0_100%)] before:bg-[radial-gradient(circle_at_top_right,rgba(15,23,42,0.08),transparent_48%)]'">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl"
+                    :class="isFinalChallengeAvailable ? 'bg-white/20' : 'bg-amber-200/60'"></div>
+                <div class="absolute -bottom-8 left-8 h-24 w-24 rounded-full blur-2xl"
+                    :class="isFinalChallengeAvailable ? 'bg-white/10' : 'bg-red-200/50'"></div>
+                <div v-if="!isFinalChallengeAvailable"
+                    class="pointer-events-none absolute inset-4 rounded-[28px] border border-dashed border-ink-900/15">
+                </div>
+                <div v-if="!isFinalChallengeAvailable"
+                    class="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700 backdrop-blur-sm">
+                    <i class="pi pi-lock text-[10px]"></i>
+                    Libera no módulo final
+                </div>
 
                 <div class="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div class="space-y-3 text-tag-100">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tag-100/80">Encerramento do
+                    <div class="space-y-3" :class="isFinalChallengeAvailable ? 'text-tag-100' : 'text-ink-900'">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em]"
+                            :class="isFinalChallengeAvailable ? 'text-tag-100/80' : 'text-ink-500'">Encerramento do
                             módulo</p>
                         <div>
                             <h3 class="text-2xl font-semibold">Desafio final do módulo</h3>
-                            <p class="mt-2 max-w-2xl text-sm text-tag-100/85">
-                                {{ hasCurrentUserTeam
-                                    ? 'Acesse a arena do desafio final, acompanhe o ranking dos clãs e veja o barco da sua equipe avançando em tempo real.'
-                                    : 'Antes de entrar na arena, escolha um clã existente ou cadastre a sua equipe em uma tela dedicada.' }}
+                            <p class="mt-2 max-w-2xl text-sm"
+                                :class="isFinalChallengeAvailable ? 'text-tag-100/85' : 'text-ink-600'">
+                                {{ !isFinalChallengeAvailable
+                                    ? 'O desafio final fica disponível apenas no último módulo. Continue avançando na trilha para liberar o cadastro de clã e a entrada na arena.'
+                                    : hasCurrentUserTeam
+                                        ? 'Acesse a arena do desafio final, acompanhe o ranking dos clãs e veja o barco da sua equipe avançando em tempo real.'
+                                        : 'Antes de entrar na arena, escolha um clã existente ou cadastre a sua equipe em uma tela dedicada.' }}
                             </p>
-                            <div v-if="currentUserTeam"
+                            <div v-if="!isFinalChallengeAvailable"
+                                class="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+                                <span class="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-amber-700">
+                                    Etapa especial bloqueada
+                                </span>
+                                <span class="rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-slate-600">
+                                    Cadastro de clã indisponível
+                                </span>
+                                <span class="rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-slate-600">
+                                    Arena liberada só no último módulo
+                                </span>
+                            </div>
+                            <div v-if="isFinalChallengeAvailable && currentUserTeam"
                                 class="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-3 py-2 text-sm text-tag-100 backdrop-blur-sm">
                                 <span class="h-3 w-3 rounded-full"
                                     :style="{ backgroundColor: currentUserTeam.clanColor }"></span>
@@ -347,31 +377,51 @@
                         </div>
                     </div>
 
-                    <div
-                        class="flex items-center gap-4 self-start rounded-2xl border border-white/25 bg-white/10 p-4 text-tag-100 backdrop-blur-sm">
-                        <div
-                            class="grid h-18 w-18 place-items-center rounded-2xl border border-white/30 bg-white/10 shadow-sm">
-                            <span class="text-4xl leading-none">🏴‍☠️</span>
+                    <div class="flex items-center gap-4 self-start rounded-2xl p-4 backdrop-blur-sm"
+                        :class="isFinalChallengeAvailable
+                            ? 'border border-white/25 bg-white/10 text-tag-100'
+                            : 'border border-white/70 bg-white/65 text-ink-900 shadow-[0_14px_35px_rgba(15,23,42,0.08)]'">
+                        <div class="grid h-18 w-18 place-items-center rounded-2xl shadow-sm" :class="isFinalChallengeAvailable
+                            ? 'border border-white/30 bg-white/10'
+                            : 'border border-amber-200 bg-[linear-gradient(135deg,#fff7ed_0%,#ffffff_100%)]'">
+                            <span class="text-4xl leading-none">{{ isFinalChallengeAvailable ? '🏴‍☠️' : '🧭' }}</span>
                         </div>
 
                         <div>
-                            <span class="chip !border-white/30 !bg-white/15 !text-tag-100">
-                                {{ hasCurrentUserTeam ? 'Disponível agora' : 'Clã obrigatório' }}
+                            <span class="chip" :class="isFinalChallengeAvailable
+                                ? '!border-white/30 !bg-white/15 !text-tag-100'
+                                : '!border-amber-200 !bg-amber-50 !text-amber-700'">
+                                {{ !isFinalChallengeAvailable ? 'Bloqueado até o último módulo' : hasCurrentUserTeam ?
+                                    'Disponível agora' : 'Clã obrigatório' }}
                             </span>
                             <p class="mt-3 text-sm font-semibold">
-                                {{ hasCurrentUserTeam ? 'Seu barco está pronto' : 'Escolher ou cadastrar clã' }}
+                                {{ !isFinalChallengeAvailable ? 'Continue sua jornada' : hasCurrentUserTeam ? 'Seu barco está pronto' : 'Escolher ou cadastrar clã' }}
                             </p>
-                            <p class="text-xs text-tag-100/75">
-                                {{ hasCurrentUserTeam ? 'Veja a prévia do seu clã e entre direto na arena' : 'Veja os clãs disponíveis e faça sua inscrição antes de começar' }}
+                            <p class="text-xs" :class="isFinalChallengeAvailable ? 'text-tag-100/75' : 'text-ink-500'">
+                                {{ !isFinalChallengeAvailable
+                                    ? 'Este acesso só libera quando você chegar ao último módulo da turma.'
+                                    : hasCurrentUserTeam ? 'Veja a prévia do seu clã e entre direto na arena' : 'Veja os clãs disponíveis e faça sua inscrição antes de começar' }}
                             </p>
+                            <div v-if="!isFinalChallengeAvailable"
+                                class="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-900 px-3 py-2 text-white">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                                    <i class="pi pi-flag text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Liberação
+                                    </p>
+                                    <p class="text-sm font-semibold">Último módulo da turma</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <i
+                        <i v-if="isFinalChallengeAvailable"
                             class="pi pi-arrow-right text-lg transition-transform duration-300 group-hover:translate-x-1"></i>
+                        <i v-else class="pi pi-lock text-lg text-amber-700"></i>
                     </div>
                 </div>
             </div>
-        </NuxtLink>
+        </component>
     </div>
 
     <ExercisesCard :visible="showTaskQuizModal" :task="selectedTask" :daily-task="selectedDailyTask"
@@ -403,6 +453,7 @@ const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
 const teams = ref<IFinalChallengerTeams[]>([]);
+const isFinalChallengeAvailable = ref(false)
 
 const currentUserTeam = computed(() => {
     return teams.value.find((team) => team.members.some((member) => member.isCurrentUser)) ?? null
@@ -1222,6 +1273,7 @@ async function fetchIslandByUserAndCurrentModule() {
         }
 
         const responsePhase = await $httpClient.phase.GetCurrentModuleUser(user.enrollmentId ?? 0);
+        await fetchFinalChallengeAvailability(responsePhase.result?.class.id ?? 0)
 
         if (responsePhase.result != null) {
             const moduleId = responsePhase.result.id
@@ -1230,16 +1282,36 @@ async function fetchIslandByUserAndCurrentModule() {
             currentModuleId.value = moduleId;
             currentClassId.value = classId;
 
-            await Promise.all([
-                fetchCurrentModuleIslands(moduleId),
-                fetchTeamForPlayerRelationship(classId, moduleId),
-            ])
+            await fetchCurrentModuleIslands(moduleId)
+
+            if (isFinalChallengeAvailable.value) {
+                await fetchTeamForPlayerRelationship(classId, moduleId)
+            } else {
+                teams.value = []
+            }
         }
     } catch (error) {
         console.error('Erro ao buscar progresso do aluno nas ilhas:', error);
         toast.error('Não foi possível carregar o progresso das ilhas. Tente novamente mais tarde.');
     } finally {
         loadingPop();
+    }
+}
+
+async function fetchFinalChallengeAvailability(classId: number) {
+    try {
+        const response = await $httpClient.finalChallenge.FinalChallengeAccess(classId);
+
+        if (response.success) {
+            isFinalChallengeAvailable.value = response.result?.hasAccess ?? false
+        } else {
+            isFinalChallengeAvailable.value = false
+            toast.error('Não foi possível verificar a disponibilidade do desafio final.');
+        }
+    } catch (error) {
+        console.error('Erro ao verificar disponibilidade do desafio final:', error);
+        isFinalChallengeAvailable.value = false
+        toast.error('Ocorreu um erro ao verificar a disponibilidade do desafio final. Tente novamente mais tarde.');
     }
 }
 

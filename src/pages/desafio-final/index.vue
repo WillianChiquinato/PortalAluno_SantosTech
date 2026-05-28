@@ -265,8 +265,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useFinalChallenge } from '~/composables/useFinalChallenge'
+import { getUserIdFromSession } from '~/composables/useLoadingConfigurations'
 import type { IFinalChallengeTask } from '~/infra/interfaces/services/finalChallenge'
 
 definePageMeta({
@@ -296,6 +297,34 @@ const selectedTask = ref<IFinalChallengeTask | null>(null)
 const taskAnswer = ref('')
 const taskAttachments = ref('')
 const isSubmittingTask = ref(false)
+
+async function ensureFinalChallengeAccess() {
+    const user = getUserIdFromSession()
+
+    if (!user?.enrollmentId) {
+        toast.error('Sessão inválida', 'Faça login novamente para continuar.', 4000)
+        await navigateTo('/')
+        return false
+    }
+
+    try {
+        const response = await $httpClient.class.GetClassOfFinalChallengeByEnrollmentId(user.enrollmentId)
+
+        if (response?.result?.id) {
+            var responseAcess = await $httpClient.finalChallenge.FinalChallengeAccess(response.result.courseId)
+
+            if (responseAcess.result.hasAccess) {
+                return true
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao validar acesso ao desafio final:', error)
+    }
+
+    toast.warn('Desafio final bloqueado', 'A arena só fica disponível no último módulo.', 4000)
+    await navigateTo('/trilha-aluno')
+    return false
+}
 
 function formatDate(value: string) {
     return new Date(value).toLocaleDateString('pt-BR', {
@@ -453,6 +482,10 @@ async function submitTaskAnswer() {
         isSubmittingTask.value = false
     }
 }
+
+onMounted(async () => {
+    await ensureFinalChallengeAccess()
+})
 </script>
 
 <style scoped lang="scss">
