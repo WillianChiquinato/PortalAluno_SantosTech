@@ -48,7 +48,7 @@ const { t } = usePortalI18n()
 const { isLoading } = useLoading();
 const { loadConfigurations } = useLoadingConfigurations();
 const { refreshNotifications } = useNotifications();
-let notificationsPollInterval: ReturnType<typeof setInterval> | null = null
+let notificationsPollInterval: number | null = null
 const loggedUserEmail = computed(() => {
     return getLoggedUser()?.email ?? ''
 })
@@ -167,7 +167,7 @@ onUnmounted(() => {
     right: -8px;
     width: 24px;
     height: 24px;
-    background-color: #dc3545;
+    background-color: #187ABF;
     color: #FFF;
     border: 2px solid #FFF;
     border-radius: 50%;

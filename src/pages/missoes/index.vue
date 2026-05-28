@@ -38,12 +38,12 @@
         <section class="panel p-3 sm:p-4 flex items-center justify-between">
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" class="chip cursor-pointer transition"
-                    :class="selectedTab === 'all' ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
+                    :class="selectedTab === 'all' ? '!border-brand-500 !bg-brand-50 !text-brand-600' : ''"
                     @click="selectedTab = 'all'">
                     Todas as missões
                 </button>
                 <button type="button" class="chip cursor-pointer transition"
-                    :class="selectedTab === 'active' ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
+                    :class="selectedTab === 'active' ? '!border-brand-500 !bg-brand-50 !text-brand-600' : ''"
                     @click="selectedTab = 'active'">
                     Minhas missões
                 </button>
@@ -58,7 +58,7 @@
 
         <section v-if="selectedTab === 'all' && goals.length" class="grid gap-4 lg:grid-cols-2">
             <article v-for="goal in goals" :key="getGoalRewardId(goal)"
-                class="panel relative overflow-hidden border-red-100/90 p-4 transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                class="panel relative overflow-hidden border-brand-100/90 p-4 transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
                 <div class="absolute right-0 top-0 h-24 w-24 rounded-full bg-brand-100/50 blur-2xl"></div>
 
                 <div class="relative z-10 space-y-4 flex flex-col h-full">
@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="chip !border-brand-200 !bg-red-50 !text-brand-600">
+                        <span class="chip !border-brand-200 !bg-brand-50 !text-brand-600">
                             <i class="pi pi-trophy text-[11px]"></i>
                             {{ goal.badges.length }} medalha{{ goal.badges.length !== 1 ? 's' : '' }}
                         </span>
@@ -89,7 +89,7 @@
                         </span>
                     </div>
 
-                    <div class="rounded-2xl border border-red-100 bg-red-50/50 p-3 sm:p-4">
+                    <div class="rounded-2xl border border-brand-100 bg-brand-50/50 p-3 sm:p-4">
                         <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ink-500">
                                 Medalhas da missão
@@ -99,7 +99,7 @@
 
                         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
                             <div v-for="badge in goal.badges" :key="badge.id"
-                                class="group relative rounded-xl border border-brand-200 bg-white p-2 text-center text-xs transition hover:border-brand-300 hover:bg-red-50">
+                                class="group relative rounded-xl border border-brand-200 bg-white p-2 text-center text-xs transition hover:border-brand-300 hover:bg-brand-50">
                                 <div class="flex justify-center items-center h-10">
                                     <BaseLottie :animation-data="BadgeUnlocked" :loop="true" :autoplay="true"
                                         class="h-9 w-9" />
@@ -503,7 +503,7 @@ async function fetchGoalData() {
         let courseId = 0
 
         if (classResponse.result) {
-            courseId = classResponse.result.courseId ?? 0
+            courseId = classResponse.result[0]?.courseId ?? 0
         }
 
         if (courseId > 0) {

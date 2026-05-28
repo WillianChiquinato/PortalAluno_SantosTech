@@ -2,14 +2,14 @@
     <Teleport to="body">
         <Transition name="task-quiz-fade" appear>
             <div v-if="props.visible" class="task-quiz-mask" @click.self="closeTaskQuiz">
-                <div v-if="props.loading" class="panel border-red-100/80 bg-white p-6">
+                <div v-if="props.loading" class="panel border-brand-100/80 bg-white p-6">
                     <div class="flex items-center gap-3">
-                        <i class="pi pi-spinner text-lg text-red-500"></i>
+                        <i class="pi pi-spinner text-lg text-brand-500"></i>
                         <p class="text-sm text-ink-500">Carregando exercício...</p>
                     </div>
                 </div>
-                <div class="task-quiz-modal panel border-red-100/80 bg-white" v-else>
-                    <div class="flex items-center justify-between border-b border-red-100/80 px-5 py-4 sm:px-6">
+                <div class="task-quiz-modal panel border-brand-100/80 bg-white" v-else>
+                    <div class="flex items-center justify-between border-b border-brand-100/80 px-5 py-4 sm:px-6">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Exercicio de Task
                             </p>
@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="hide-scrollbar grid flex-1 gap-4 overflow-y-auto p-4 sm:grid-cols-[2fr_1fr] sm:p-6">
-                        <section class="panel border-red-100/80 p-4 sm:p-5">
+                        <section class="panel border-brand-100/80 p-4 sm:p-5">
                             <template v-if="!props.task">
                                 <h4 class="text-lg sm:text-xl font-semibold">Exercícios disponíveis</h4>
                                 <p class="mt-2 text-sm text-ink-500">Escolha um exercício para iniciar o quiz.</p>
@@ -35,7 +35,7 @@
                                         class="relative w-full overflow-hidden rounded-xl border p-4 text-left transition"
                                         :class="exercise.isCompletedAnswer
                                             ? 'cursor-not-allowed border-slate-300 bg-slate-100/90 text-ink-500'
-                                            : 'cursor-pointer border-red-100/80 bg-white hover:border-brand-200 hover:bg-red-50/40'"
+                                            : 'cursor-pointer border-brand-100/80 bg-white hover:border-brand-200 hover:bg-brand-50/40'"
                                         :disabled="exercise.isCompletedAnswer" @click="startExerciseQuiz(exercise)">
                                         <div class="flex items-center justify-between gap-2"
                                             :class="exercise.isCompletedAnswer ? 'opacity-55' : ''">
@@ -58,12 +58,12 @@
                                 <h4 class="mt-4 text-xl font-semibold leading-snug">{{ currentQuestion.statement }}</h4>
 
                                 <div v-if="referenceVideoUrl"
-                                    class="mt-4 rounded-xl border border-red-100/80 bg-red-50/30 p-3">
+                                    class="mt-4 rounded-xl border border-brand-100/80 bg-brand-50/30 p-3">
                                     <p class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-ink-500">Vídeo
                                         de referência</p>
 
                                     <div v-if="referenceVideoEmbedUrl"
-                                        class="overflow-hidden rounded-lg border border-red-100/80 bg-white">
+                                        class="overflow-hidden rounded-lg border border-brand-100/80 bg-white">
                                         <iframe :src="referenceVideoEmbedUrl" class="referencesVideo"
                                             title="Vídeo de referência do exercício"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -93,8 +93,8 @@
                                         :key="`${currentQuestion.id}-${option.id}`" type="button"
                                         class="w-full rounded-xl border px-4 py-3 text-left text-sm transition cursor-pointer"
                                         :class="props.selectedAnswers[currentQuestion.id] === option.id
-                                            ? 'border-brand-500 bg-red-50 text-brand-600'
-                                            : 'border-red-100/80 bg-white text-ink-700 hover:border-brand-200'"
+                                            ? 'border-brand-500 bg-brand-50 text-brand-600'
+                                            : 'border-brand-100/80 bg-white text-ink-700 hover:border-brand-200'"
                                         @click="selectAnswer(currentQuestion.id, option.id)">
                                         {{ option.label }}
                                     </button>
@@ -103,7 +103,7 @@
                                 <div v-if="!props.loading"
                                     class="mt-6 flex flex-wrap items-center justify-between gap-2">
                                     <button type="button"
-                                        class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                                        class="bg-brand-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                                         @click="backToExercises">
                                         Voltar
                                     </button>
@@ -124,7 +124,7 @@
                                 <h4 class="text-xl font-semibold">Relatório do exercício</h4>
 
                                 <div class="mt-4 rounded-2xl border px-4 py-4 sm:px-5" :class="isExerciseCorrect
-                                    ? 'border-brand-200 bg-red-50/50'
+                                    ? 'border-brand-200 bg-brand-50/50'
                                     : 'border-red-200 bg-red-50/30'">
                                     <div class="flex items-start gap-3">
                                         <div class="flex h-10 w-10 items-center justify-center rounded-xl border"
@@ -167,7 +167,7 @@
 
                                 <div class="mt-4 space-y-2">
                                     <article v-for="item in questionReport" :key="item.id"
-                                        class="rounded-xl border border-red-100/80 bg-white px-4 py-3">
+                                        class="rounded-xl border border-brand-100/80 bg-white px-4 py-3">
                                         <div class="flex items-start justify-between gap-2">
                                             <p class="text-sm text-ink-800">{{ item.statement }}</p>
                                             <span class="chip" :class="item.isDissertative
@@ -226,7 +226,7 @@
                                 <span class="text-2xl">💡</span>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-rose-400">Material de
+                                <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-400">Material de
                                     Apoio</p>
                                 <h3 class="text-base font-semibold text-slate-900">Precisa de uma ajudinha? 🚀</h3>
                             </div>
@@ -511,7 +511,7 @@ function finishQuiz() {
     height: min(94vh, 920px);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(220, 38, 38, 0.1);
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(24, 122, 191, 0.1);
 }
 
 .task-quiz-fade-enter-active,
@@ -550,18 +550,18 @@ function finishQuiz() {
     height: 2.25rem;
     padding: 0 1rem;
     border-radius: 0.75rem;
-    border: 1.5px solid #fb7185;
-    background: linear-gradient(135deg, #ffe4e6 0%, #fda4af 100%);
-    color: #9f1239;
+    border: 1.5px solid #49A8EB;
+    background: linear-gradient(135deg, #BDD9F2 0%, #8DC4E8 100%);
+    color: #04325A;
     font-size: 0.75rem;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+    box-shadow: 0 2px 8px rgba(24, 122, 191, 0.15);
     transition: all 0.18s ease;
 
     &:hover {
-        background: linear-gradient(135deg, #fda4af 0%, #f43f5e 100%);
-        border-color: #f43f5e;
-        box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
+        background: linear-gradient(135deg, #8DC4E8 0%, #187ABF 100%);
+        border-color: #187ABF;
+        box-shadow: 0 4px 14px rgba(24, 122, 191, 0.25);
         transform: translateY(-1px);
     }
 
@@ -589,10 +589,10 @@ function finishQuiz() {
     display: flex;
     flex-direction: column;
     border-radius: 1.25rem;
-    border: 1.5px solid #fda4af;
+    border: 1.5px solid #8DC4E8;
     background: #fff;
     box-shadow:
-        0 32px 80px rgba(244, 63, 94, 0.18),
+        0 32px 80px rgba(24, 122, 191, 0.18),
         0 8px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
@@ -602,8 +602,8 @@ function finishQuiz() {
     align-items: center;
     justify-content: space-between;
     padding: 1.1rem 1.4rem;
-    background: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 100%);
-    border-bottom: 1.5px solid #fda4af;
+    background: linear-gradient(135deg, #BDD9F2 0%, #EBF5FF 100%);
+    border-bottom: 1.5px solid #8DC4E8;
 }
 
 .apoio-modal__icon {
@@ -613,9 +613,9 @@ function finishQuiz() {
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 0.875rem;
-    border: 1.5px solid #fda4af;
-    background: linear-gradient(135deg, #ffe4e6, #fff1f2);
-    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.2);
+    border: 1.5px solid #8DC4E8;
+    background: linear-gradient(135deg, #BDD9F2, #EBF5FF);
+    box-shadow: 0 2px 8px rgba(24, 122, 191, 0.2);
 }
 
 .apoio-modal__close {
@@ -632,9 +632,9 @@ function finishQuiz() {
     transition: all 0.15s ease;
 
     &:hover {
-        border-color: #fb7185;
-        background: #ffe4e6;
-        color: #9f1239;
+        border-color: #49A8EB;
+        background: #BDD9F2;
+        color: #04325A;
     }
 }
 
@@ -646,8 +646,8 @@ function finishQuiz() {
 
 .apoio-modal__footer {
     padding: 0.9rem 1.4rem;
-    border-top: 1.5px solid #fda4af;
-    background: #fff1f2;
+    border-top: 1.5px solid #8DC4E8;
+    background: #EBF5FF;
     display: flex;
     justify-content: flex-end;
 }
@@ -659,17 +659,17 @@ function finishQuiz() {
     height: 2.1rem;
     padding: 0 1.1rem;
     border-radius: 0.625rem;
-    border: 1.5px solid #fb7185;
-    background: linear-gradient(135deg, #ffe4e6, #fda4af);
-    color: #9f1239;
+    border: 1.5px solid #49A8EB;
+    background: linear-gradient(135deg, #BDD9F2, #8DC4E8);
+    color: #04325A;
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
 
     &:hover {
-        background: linear-gradient(135deg, #fda4af, #fb7185);
-        box-shadow: 0 2px 10px rgba(244, 63, 94, 0.2);
+        background: linear-gradient(135deg, #49A8EB, #187ABF);
+        box-shadow: 0 2px 10px rgba(24, 122, 191, 0.2);
     }
 }
 

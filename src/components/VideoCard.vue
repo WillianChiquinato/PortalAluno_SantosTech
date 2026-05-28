@@ -61,7 +61,7 @@ const progressValue = computed(() => {
 
 <template>
   <article class="panel group flex h-full flex-col overflow-hidden p-0 transition hover:-translate-y-1 hover:shadow-md">
-    <div class="relative aspect-video overflow-hidden border-b border-red-100/80 bg-sand-100">
+    <div class="relative aspect-video overflow-hidden border-b border-brand-100/80 bg-sand-100">
       <img :src="thumbnailUrl" :alt="`Thumbnail do vídeo ${title}`"
         class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
 
@@ -97,7 +97,7 @@ const progressValue = computed(() => {
         <NuxtLink :to="{
           path: `/videos/${id}`,
           query: startAtSeconds > 0 ? { t: String(startAtSeconds) } : {},
-        }" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs">
+        }" class="bg-brand-50 text-ink-900 btn-outline h-9 px-4 text-xs">
           {{ ctaLabel }}
         </NuxtLink>
       </div>

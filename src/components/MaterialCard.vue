@@ -1,7 +1,7 @@
 <template>
     <article
         class="panel group flex h-full flex-col overflow-hidden p-0 transition hover:-translate-y-1 hover:shadow-md">
-        <div class="relative flex h-28 items-center justify-center border-b border-red-100/80 bg-sand-100">
+        <div class="relative flex h-28 items-center justify-center border-b border-brand-100/80 bg-sand-100">
             <span class="text-4xl" aria-hidden="true">📄</span>
 
             <div class="absolute inset-x-0 top-0 flex items-center justify-between p-3">
@@ -26,7 +26,7 @@
                 <span class="chip !px-2.5 !py-1 !text-[11px]">{{ uploadedAtLabel }}</span>
 
                 <a :href="resolvedFileUrl" target="_blank" rel="noopener noreferrer"
-                    class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs" :aria-label="`Abrir material ${title}`">
+                    class="bg-brand-50 text-ink-900 btn-outline h-9 px-4 text-xs" :aria-label="`Abrir material ${title}`">
                     Abrir material
                 </a>
             </div>

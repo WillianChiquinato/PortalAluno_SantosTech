@@ -2,8 +2,8 @@
     <Teleport to="body">
         <Transition name="upload-modal-fade">
             <div v-if="model" class="upload-cover-mask" @click.self="handleBack">
-                <div class="upload-cover-modal panel w-[min(92vw,560px)] border-red-100/80 bg-white">
-                    <div class="flex items-center justify-between border-b border-red-100/80 px-6 py-4">
+                <div class="upload-cover-modal panel w-[min(92vw,560px)] border-brand-100/80 bg-white">
+                    <div class="flex items-center justify-between border-b border-brand-100/80 px-6 py-4">
                         <h3 class="text-base font-semibold text-ink-900">{{ props.name }}</h3>
                         <button type="button" class="chip h-8 w-8 justify-center p-0 cursor-pointer" @click="handleBack"
                             aria-label="Fechar modal">

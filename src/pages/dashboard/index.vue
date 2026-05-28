@@ -79,7 +79,7 @@
                     <div class="dashboard-skeleton-block h-4 w-10/12 rounded-full"></div>
                 </div>
 
-                <div class="panel space-y-3 bg-red-50 p-4">
+                <div class="panel space-y-3 bg-brand-50 p-4">
                     <div class="dashboard-skeleton-block h-5 w-32 rounded-full"></div>
                     <div class="dashboard-skeleton-block h-4 w-48 rounded-full"></div>
                     <div class="dashboard-skeleton-block h-9 w-full rounded-full"></div>
@@ -144,10 +144,10 @@
 
                     <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
                         <button
-                            class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
+                            class="btn-outline h-9 w-full cursor-pointer bg-brand-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
                             @click="openUploadCoverAndPicture">{{ t('dashboardEditPhotos') }}</button>
                         <button
-                            class="btn-outline h-9 w-full cursor-pointer bg-red-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
+                            class="btn-outline h-9 w-full cursor-pointer bg-brand-50 px-2 xl:px-5 text-xs text-brand-600 sm:w-auto"
                             @click="openEditAttributes">{{ t('dashboardEditProfile') }}</button>
                     </div>
                 </div>
@@ -168,7 +168,7 @@
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                         <div v-for="(badge, index) in badgeSlots" :key="badge.name"
                             class="rounded-xl border p-1 text-center text-xs cursor-pointer" :class="[
-                                badge.unlocked ? 'border-brand-200 bg-red-50 text-brand-600 medal-idle' : 'border-slate-200 bg-slate-50 text-ink-500',
+                                badge.unlocked ? 'border-brand-200 bg-brand-50 text-brand-600 medal-idle' : 'border-slate-200 bg-slate-50 text-ink-500',
                             ]" :style="badge.unlocked ? { animationDelay: `${(index % 6) * 0.22}s` } : undefined">
                             <div class="w-full flex justify-center items-center h-9">
                                 <BaseLottie v-if="badge.unlocked" :animation-data="BadgeUnlocked" :loop="true"
@@ -302,7 +302,7 @@
                     <div class="flex items-center gap-3">
 
                         <div
-                            class="w-12 h-12 border-1 border-yellow rounded-[20%] bg-red-50 flex items-center justify-center">
+                            class="w-12 h-12 border-1 border-brand-200 rounded-[20%] bg-brand-50 flex items-center justify-center">
                             <BaseLottie :animation-data="starsAnim" :loop="true" :autoplay="true" class="w-14 h-14" />
                         </div>
 
@@ -375,7 +375,7 @@
         <p class="text-sm text-ink-500">{{ t('dashboardUpdateBasicInfo') }}</p>
 
         <div class="space-y-3">
-            <div class="panel border-red-100/80 p-3">
+            <div class="panel border-brand-100/80 p-3">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
                     t('dashboardNameLabel') }}</label>
                 <input v-model="profile!.name" type="text" class="input w-full"
@@ -383,7 +383,7 @@
 
             </div>
 
-            <div class="panel border-red-100/80 p-3">
+            <div class="panel border-brand-100/80 p-3">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
                     t('dashboardEmailLabel') }}</label>
                 <input v-model="profile!.email" type="email" class="input w-full"
@@ -393,7 +393,7 @@
                 </p>
             </div>
 
-            <div class="panel border-red-100/80 p-3">
+            <div class="panel border-brand-100/80 p-3">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
                     t('dashboardPasswordLabel') }}</label>
                 <input v-model="editPassword" :type="showPassword ? 'text' : 'password'" class="input w-full"
@@ -406,7 +406,7 @@
                 </button>
             </div>
 
-            <div class="panel border-red-100/80 p-3">
+            <div class="panel border-brand-100/80 p-3">
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-500">{{
                     t('dashboardBioLabel') }}</label>
                 <textarea v-model="profile!.bio" class="input w-full" :placeholder="t('dashboardBioPlaceholder')"
@@ -414,7 +414,7 @@
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1">
-                <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                <button type="button" class="bg-brand-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                     @click="closeEditAttributes">
                     {{ t('dashboardBack') }}
                 </button>
@@ -2302,7 +2302,7 @@ onBeforeUnmount(() => {
     max-height: calc(100vh - 2rem);
     border-radius: 1rem;
     background: #fff;
-    border: 1px solid #fee2e2;
+    border: 1px solid #EBF5FF;
     box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
     display: flex;
     flex-direction: column;
@@ -2314,7 +2314,7 @@ onBeforeUnmount(() => {
     max-height: calc(100vh - 2rem);
     border-radius: 1rem;
     background: #fff;
-    border: 1px solid #fee2e2;
+    border: 1px solid #EBF5FF;
     box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
     display: flex;
     flex-direction: column;
@@ -2327,8 +2327,8 @@ onBeforeUnmount(() => {
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid #fee2e2;
-    background: linear-gradient(90deg, #fff7f7 0%, #fff 70%);
+    border-bottom: 1px solid #EBF5FF;
+    background: linear-gradient(90deg, #F0F8FF 0%, #fff 70%);
 }
 
 .global-ranking-title {
@@ -2358,8 +2358,8 @@ onBeforeUnmount(() => {
 }
 
 .global-ranking-compare-card {
-    border: 1px solid #fecdd3;
-    background: linear-gradient(160deg, #fff7f9 0%, #fff 85%);
+    border: 1px solid #BDD9F2;
+    background: linear-gradient(160deg, #F0F8FF 0%, #fff 85%);
     border-radius: 0.8rem;
     padding: 0.7rem;
 }
@@ -2370,14 +2370,14 @@ onBeforeUnmount(() => {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #9f1239;
+    color: #0270E0;
 }
 
 .global-ranking-compare-value {
     margin: 0.2rem 0 0;
     font-size: 1rem;
     font-weight: 800;
-    color: #be123c;
+    color: #187ABF;
 }
 
 .global-ranking-compare-helper {
@@ -2388,9 +2388,9 @@ onBeforeUnmount(() => {
 }
 
 .global-ranking-event {
-    border: 1px solid #fecdd3;
+    border: 1px solid #BDD9F2;
     border-radius: 0.85rem;
-    background: linear-gradient(160deg, #fff7f9 0%, #fff 85%);
+    background: linear-gradient(160deg, #F0F8FF 0%, #fff 85%);
     padding: 0.72rem;
     margin-bottom: 0.9rem;
 }
@@ -2408,7 +2408,7 @@ onBeforeUnmount(() => {
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #be123c;
+    color: #187ABF;
 }
 
 .global-ranking-event-title {
@@ -2437,9 +2437,9 @@ onBeforeUnmount(() => {
 }
 
 .global-ranking-event-status--open {
-    border-color: #fb7185;
-    background: #ffe4e6;
-    color: #9f1239;
+    border-color: #49A8EB;
+    background: #EBF5FF;
+    color: #0270E0;
 }
 
 .global-ranking-event-status--closed {
@@ -2465,7 +2465,7 @@ onBeforeUnmount(() => {
     grid-template-columns: auto auto minmax(0, 1fr);
     align-items: center;
     gap: 0.55rem;
-    border: 1px solid #fecdd3;
+    border: 1px solid #BDD9F2;
     border-radius: 0.75rem;
     background: #fff;
     padding: 0.45rem 0.52rem;
@@ -2475,8 +2475,8 @@ onBeforeUnmount(() => {
     min-width: 2rem;
     text-align: center;
     border-radius: 999px;
-    background: #ffe4e6;
-    color: #9f1239;
+    background: #EBF5FF;
+    color: #0270E0;
     font-size: 0.68rem;
     font-weight: 800;
     padding: 0.22rem 0.34rem;
@@ -2487,7 +2487,7 @@ onBeforeUnmount(() => {
     height: 2.4rem;
     border-radius: 0.6rem;
     object-fit: cover;
-    border: 1px solid #fecdd3;
+    border: 1px solid #BDD9F2;
     background: #fff;
 }
 
@@ -2777,9 +2777,9 @@ onBeforeUnmount(() => {
 }
 
 .grade-ranking-event-status--closed {
-    border-color: #fecaca;
-    background: #fee2e2;
-    color: #991b1b;
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
 }
 
 .grade-ranking-event-empty {
@@ -2993,15 +2993,15 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border: 1px solid #fee2e2;
+    border: 1px solid #EBF5FF;
     border-radius: 0.85rem;
     padding: 0.55rem 0.65rem;
     background: #fff;
 }
 
 .global-ranking-row-highlight {
-    border-color: #fb7185;
-    background: #fff1f2;
+    border-color: #49A8EB;
+    background: #EBF5FF;
 }
 
 .global-ranking-position {
@@ -3009,14 +3009,14 @@ onBeforeUnmount(() => {
     text-align: center;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #be123c;
+    color: #187ABF;
 }
 
 .global-ranking-avatar {
     width: 2.1rem;
     height: 2.1rem;
     border-radius: 999px;
-    border: 1px solid #fecdd3;
+    border: 1px solid #BDD9F2;
     object-fit: cover;
     background: #fff;
 }
@@ -3026,8 +3026,8 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: space-between;
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid #fee2e2;
-    background: linear-gradient(90deg, #fff7f7 0%, #fff 70%);
+    border-bottom: 1px solid #EBF5FF;
+    background: linear-gradient(90deg, #F0F8FF 0%, #fff 70%);
 }
 
 .image-viewer-title {
@@ -3040,10 +3040,10 @@ onBeforeUnmount(() => {
 .image-viewer-close {
     width: 2rem;
     height: 2rem;
-    border: 1px solid #fecaca;
+    border: 1px solid #BDD9F2;
     border-radius: 999px;
     background: #fff;
-    color: #be123c;
+    color: #187ABF;
     cursor: pointer;
 }
 
@@ -3109,11 +3109,11 @@ onBeforeUnmount(() => {
 
     0%,
     100% {
-        box-shadow: 0 10px 24px rgba(244, 63, 94, 0.22);
+        box-shadow: 0 10px 24px rgba(24, 122, 191, 0.22);
     }
 
     50% {
-        box-shadow: 0 14px 30px rgba(244, 63, 94, 0.34);
+        box-shadow: 0 14px 30px rgba(24, 122, 191, 0.34);
     }
 }
 

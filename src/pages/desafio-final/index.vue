@@ -131,18 +131,18 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-3 text-xs text-ink-500 sm:grid-cols-2">
-                            <div class="rounded-2xl bg-red-50 px-3 py-2">
+                            <div class="rounded-2xl bg-brand-50 px-3 py-2">
                                 <p class="uppercase tracking-[0.14em] text-[11px] text-ink-400">Barco</p>
                                 <p class="mt-1 truncate font-medium text-ink-700">{{ clan.boatName }}</p>
                             </div>
-                            <div class="rounded-2xl bg-red-50 px-3 py-2 sm:text-right">
+                            <div class="rounded-2xl bg-brand-50 px-3 py-2 sm:text-right">
                                 <p class="uppercase tracking-[0.14em] text-[11px] text-ink-400">Checkpoint</p>
                                 <p class="mt-1 truncate font-medium text-ink-700">{{ clan.currentCheckpoint }}</p>
                             </div>
                         </div>
 
-                        <div class="h-2 overflow-hidden rounded-full bg-red-100">
-                            <div class="h-full rounded-full bg-[linear-gradient(90deg,#dc2626,#ef4444)]"
+                        <div class="h-2 overflow-hidden rounded-full bg-brand-100">
+                            <div class="h-full rounded-full bg-[linear-gradient(90deg,#187ABF,#49A8EB)]"
                                 :style="{ width: `${clan.progressPercent}%` }"></div>
                         </div>
 
@@ -196,7 +196,7 @@
 
                             <button type="button" class="btn-outline h-10 cursor-pointer px-4 text-xs"
                                 :disabled="task.status === 'locked'"
-                                :class="task.status === 'locked' ? '!cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500' : 'bg-red-50 text-brand-600'"
+                                :class="task.status === 'locked' ? '!cursor-not-allowed !border-slate-300 !bg-slate-100 !text-ink-500' : 'bg-brand-50 text-brand-600'"
                                 @click="openTaskModal(task)">
                                 Ver proposta
                             </button>
@@ -210,7 +210,7 @@
             <Transition name="final-modal-fade">
                 <div v-if="isTaskModalOpen && selectedTask" class="final-modal-overlay" @click.self="closeTaskModal">
                     <div class="final-modal-card">
-                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-red-100 pb-4">
+                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-brand-100 pb-4">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">Desafio</p>
                                 <h3 class="mt-2 text-2xl font-semibold text-ink-900">{{ selectedTask.title }}</h3>
@@ -225,7 +225,7 @@
                         </div>
 
                         <div class="mt-5 grid gap-5 xl:grid-cols-[1fr_0.95fr]">
-                            <section class="rounded-2xl border border-red-100 bg-red-50/60 p-5">
+                            <section class="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
                                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Proposta</p>
                                 <p class="mt-3 text-sm leading-7 text-ink-700">{{ taskBriefing(selectedTask) }}</p>
                             </section>
@@ -520,7 +520,7 @@ onMounted(async () => {
 
 .final-pill--sky {
     background: rgba(255, 255, 255, 0.88);
-    color: #b91c1c;
+    color: #187ABF;
 }
 
 .final-pill--red {
@@ -542,10 +542,10 @@ onMounted(async () => {
     width: 100%;
     margin-top: 0.5rem;
     border-radius: 1.75rem;
-    border: 1px solid rgba(252, 165, 165, 0.45);
+    border: 1px solid rgba(49, 130, 206, 0.45);
     background:
         radial-gradient(circle at top, rgba(255, 255, 255, 0.5), transparent 30%),
-        linear-gradient(180deg, #fff5f5 0%, #fecaca 35%, #f87171 100%);
+        linear-gradient(180deg, #EBF5FF 0%, #BDD9F2 35%, #49A8EB 100%);
 }
 
 .final-ocean-stage--safe {
@@ -615,7 +615,7 @@ onMounted(async () => {
 }
 
 .final-boat {
-    --boat-color: #b91c1c;
+    --boat-color: #187ABF;
     position: absolute;
     transform: translate(-50%, -50%);
     transition: left 0.9s ease, top 0.9s ease, transform 0.4s ease;
@@ -626,8 +626,8 @@ onMounted(async () => {
 }
 
 .final-boat--current .final-boat__label {
-    border-color: rgba(185, 28, 28, 0.45);
-    box-shadow: 0 16px 34px rgba(185, 28, 28, 0.16);
+    border-color: rgba(24, 122, 191, 0.45);
+    box-shadow: 0 16px 34px rgba(24, 122, 191, 0.16);
 }
 
 .final-boat--reverse {
@@ -746,7 +746,7 @@ onMounted(async () => {
     grid-template-columns: auto 1fr auto;
     gap: 0.9rem;
     align-items: center;
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 1.2rem;
     padding: 0.9rem;
     background: rgba(255, 255, 255, 0.88);
@@ -768,7 +768,7 @@ onMounted(async () => {
 .final-ranking-card {
     display: grid;
     gap: 0.85rem;
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 1.5rem;
     padding: 0.85rem;
     background: rgba(255, 255, 255, 0.92);
@@ -791,14 +791,14 @@ onMounted(async () => {
 }
 
 .final-ranking-card--current {
-    border-color: rgba(185, 28, 28, 0.4);
-    background: rgba(254, 242, 242, 0.95);
+    border-color: rgba(24, 122, 191, 0.4);
+    background: rgba(235, 245, 255, 0.95);
 }
 
 .final-ranking-card--gold.final-ranking-card--current,
 .final-ranking-card--silver.final-ranking-card--current,
 .final-ranking-card--bronze.final-ranking-card--current {
-    box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(24, 122, 191, 0.18);
 }
 
 .final-ranking-card__position {
@@ -842,8 +842,8 @@ onMounted(async () => {
     align-items: center;
     border-radius: 999px;
     padding: 0.2rem 0.5rem;
-    background: rgba(220, 38, 38, 0.1);
-    color: #b91c1c;
+    background: rgba(24, 122, 191, 0.1);
+    color: #187ABF;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -909,8 +909,8 @@ onMounted(async () => {
 }
 
 .final-ranking-row--current {
-    border-color: rgba(185, 28, 28, 0.36);
-    background: rgba(254, 242, 242, 0.88);
+    border-color: rgba(24, 122, 191, 0.36);
+    background: rgba(235, 245, 255, 0.88);
 }
 
 .final-ranking-row__position {
@@ -930,10 +930,10 @@ onMounted(async () => {
 }
 
 .final-task-card {
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 1.5rem;
     padding: 1rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(254, 242, 242, 0.88));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(235, 245, 255, 0.88));
 }
 
 .final-modal-overlay {
@@ -952,7 +952,7 @@ onMounted(async () => {
     width: min(100%, 70rem);
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 1.75rem;
     padding: 1.25rem;
     background: rgba(255, 255, 255, 0.98);
@@ -965,16 +965,16 @@ onMounted(async () => {
     justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 999px;
-    background: #fff5f5;
-    color: #991b1b;
+    background: #EBF5FF;
+    color: #187ABF;
     cursor: pointer;
 }
 
 .final-modal-textarea {
     width: 100%;
-    border: 1px solid rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(141, 196, 232, 0.95);
     border-radius: 1rem;
     padding: 0.95rem 1rem;
     resize: vertical;
@@ -983,9 +983,9 @@ onMounted(async () => {
 }
 
 .final-modal-textarea:focus {
-    outline: 2px solid rgba(220, 38, 38, 0.18);
+    outline: 2px solid rgba(24, 122, 191, 0.18);
     outline-offset: 0;
-    border-color: rgba(220, 38, 38, 0.5);
+    border-color: rgba(24, 122, 191, 0.5);
 }
 
 .final-modal-fade-enter-active,

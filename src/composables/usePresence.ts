@@ -1,6 +1,6 @@
 import { useRuntimeConfig } from '#imports'
 import { ref, readonly, onUnmounted } from 'vue'
-import { getLoggedUser, getToken, verifyToken } from './useAuth'
+import { getLoggedUser, verifyToken } from './useAuth'
 
 type PresenceServerMessage =
   | { type: 'presence:hello'; userId: string; isOnline: boolean; lastSeenAt: string }
@@ -192,14 +192,11 @@ async function postPresenceRequest(url: string): Promise<Record<string, unknown>
     throw new Error('Presence URL is not configured')
   }
 
-  const token = getToken()
-  if (!token) throw new Error('No auth token')
-
   const response = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     body: '{}',
   })
@@ -308,12 +305,6 @@ async function openSocketInternal() {
 
   const socketUrl = new URL(wsUrl)
   socketUrl.searchParams.set('ticket', ticket)
-  if (/^(127\.0\.0\.1|localhost)$/i.test(socketUrl.hostname)) {
-    const token = getToken()
-    if (token) {
-      socketUrl.searchParams.set('token', token)
-    }
-  }
 
   const ws = new WebSocket(socketUrl.toString(), [
     WS_PROTOCOL,

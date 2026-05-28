@@ -39,8 +39,8 @@
         </section>
 
         <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <section class="panel overflow-hidden border-red-100/80 bg-white p-0">
-                <div class="border-b border-red-100/80 bg-gradient-to-r from-white to-red-50/60 px-6 py-5">
+            <section class="panel overflow-hidden border-brand-100/80 bg-white p-0">
+                <div class="border-b border-brand-100/80 bg-gradient-to-r from-white to-brand-50/60 px-6 py-5">
                     <div class="flex items-center justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-400">
@@ -57,20 +57,20 @@
                         </div>
 
                         <div
-                            class="hidden h-16 w-16 place-items-center rounded-2xl border border-red-100 bg-red-50 lg:grid">
+                            class="hidden h-16 w-16 place-items-center rounded-2xl border border-brand-100 bg-brand-50 lg:grid">
                             <span class="text-3xl text-brand-500">🏴‍☠️</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-4 p-5">
-                    <div v-if="isLoadingTeams" class="rounded-2xl border border-red-100 bg-red-50/60 p-6 text-center">
+                    <div v-if="isLoadingTeams" class="rounded-2xl border border-brand-100 bg-brand-50/60 p-6 text-center">
                         <p class="text-sm font-medium text-ink-900">Carregando clãs...</p>
                         <p class="mt-2 text-sm text-ink-500">Buscando os times já cadastrados para sua turma.</p>
                     </div>
 
                     <div v-else-if="availableTeams.length === 0"
-                        class="rounded-2xl border border-dashed border-red-100 bg-red-50/50 p-6 text-center">
+                        class="rounded-2xl border border-dashed border-brand-100 bg-brand-50/50 p-6 text-center">
                         <p class="text-sm font-medium text-ink-900">Nenhum clã cadastrado ainda</p>
                         <p class="mt-2 text-sm text-ink-500">
                             Seja o primeiro a registrar um clã para liberar o desafio final da turma.
@@ -78,9 +78,9 @@
                     </div>
 
                     <div v-for="team in availableTeams" :key="team.clanName"
-                        class="rounded-2xl border border-red-100/80 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:bg-red-50/40">
+                        class="rounded-2xl border border-brand-100/80 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:bg-brand-50/40">
                         <div class="flex items-start gap-4">
-                            <div class="grid h-16 w-16 place-items-center rounded-2xl border border-red-100 text-2xl"
+                            <div class="grid h-16 w-16 place-items-center rounded-2xl border border-brand-100 text-2xl"
                                 :style="{ backgroundColor: `${team.clanColor}22`, color: team.clanColor }">
                                 ⛵
                             </div>
@@ -101,11 +101,11 @@
                                 </p>
 
                                 <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-500">
-                                    <span class="rounded-xl border border-red-100 bg-red-50/70 px-2 py-1">
+                                    <span class="rounded-xl border border-brand-100 bg-brand-50/70 px-2 py-1">
                                         👥 {{ team.members.length }} membro(s)
                                     </span>
 
-                                    <span class="rounded-xl border border-red-100 bg-red-50/70 px-2 py-1">
+                                    <span class="rounded-xl border border-brand-100 bg-brand-50/70 px-2 py-1">
                                         🎨 {{ team.clanColor }}
                                     </span>
                                 </div>
@@ -122,11 +122,11 @@
                 </div>
             </section>
 
-            <section class="panel border-red-100/80 bg-white p-6 sm:p-7">
+            <section class="panel border-brand-100/80 bg-white p-6 sm:p-7">
                 <div class="flex h-full flex-col justify-between gap-8">
                     <div>
                         <div
-                            class="grid h-18 w-18 place-items-center rounded-2xl border border-red-100 bg-red-50 text-4xl text-brand-500">
+                            class="grid h-18 w-18 place-items-center rounded-2xl border border-brand-100 bg-brand-50 text-4xl text-brand-500">
                             <i class="pi pi-flag text-3xl"></i>
                         </div>
 
@@ -140,7 +140,7 @@
                         </p>
 
                         <div class="mt-6 space-y-3">
-                            <div class="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50/55 p-3">
+                            <div class="flex items-center gap-3 rounded-2xl border border-brand-100 bg-brand-50/55 p-3">
                                 <span
                                     class="grid h-10 w-10 place-items-center rounded-xl bg-white text-lg text-brand-500">⚓</span>
 
@@ -150,7 +150,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50/55 p-3">
+                            <div class="flex items-center gap-3 rounded-2xl border border-brand-100 bg-brand-50/55 p-3">
                                 <span
                                     class="grid h-10 w-10 place-items-center rounded-xl bg-white text-lg text-brand-500">🏆</span>
 
@@ -160,7 +160,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50/55 p-3">
+                            <div class="flex items-center gap-3 rounded-2xl border border-brand-100 bg-brand-50/55 p-3">
                                 <span
                                     class="grid h-10 w-10 place-items-center rounded-xl bg-white text-lg text-brand-500">🔥</span>
 
@@ -173,7 +173,7 @@
                     </div>
 
                     <div
-                        class="space-y-4 rounded-2xl border border-red-100 bg-gradient-to-b from-white to-red-50/50 p-4 sm:p-5">
+                        class="space-y-4 rounded-2xl border border-brand-100 bg-gradient-to-b from-white to-brand-50/50 p-4 sm:p-5">
                         <div class="space-y-2">
                             <p class="text-sm font-semibold text-ink-900">Cadastro rápido</p>
                             <p class="text-sm text-ink-500">
@@ -193,8 +193,8 @@
         <Teleport to="body">
             <Transition name="modal-fade">
                 <div v-if="showTeamRegistrationModal" class="cover-mask" @click.self="closeTeamRegistrationModal">
-                    <div class="cover-modal panel w-[min(92vw,580px)] border-red-100/80 bg-white">
-                        <div class="flex items-center justify-between border-b border-red-100/80 px-6 py-4">
+                    <div class="cover-modal panel w-[min(92vw,580px)] border-brand-100/80 bg-white">
+                        <div class="flex items-center justify-between border-b border-brand-100/80 px-6 py-4">
                             <div>
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-400">
                                     Desafio final
@@ -209,7 +209,7 @@
                             </button>
                         </div>
 
-                        <form class="space-y-4 bg-gradient-to-b from-white to-red-50/30 px-6 py-5"
+                        <form class="space-y-4 bg-gradient-to-b from-white to-brand-50/30 px-6 py-5"
                             @submit.prevent="submitTeamRegistration">
                             <p class="text-sm text-ink-700">
                                 Preencha os dados do seu clã. Seu usuário será incluído automaticamente na equipe.
@@ -221,7 +221,7 @@
                                 </label>
 
                                 <input id="team-name-modal" v-model.trim="teamForm.name" type="text" maxlength="60"
-                                    class="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
+                                    class="w-full rounded-2xl border border-brand-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
                                     placeholder="Ex.: Byte Raiders" />
                             </div>
 
@@ -231,7 +231,7 @@
                                 </label>
 
                                 <input id="boat-name-modal" v-model.trim="teamForm.boatName" type="text" maxlength="60"
-                                    class="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
+                                    class="w-full rounded-2xl border border-brand-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
                                     placeholder="Ex.: Red Kraken" />
                             </div>
 
@@ -242,7 +242,7 @@
 
                                 <textarea id="team-description-modal" v-model.trim="teamForm.description" rows="4"
                                     maxlength="180"
-                                    class="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
+                                    class="w-full rounded-2xl border border-brand-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
                                     placeholder="Resumo curto da proposta do seu clã."></textarea>
                             </div>
 
@@ -258,29 +258,29 @@
                                 </div>
 
                                 <input id="team-member-search" v-model.trim="memberSearch" type="text"
-                                    class="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
+                                    class="w-full rounded-2xl border border-brand-100 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-brand-300"
                                     placeholder="Buscar integrante por nome ou e-mail" />
 
                                 <div
-                                    class="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-red-100 bg-white p-2">
+                                    class="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-brand-100 bg-white p-2">
                                     <div v-if="isLoadingMembers"
-                                        class="rounded-xl bg-red-50 px-4 py-3 text-sm text-ink-500">
+                                        class="rounded-xl bg-brand-50 px-4 py-3 text-sm text-ink-500">
                                         Carregando participantes...
                                     </div>
 
                                     <div v-else-if="filteredMemberOptions.length === 0"
-                                        class="rounded-xl bg-red-50 px-4 py-3 text-sm text-ink-500">
+                                        class="rounded-xl bg-brand-50 px-4 py-3 text-sm text-ink-500">
                                         Nenhum participante encontrado para o filtro informado.
                                     </div>
 
                                     <button v-for="member in filteredMemberOptions" :key="member.id" type="button"
                                         class="flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition"
                                         :class="isMemberSelected(member.id)
-                                            ? 'border-brand-200 bg-red-50'
-                                            : 'border-transparent bg-white hover:border-red-100 hover:bg-red-50/60'"
+                                            ? 'border-brand-200 bg-brand-50'
+                                            : 'border-transparent bg-white hover:border-brand-100 hover:bg-brand-50/60'"
                                         @click="toggleMemberSelection(member.id)">
                                         <div
-                                            class="grid h-10 w-10 place-items-center rounded-full border border-red-100 bg-white text-sm font-semibold text-brand-500">
+                                            class="grid h-10 w-10 place-items-center rounded-full border border-brand-100 bg-white text-sm font-semibold text-brand-500">
                                             {{ member.name.charAt(0).toUpperCase() }}
                                         </div>
 
@@ -295,7 +295,7 @@
 
                                         <div class="flex items-center gap-2">
                                             <span v-if="member.id === currentUserId"
-                                                class="rounded-full border border-brand-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-500">
+                                                class="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-500">
                                                 obrigatório
                                             </span>
                                             <i class="pi"
@@ -316,12 +316,12 @@
                                 </label>
 
                                 <div
-                                    class="flex items-center gap-3 rounded-2xl border border-red-100 bg-white px-4 py-3">
+                                    class="flex items-center gap-3 rounded-2xl border border-brand-100 bg-white px-4 py-3">
                                     <input id="team-color-modal" v-model="teamForm.clanColor" type="color"
                                         class="h-10 w-12 cursor-pointer rounded border-0 bg-transparent p-0" />
                                     <span class="text-sm font-medium text-ink-700">{{ teamForm.clanColor }}</span>
                                     <span
-                                        class="ml-auto inline-flex items-center rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs text-ink-500">
+                                        class="ml-auto inline-flex items-center rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs text-ink-500">
                                         Prévia do clã
                                     </span>
                                 </div>
@@ -672,7 +672,7 @@ onBeforeMount(async () => {
 .cover-modal {
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
-    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(220, 38, 38, 0.1) !important;
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(24, 122, 191, 0.1) !important;
 }
 
 .modal-fade-enter-active,

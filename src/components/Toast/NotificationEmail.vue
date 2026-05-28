@@ -71,7 +71,7 @@ async function goToEmailConfirmation() {
 .notification-card {
     width: min(92vw, 360px);
     border-radius: 14px;
-    border: 2px solid rgba(232, 92, 92, 0.54);
+    border: 2px solid rgba(24, 122, 191, 0.54);
     background: var(--color-white);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
     backdrop-filter: blur(10px);
@@ -86,8 +86,8 @@ async function goToEmailConfirmation() {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(220, 38, 38, 0.12);
-    color: #dc2626;
+    background: rgba(24, 122, 191, 0.12);
+    color: #187ABF;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,12 +132,12 @@ async function goToEmailConfirmation() {
 
 .action-primary {
     flex: 1;
-    background: #dc2626;
+    background: #187ABF;
     color: #fff;
 }
 
 .action-primary:hover {
-    background: #b91c1c;
+    background: #0270E0;
 }
 
 .action-secondary {
@@ -164,13 +164,13 @@ async function goToEmailConfirmation() {
 
 :global(.dark) .notification-card {
     background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(239, 68, 68, 0.4);
+    border-color: rgba(24, 122, 191, 0.4);
     box-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
 }
 
 :global(.dark) .notification-icon {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
+    background: rgba(24, 122, 191, 0.2);
+    color: #49A8EB;
 }
 
 :global(.dark) .action-secondary {

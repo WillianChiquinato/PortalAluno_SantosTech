@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .code-editor-host {
     min-height: 260px;
-    border: 1px solid rgba(254, 202, 202, 0.8);
+    border: 1px solid rgba(141, 196, 232, 0.8);
     border-radius: 0.75rem;
     overflow: hidden;
     background: #fff;
@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
 }
 
 .code-editor-host:deep(.cm-gutters) {
-    border-right: 1px solid rgba(254, 202, 202, 0.65);
-    background: rgba(254, 242, 242, 0.5);
+    border-right: 1px solid rgba(141, 196, 232, 0.65);
+    background: rgba(235, 245, 255, 0.5);
 }
 </style>

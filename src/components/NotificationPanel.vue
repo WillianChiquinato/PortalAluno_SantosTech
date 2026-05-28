@@ -32,7 +32,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button v-if="hasUnread"
-                            class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:text-brand-400 dark:hover:bg-slate-900"
+                            class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-brand-600 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:text-brand-400 dark:hover:bg-slate-900"
                             :disabled="isLoading" @click="handleMarkAllAsRead">
                             {{ t('notificationsMarkAllShort') }}
                         </button>

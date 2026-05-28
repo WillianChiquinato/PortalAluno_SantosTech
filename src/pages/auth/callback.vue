@@ -1,14 +1,31 @@
 <template>
     <section class="mx-auto flex min-h-[70vh] max-w-2xl items-center justify-center px-6 py-16">
         <div class="w-full max-w-lg rounded-[28px] border border-white/70 bg-white/90 p-10 text-center shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur">
-            <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-brand-600">
-                <i class="pi pi-spin pi-spinner text-2xl"></i>
-            </div>
-            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-ink-500">Autenticacao</p>
-            <h1 class="mt-3 text-3xl font-semibold text-ink-900">Concluindo seu acesso</h1>
-            <p class="mt-3 text-sm leading-6 text-ink-600">
-                Estamos validando sua sessao e preparando seu ambiente no portal.
-            </p>
+
+            <template v-if="authError">
+                <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
+                    <i class="pi pi-times-circle text-2xl"></i>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-ink-500">Erro de autenticação</p>
+                <h1 class="mt-3 text-2xl font-semibold text-ink-900">Não foi possível concluir o acesso</h1>
+                <p class="mt-3 text-sm leading-6 text-ink-600">{{ authError }}</p>
+                <a :href="retryUrl"
+                    class="mt-6 inline-block rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition">
+                    Tentar novamente
+                </a>
+            </template>
+
+            <template v-else>
+                <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-brand-600">
+                    <i class="pi pi-spin pi-spinner text-2xl"></i>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-ink-500">Autenticacao</p>
+                <h1 class="mt-3 text-3xl font-semibold text-ink-900">Concluindo seu acesso</h1>
+                <p class="mt-3 text-sm leading-6 text-ink-600">
+                    Estamos validando sua sessao e preparando seu ambiente no portal.
+                </p>
+            </template>
+
         </div>
     </section>
 </template>
@@ -18,12 +35,19 @@ import { checkAuth, getLoggedUser, setStudentViewReturnUrl } from '~/composables
 import { useLoadingConfigurations } from '~/composables/useLoadingConfigurations'
 import { useUserStore } from '~/infra/store/userStore'
 
+const AUTH_ORIGIN = 'https://auth.santos-tech.com'
+
 const route = useRoute()
 const toast = useToastService()
 const { loadConfigurations } = useLoadingConfigurations()
 const userStore = useUserStore()
 
+const authError = ref<string | null>(null)
+const retryUrl = ref(`${AUTH_ORIGIN}?redirect=%2Fdashboard`)
+
 onMounted(async () => {
+    retryUrl.value = `${AUTH_ORIGIN}?redirect=${encodeURIComponent(window.location.origin + '/dashboard')}`
+
     const queryReturnTo = Array.isArray(route.query.returnTo)
         ? route.query.returnTo[0]
         : route.query.returnTo
@@ -54,15 +78,19 @@ onMounted(async () => {
         : route.query.message
 
     if (errorMessage) {
-        toast.error('Acesso nao autorizado', errorMessage, 4500)
-        await navigateTo('/')
+        // Não redirecionar para auth automaticamente — isso causaria loop infinito
+        // se o auth server mandar de volta para cá sem resolver o erro
+        authError.value = String(errorMessage)
+        toast.error('Acesso nao autorizado', String(errorMessage), 4500)
         return
     }
 
     const isAuthenticated = await checkAuth(true)
     if (!isAuthenticated) {
-        toast.error('Falha na autenticacao', 'Nao foi possivel concluir seu login social.', 4500)
-        await navigateTo('/')
+        // Não redirecionar para auth automaticamente — quebraria o loop:
+        // callback → auth (já autenticado lá) → callback → ...
+        authError.value = 'Nao foi possivel validar sua sessao. Clique em "Tentar novamente".'
+        toast.error('Falha na autenticacao', 'Nao foi possivel concluir seu login.', 4500)
         return
     }
 

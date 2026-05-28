@@ -49,7 +49,7 @@ const cardClass = computed(() => {
   }
 
   if (props.featured) {
-    return 'cursor-pointer border-amber-300 bg-gradient-to-r from-amber-50 via-white to-red-50 shadow-[0_8px_24px_rgba(217,119,6,0.18)] hover:-translate-y-0.5'
+    return 'cursor-pointer border-amber-300 bg-gradient-to-r from-amber-50 via-white to-amber-50/60 shadow-[0_8px_24px_rgba(217,119,6,0.18)] hover:-translate-y-0.5'
   }
 
   return 'cursor-pointer hover:-translate-y-0.5'

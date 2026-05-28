@@ -28,7 +28,7 @@
                                 <span class="text-2xl">📈</span>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-rose-400">Histórico</p>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-400">Histórico</p>
                                 <h3 class="text-base font-semibold text-slate-900">Seu progresso no ranking 🎯</h3>
                             </div>
                         </div>
@@ -112,15 +112,15 @@ async function openHistorico() {
     justify-content: center;
     gap: 0.45rem;
     overflow: hidden;
-    border: 1px solid #fda4af;
+    border: 1px solid #8DC4E8;
     border-radius: 999px;
     padding: 0.62rem 1rem;
     font-size: 0.78rem;
     font-weight: 700;
     line-height: 1;
-    color: #9f1239;
-    background: linear-gradient(100deg, #fff1f2 0%, #ffe4e6 42%, #fff7ed 100%);
-    box-shadow: 0 1px 4px rgba(244, 63, 94, 0.22);
+    color: #04325A;
+    background: linear-gradient(100deg, #EBF5FF 0%, #BDD9F2 50%, #ffffff 100%);
+    box-shadow: 0 1px 4px rgba(24, 122, 191, 0.22);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     animation: ranking-pulse 2.2s ease-in-out infinite;
@@ -128,8 +128,8 @@ async function openHistorico() {
 
 .ranking-cta:hover {
     transform: translateY(-1px) scale(1.01);
-    border-color: #fb7185;
-    box-shadow: 0 2px 10px rgba(244, 63, 94, 0.28);
+    border-color: #49A8EB;
+    box-shadow: 0 2px 10px rgba(24, 122, 191, 0.28);
 }
 
 .ranking-cta--disabled {
@@ -141,7 +141,7 @@ async function openHistorico() {
 
 .ranking-cta--disabled:hover {
     transform: none;
-    border-color: #fda4af;
+    border-color: #8DC4E8;
     box-shadow: none;
 }
 
@@ -150,12 +150,12 @@ async function openHistorico() {
 }
 
 .ranking-cta:focus-visible {
-    outline: 2px solid #fb7185;
+    outline: 2px solid #49A8EB;
     outline-offset: 2px;
 }
 
 .ranking-cta__icon {
-    color: #be123c;
+    color: #187ABF;
     font-size: 0.8rem;
 }
 
@@ -191,11 +191,11 @@ async function openHistorico() {
 
     0%,
     100% {
-        box-shadow: 0 10px 24px rgba(244, 63, 94, 0.22);
+        box-shadow: 0 10px 24px rgba(24, 122, 191, 0.22);
     }
 
     50% {
-        box-shadow: 0 14px 30px rgba(244, 63, 94, 0.34);
+        box-shadow: 0 14px 30px rgba(24, 122, 191, 0.34);
     }
 }
 
@@ -225,18 +225,18 @@ async function openHistorico() {
     height: 2.25rem;
     padding: 0 1rem;
     border-radius: 0.75rem;
-    border: 1.5px solid #fb7185;
-    background: linear-gradient(135deg, #ffe4e6 0%, #fda4af 100%);
-    color: #9f1239;
+    border: 1.5px solid #49A8EB;
+    background: linear-gradient(135deg, #BDD9F2 0%, #8DC4E8 100%);
+    color: #04325A;
     font-size: 0.75rem;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+    box-shadow: 0 2px 8px rgba(24, 122, 191, 0.15);
     transition: all 0.18s ease;
 
     &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #fda4af 0%, #f43f5e 100%);
-        border-color: #f43f5e;
-        box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
+        background: linear-gradient(135deg, #8DC4E8 0%, #187ABF 100%);
+        border-color: #187ABF;
+        box-shadow: 0 4px 14px rgba(24, 122, 191, 0.25);
         transform: translateY(-1px);
     }
 
@@ -269,10 +269,10 @@ async function openHistorico() {
     display: flex;
     flex-direction: column;
     border-radius: 1.25rem;
-    border: 1.5px solid #fda4af;
+    border: 1.5px solid #8DC4E8;
     background: #fff;
     box-shadow:
-        0 32px 80px rgba(244, 63, 94, 0.18),
+        0 32px 80px rgba(24, 122, 191, 0.18),
         0 8px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
@@ -282,8 +282,8 @@ async function openHistorico() {
     align-items: center;
     justify-content: space-between;
     padding: 1.1rem 1.4rem;
-    background: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 100%);
-    border-bottom: 1.5px solid #fda4af;
+    background: linear-gradient(135deg, #BDD9F2 0%, #EBF5FF 100%);
+    border-bottom: 1.5px solid #8DC4E8;
 }
 
 .historico-modal__icon {
@@ -293,9 +293,9 @@ async function openHistorico() {
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 0.875rem;
-    border: 1.5px solid #fda4af;
-    background: linear-gradient(135deg, #ffe4e6, #fff1f2);
-    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.2);
+    border: 1.5px solid #8DC4E8;
+    background: linear-gradient(135deg, #BDD9F2, #EBF5FF);
+    box-shadow: 0 2px 8px rgba(24, 122, 191, 0.2);
 }
 
 .historico-modal__close {
@@ -312,9 +312,9 @@ async function openHistorico() {
     transition: all 0.15s ease;
 
     &:hover {
-        border-color: #fda4af;
-        background: #ffe4e6;
-        color: #9f1239;
+        border-color: #8DC4E8;
+        background: #BDD9F2;
+        color: #04325A;
     }
 }
 
@@ -326,8 +326,8 @@ async function openHistorico() {
 
 .historico-modal__footer {
     padding: 0.9rem 1.4rem;
-    border-top: 1.5px solid #fda4af;
-    background: #fff1f2;
+    border-top: 1.5px solid #8DC4E8;
+    background: #EBF5FF;
     display: flex;
     justify-content: flex-end;
 }
@@ -339,17 +339,17 @@ async function openHistorico() {
     height: 2.1rem;
     padding: 0 1.1rem;
     border-radius: 0.625rem;
-    border: 1.5px solid #fda4af;
-    background: linear-gradient(135deg, #ffe4e6, #fda4af);
-    color: #9f1239;
+    border: 1.5px solid #8DC4E8;
+    background: linear-gradient(135deg, #BDD9F2, #8DC4E8);
+    color: #04325A;
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
 
     &:hover {
-        background: linear-gradient(135deg, #fda4af, #fb7185);
-        box-shadow: 0 2px 10px rgba(244, 63, 94, 0.2);
+        background: linear-gradient(135deg, #49A8EB, #187ABF);
+        box-shadow: 0 2px 10px rgba(24, 122, 191, 0.2);
     }
 }
 

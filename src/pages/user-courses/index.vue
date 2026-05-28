@@ -232,14 +232,14 @@ onMounted(async () => {
     align-items: center;
     gap: 0.375rem;
     border-radius: 9999px;
-    background: rgba(220, 38, 38, 0.25);
-    border: 1px solid rgba(220, 38, 38, 0.40);
+    background: rgba(24, 122, 191, 0.25);
+    border: 1px solid rgba(24, 122, 191, 0.40);
     padding: 0.25rem 0.875rem;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #fecaca;
+    color: #BDD9F2;
 }
 
 .glass-card {

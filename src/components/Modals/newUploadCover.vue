@@ -2,8 +2,8 @@
     <Teleport to="body">
         <Transition name="upload-modal-fade">
             <div v-if="model" class="upload-cover-mask" @click.self="handleBack">
-                <div class="upload-cover-modal panel w-[min(92vw,560px)] border-red-100/80 bg-white">
-                    <div class="flex items-center justify-between border-b border-red-100/80 px-6 py-4">
+                <div class="upload-cover-modal panel w-[min(92vw,560px)] border-brand-100/80 bg-white">
+                    <div class="flex items-center justify-between border-b border-brand-100/80 px-6 py-4">
                         <h3 class="text-base font-semibold text-ink-900">{{ props.name }}</h3>
                         <button type="button" class="chip h-8 w-8 justify-center p-0 cursor-pointer" @click="handleBack"
                             :disabled="loading" aria-label="Fechar modal">
@@ -11,7 +11,7 @@
                         </button>
                     </div>
 
-                    <div class="space-y-4 bg-gradient-to-b from-white to-red-50/30 px-6 py-5">
+                    <div class="space-y-4 bg-gradient-to-b from-white to-brand-50/30 px-6 py-5">
                         <p class="text-sm text-ink-500">Selecione os arquivos para enviar.</p>
 
                         <input ref="fileInput" type="file" class="hidden" :accept="props.accept"
@@ -20,14 +20,14 @@
                             @change="onProfileFileChange" />
 
                         <button type="button"
-                            class="upload-drop panel w-full border-dashed border-red-200 p-5 text-left transition cursor-pointer"
+                            class="upload-drop panel w-full border-dashed border-brand-200 p-5 text-left transition cursor-pointer"
                             @click="openFilePicker">
                             <p class="text-sm font-semibold text-ink-900">Escolher arquivo de capa</p>
                             <p class="mt-1 text-xs text-ink-500">Clique para selecionar no computador.</p>
                         </button>
 
                         <button type="button"
-                            class="upload-drop panel w-full border-dashed border-red-200 p-5 text-left transition cursor-pointer"
+                            class="upload-drop panel w-full border-dashed border-brand-200 p-5 text-left transition cursor-pointer"
                             @click="openFilePickerProfile">
                             <p class="text-sm font-semibold text-ink-900">Escolher arquivo de perfil</p>
                             <p class="mt-1 text-xs text-ink-500">Clique para selecionar no computador.</p>
@@ -35,7 +35,7 @@
 
                         <div v-if="selectedCoverFile" class="panel flex items-center gap-3 p-3">
                             <img v-if="coverPreviewUrl" :src="coverPreviewUrl" alt="Preview da capa"
-                                class="h-12 w-12 rounded-lg border border-red-100 object-cover" />
+                                class="h-12 w-12 rounded-lg border border-brand-100 object-cover" />
 
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-medium text-ink-900">{{ selectedCoverFile.name }}</p>
@@ -50,7 +50,7 @@
 
                         <div v-if="selectedProfileFile" class="panel flex items-center gap-3 p-3">
                             <img v-if="profilePreviewUrl" :src="profilePreviewUrl" alt="Preview do perfil"
-                                class="h-12 w-12 rounded-lg border border-red-100 object-cover" />
+                                class="h-12 w-12 rounded-lg border border-brand-100 object-cover" />
 
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-medium text-ink-900">{{ selectedProfileFile.name }}</p>
@@ -66,8 +66,8 @@
                         <slot></slot>
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 border-t border-red-100/80 px-6 py-4">
-                        <button type="button" class="bg-red-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
+                    <div class="flex items-center justify-end gap-2 border-t border-brand-100/80 px-6 py-4">
+                        <button type="button" class="bg-brand-50 text-ink-900 btn-outline h-9 px-4 text-xs cursor-pointer"
                             @click="handleBack" :disabled="loading">
                             Voltar
                         </button>
@@ -232,7 +232,7 @@ onUnmounted(() => {
 }
 
 .upload-cover-modal {
-    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(220, 38, 38, 0.1) !important;
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(24, 122, 191, 0.1) !important;
 }
 
 .upload-drop {
@@ -242,8 +242,8 @@ onUnmounted(() => {
 
 .upload-drop:hover {
     transform: translateY(-1px);
-    border-color: rgba(220, 38, 38, 0.35);
-    box-shadow: 0 10px 22px rgba(220, 38, 38, 0.12);
+    border-color: rgba(24, 122, 191, 0.35);
+    box-shadow: 0 10px 22px rgba(24, 122, 191, 0.12);
 }
 
 .upload-modal-fade-enter-active,
