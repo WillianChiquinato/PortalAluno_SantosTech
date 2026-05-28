@@ -1,9 +1,8 @@
-import { checkAuth, verifyToken, setLoggedUser } from '@/composables/useAuth'
+import { checkAuth, verifyToken } from '@/composables/useAuth'
 
 const AUTH_ORIGIN = 'https://auth.santos-tech.com'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  // O callback gerencia seu próprio fluxo — não interferir
   if (to.path === '/auth/callback') {
     return
   }
@@ -11,30 +10,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
   let hasValidSession = false
 
   if (process.client) {
-    // Client: usa estado cacheado + API se necessário
     hasValidSession = verifyToken() || (await checkAuth())
   } else {
-    // SSR: chama a API diretamente passando os cookies do browser via header
-    // useRequestHeaders só funciona no contexto do middleware, não dentro de $fetch.create
-    try {
-      const { $httpClient } = useNuxtApp()
-      const { cookie } = useRequestHeaders(['cookie'])
-      const response = await $httpClient.auth.Session({
-        headers: cookie ? { cookie } : {},
-      })
-      if (response?.result) {
-        setLoggedUser(response.result)
-        hasValidSession = true
-      }
-    } catch {
-      hasValidSession = false
-    }
+    // SSR: verifica presença do cookie access_token — não chama a API para evitar
+    // problemas de URL relativa no contexto Node.js (apiBaseUrl pode ser vazio no SSR)
+    const { cookie } = useRequestHeaders(['cookie'])
+    hasValidSession = Boolean(
+      cookie && cookie.split(';').some((c) => c.trim().startsWith('access_token=')),
+    )
   }
 
   if (!hasValidSession) {
-    const origin = process.client
-      ? window.location.origin
-      : useRequestURL().origin
+    const origin = process.client ? window.location.origin : useRequestURL().origin
     const redirectUrl = origin + to.fullPath
     return navigateTo(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`, { external: true })
   }

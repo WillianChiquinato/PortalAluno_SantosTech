@@ -9,7 +9,7 @@ export const fetchInstance = $fetch.create({
     const { public: { apiBaseUrl } } = useRuntimeConfig()
     const headers = new Headers(options.headers)
 
-    options.baseURL = apiBaseUrl
+    options.baseURL = apiBaseUrl || '/'
     options.credentials = 'include'
     headers.set('Content-Type', 'application/json')
 

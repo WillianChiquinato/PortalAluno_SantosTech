@@ -87,8 +87,12 @@ async function fetchSession(force = false) {
       const { $httpClient } = useNuxtApp()
       const response = await $httpClient.auth.Session()
 
-      setLoggedUser(response.result)
-      return true
+      if (response?.result) {
+        setLoggedUser(response.result)
+        return true
+      }
+      clearAuth()
+      return false
     } catch {
       clearAuth()
       return false
