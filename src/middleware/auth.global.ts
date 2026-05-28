@@ -7,19 +7,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  const publicRoutes = new Set([
-    '/auth/callback',
-  ])
-  const isPublicRoute = publicRoutes.has(to.path)
+  // O callback gerencia seu próprio fluxo de autenticação — não interferir aqui
+  // evita que o middleware redirecione para /dashboard antes do onMounted do callback rodar
+  // e evita chamar checkAuth() duas vezes no mesmo carregamento
+  if (to.path === '/auth/callback') {
+    return
+  }
+
   const hasValidSession = verifyToken() || (await checkAuth())
 
-  if (!hasValidSession && !isPublicRoute) {
+  if (!hasValidSession) {
     const redirectUrl = window.location.origin + to.fullPath
     window.location.replace(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`)
     return
   }
 
-  if (hasValidSession && (isPublicRoute || to.path === '/')) {
+  if (to.path === '/') {
     return navigateTo('/dashboard')
   }
 })
