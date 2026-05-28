@@ -1,4 +1,4 @@
-import { checkAuth, verifyToken } from '@/composables/useAuth'
+import { checkAuth, verifyToken, setLoggedUser } from '@/composables/useAuth'
 
 const AUTH_ORIGIN = 'https://auth.santos-tech.com'
 
@@ -8,15 +8,31 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  const hasValidSession = verifyToken() || (await checkAuth())
+  let hasValidSession = false
+
+  if (process.client) {
+    // Client: usa estado cacheado + API se necessário
+    hasValidSession = verifyToken() || (await checkAuth())
+  } else {
+    // SSR: chama a API diretamente passando os cookies do browser
+    // (fetchSession tem guard !import.meta.client e não funciona no servidor)
+    try {
+      const { $httpClient } = useNuxtApp()
+      const response = await $httpClient.auth.Session()
+      if (response?.result) {
+        setLoggedUser(response.result)
+        hasValidSession = true
+      }
+    } catch {
+      hasValidSession = false
+    }
+  }
 
   if (!hasValidSession) {
-    // Usa useRequestURL() no SSR e window no client para obter a origin correta
     const origin = process.client
       ? window.location.origin
       : useRequestURL().origin
     const redirectUrl = origin + to.fullPath
-    // navigateTo com external:true funciona em SSR e client — sem flash de conteúdo
     return navigateTo(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`, { external: true })
   }
 

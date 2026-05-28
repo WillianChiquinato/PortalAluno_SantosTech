@@ -67,6 +67,10 @@ export function setLoggedUser(user: IAuth | null) {
 }
 
 async function fetchSession(force = false) {
+  if (!import.meta.client) {
+    return false
+  }
+
   const initialized = authInitializedState()
   const pending = authPendingState()
 
