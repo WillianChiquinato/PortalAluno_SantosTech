@@ -14,11 +14,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Client: usa estado cacheado + API se necessário
     hasValidSession = verifyToken() || (await checkAuth())
   } else {
-    // SSR: chama a API diretamente passando os cookies do browser
-    // (fetchSession tem guard !import.meta.client e não funciona no servidor)
+    // SSR: chama a API diretamente passando os cookies do browser via header
+    // useRequestHeaders só funciona no contexto do middleware, não dentro de $fetch.create
     try {
       const { $httpClient } = useNuxtApp()
-      const response = await $httpClient.auth.Session()
+      const { cookie } = useRequestHeaders(['cookie'])
+      const response = await $httpClient.auth.Session({
+        headers: cookie ? { cookie } : {},
+      })
       if (response?.result) {
         setLoggedUser(response.result)
         hasValidSession = true

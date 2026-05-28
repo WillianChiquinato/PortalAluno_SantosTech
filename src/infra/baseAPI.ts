@@ -1,4 +1,4 @@
-import { useRuntimeConfig, useRequestHeaders } from '#imports'
+import { useRuntimeConfig } from '#imports'
 import { $fetch } from 'ofetch'
 import { clearAuth } from '~/composables/useAuth'
 
@@ -12,15 +12,6 @@ export const fetchInstance = $fetch.create({
     options.baseURL = apiBaseUrl
     options.credentials = 'include'
     headers.set('Content-Type', 'application/json')
-
-    // No SSR, passa os cookies do browser para a API explicitamente
-    // sem isso, checkAuth() no servidor nunca encontra o access_token
-    if (!process.client) {
-      const reqHeaders = useRequestHeaders(['cookie'])
-      if (reqHeaders.cookie) {
-        headers.set('cookie', reqHeaders.cookie)
-      }
-    }
 
     options.headers = headers
   },
