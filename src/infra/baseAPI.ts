@@ -23,11 +23,9 @@ export const fetchInstance = $fetch.create({
   onResponseError({ response }) {
     if (response.status === 401) {
       clearAuth()
-
-      if (import.meta.client) {
-        const redirectUrl = window.location.href
-        window.location.replace(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`)
-      }
+      // Não redirecionar aqui — o middleware de rota já trata o redirect para
+      // auth quando a sessão está inválida. Redirecionar no 401 cria loop:
+      // API 401 → auth (usuário já autenticado lá) → portal → API 401 → auth → ...
     }
 
     console.error('API Error:', response)
