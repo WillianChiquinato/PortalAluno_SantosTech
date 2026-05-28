@@ -17,7 +17,7 @@ const statusMap: Record<StatStatus, { label: string; classes: string }> = {
   },
   progress: {
     label: 'Evoluindo',
-    classes: 'border-brand-200 bg-red-50 text-brand-600',
+    classes: 'border-brand-200 bg-brand-50 text-brand-600',
   },
   warning: {
     label: 'Atencao',

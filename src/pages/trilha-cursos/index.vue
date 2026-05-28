@@ -54,7 +54,7 @@
         <section v-if="paidCourses.length" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <article v-for="course in paidCourses" :key="course.id" class="panel flex flex-col p-5">
                 <div class="flex items-start justify-between gap-3">
-                    <span class="chip !bg-red-50 !text-brand-600 !border-brand-200">Premium</span>
+                    <span class="chip !bg-brand-50 !text-brand-600 !border-brand-200">Premium</span>
                     <span class="text-xs font-semibold text-ink-500">{{ formatPrice(course.price) }}</span>
                 </div>
 
@@ -68,7 +68,7 @@
                     <span class="chip">{{ course.duration }}h</span>
                 </div>
 
-                <div class="mt-4 rounded-xl border border-red-100/80 bg-red-50/60 p-3">
+                <div class="mt-4 rounded-xl border border-brand-100/80 bg-brand-50/60 p-3">
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-ink-500">Foco do curso</p>
                     <p class="mt-1 text-sm text-ink-700">{{ course.paidFocus }}</p>
                 </div>
@@ -86,7 +86,7 @@
 
                 <p class="mt-4 text-xs text-ink-500">Atualizado em {{ formatDate(course.updatedAt) }}</p>
 
-                <button class="bg-red-50 text-ink-900 btn-outline mt-4 h-10 px-4">Continuar trilha</button>
+                <button class="bg-brand-50 text-ink-900 btn-outline mt-4 h-10 px-4">Continuar trilha</button>
             </article>
         </section>
 

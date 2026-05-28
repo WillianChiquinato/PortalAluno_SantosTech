@@ -1,6 +1,6 @@
 <template>
   <button type="button"
-    class="w-full rounded-2xl border border-red-100/80 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm cursor-pointer setting-toggle-btn"
+    class="w-full rounded-2xl border border-brand-100/80 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm cursor-pointer setting-toggle-btn"
     @click="toggleEnabled">
     <div class="flex items-center justify-between gap-4 setting-toggle-row">
       <div class="space-y-1 setting-toggle-info">
@@ -9,7 +9,7 @@
       </div>
 
       <div v-if="variant === 'default'" class="h-7 w-12 rounded-full border p-1 transition setting-toggle-switch"
-        :class="isEnabled ? 'border-brand-200 bg-red-50' : 'border-slate-200 bg-sand-100'">
+        :class="isEnabled ? 'border-brand-200 bg-brand-50' : 'border-slate-200 bg-sand-100'">
         <div class="h-5 w-5 rounded-full transition-all duration-200"
           :class="isEnabled ? 'translate-x-5 bg-brand-500 shadow-sm' : 'bg-white'" />
       </div>
@@ -24,7 +24,7 @@
       </div>
 
       <div v-else
-        class="h-9 w-16 overflow-hidden rounded-full border border-brand-200 bg-red-50 p-0.5 setting-toggle-theme">
+        class="h-9 w-16 overflow-hidden rounded-full border border-brand-200 bg-brand-50 p-0.5 setting-toggle-theme">
         <canvas ref="themeCanvas" class="h-full w-full pointer-events-none"></canvas>
       </div>
     </div>

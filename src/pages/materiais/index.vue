@@ -21,7 +21,7 @@
         <section v-if="materials.length" class="panel p-4">
             <div class="flex flex-wrap items-center gap-2">
                 <button v-for="type in materialTypes" :key="type" class="chip cursor-pointer transition"
-                    :class="selectedType === type ? '!border-brand-500 !bg-red-50 !text-brand-600' : ''"
+                    :class="selectedType === type ? '!border-brand-500 !bg-brand-50 !text-brand-600' : ''"
                     @click="selectedType = type">
                     {{ type === 'all' ? 'Todos' : type }}
                 </button>

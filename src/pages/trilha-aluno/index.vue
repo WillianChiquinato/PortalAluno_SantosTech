@@ -55,7 +55,7 @@
                     <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-lg font-semibold">Mapa tático das ilhas</h3>
                         <div class="flex flex-wrap gap-2 text-xs">
-                            <span class="chip !border-brand-200 !bg-red-50 !text-brand-600">Concluída</span>
+                            <span class="chip !border-brand-200 !bg-brand-50 !text-brand-600">Concluída</span>
                             <span class="chip !border-ink-900 !text-ink-900">Atual</span>
                             <span class="chip !border-slate-200 !bg-slate-50 !text-ink-500">Bloqueada</span>
                         </div>
@@ -63,7 +63,7 @@
 
                     <div class="relative space-y-5">
                         <div
-                            class="pointer-events-none absolute inset-y-4 left-1/2 hidden -translate-x-1/2 border-l-2 border-dashed border-red-200 lg:block">
+                            class="pointer-events-none absolute inset-y-4 left-1/2 hidden -translate-x-1/2 border-l-2 border-dashed border-brand-200 lg:block">
                         </div>
 
                         <template v-if="hasIslands">
@@ -87,7 +87,7 @@
 
                                 <div v-if="island.status === 'Concluído'" class="absolute right-4 top-4 z-20">
                                     <span
-                                        class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-red-50 px-3 py-2 text-[13px] font-semibold text-brand-600">
+                                        class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-[13px] font-semibold text-brand-600">
                                         <span class="leading-none">✓</span>
                                         <span>Ilha concluída</span>
                                     </span>
@@ -104,7 +104,7 @@
 
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="chip" :class="[
-                                            island.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
+                                            island.status === 'Concluído' ? '!border-brand-200 !bg-brand-50 !text-brand-600' : '',
                                             island.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
                                             island.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
                                             island.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
@@ -112,13 +112,13 @@
                                             {{ statusLabel(island.status) }}
                                         </span>
                                         <span v-if="island.lowerState > 0"
-                                            class="chip !border-red-200 !bg-red-50 !text-brand-600">
+                                            class="chip !border-brand-200 !bg-brand-50 !text-brand-600">
                                             lowerState {{ island.lowerState }}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div class="mb-4 h-2 w-full overflow-hidden rounded-full bg-red-50">
+                                <div class="mb-4 h-2 w-full overflow-hidden rounded-full bg-brand-50">
                                     <div class="h-full rounded-full bg-gradient-to-r from-brand-600 to-accent-500"
                                         :style="{ width: `${island.progress}%` }"></div>
                                 </div>
@@ -166,7 +166,7 @@
 
                         <div class="flex items-center gap-2">
                             <span class="chip" :class="[
-                                selectedIsland.status === 'Concluído' ? '!border-brand-200 !bg-red-50 !text-brand-600' : '',
+                                selectedIsland.status === 'Concluído' ? '!border-brand-200 !bg-brand-50 !text-brand-600' : '',
                                 selectedIsland.status === 'Em Progresso' ? '!border-ink-900 !text-ink-900' : '',
                                 selectedIsland.status === 'Não Iniciado' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
                                 selectedIsland.status === 'Desconhecido' ? '!border-slate-200 !bg-slate-50 !text-ink-500' : '',
@@ -174,16 +174,16 @@
                                 {{ statusLabel(selectedIsland.status) }}
                             </span>
                             <span v-if="selectedIsland.lowerState > 0"
-                                class="chip !border-brand-200 !bg-red-50 !text-brand-600">
+                                class="chip !border-brand-200 !bg-brand-50 !text-brand-600">
                                 Lower fixa • +30%
                             </span>
-                            <button class="bg-red-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer"
+                            <button class="bg-brand-50 text-ink-900 btn-outline h-10 px-4 cursor-pointer"
                                 @click="leaveIsland">Voltar para
                                 ilhas</button>
                         </div>
                     </div>
 
-                    <div v-if="selectedIsland.lowerState > 0" class="panel border-brand-200 bg-red-50/70 p-4">
+                    <div v-if="selectedIsland.lowerState > 0" class="panel border-brand-200 bg-brand-50/70 p-4">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Rota lower
@@ -205,7 +205,7 @@
                     </div>
 
                     <div
-                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-red-100/80 bg-accent-300 p-4 sm:p-5 lg:max-w-5xl lg:px-10 lg:py-8">
+                        class="relative mx-auto mt-2 max-w-xl rounded-2xl border border-brand-100/80 bg-accent-300 p-4 sm:p-5 lg:max-w-5xl lg:px-10 lg:py-8">
                         <div
                             class="pointer-events-none absolute bottom-8 left-1/2 top-8 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-brand-600 via-brand-500/80 to-brand-300/60 lg:hidden">
                         </div>
@@ -264,7 +264,7 @@
                                                     :key="exerciseFlow.exercise.id" :class="[
                                                         'w-full rounded-xl border px-3 py-3 text-left transition-all',
                                                         canStartExercise(blip, exerciseFlow)
-                                                            ? 'cursor-pointer border-red-100/80 bg-loading hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-[1.02]'
+                                                            ? 'cursor-pointer border-brand-100/80 bg-loading hover:bg-success-200/20 hover:text-loading hover:border-white hover:scale-[1.02]'
                                                             : 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-80'
                                                     ]" :disabled="!canStartExercise(blip, exerciseFlow)"
                                                     @click="enterExercise(blip, exerciseFlow)">
@@ -304,7 +304,7 @@
                                 </div>
 
                                 <div
-                                    class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-100 bg-white lg:hidden">
+                                    class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-100 bg-white lg:hidden">
                                 </div>
                             </div>
                         </div>
@@ -788,11 +788,11 @@ function exerciseStatusLabel(exerciseFlow: ContainerExerciseFlow) {
 
 function exerciseStatusClass(exerciseFlow: ContainerExerciseFlow) {
     if (exerciseFlow.exercise.isCompletedAnswer || exerciseFlow.stateExercise === 'Correto') {
-        return '!border-brand-200 !bg-red-50 !text-brand-600'
+        return '!border-brand-200 !bg-brand-50 !text-brand-600'
     }
 
     if (exerciseFlow.stateExercise === 'Errou') {
-        return '!border-red-200 !bg-red-50 !text-brand-600'
+        return '!border-brand-200 !bg-brand-50 !text-brand-600'
     }
 
     if (exerciseFlow.stateExercise === 'Atual') {
@@ -1140,11 +1140,11 @@ function blipClass(container: BlipContainer) {
     }
 
     if (container.stateContainer === 'Concluído') {
-        return 'cursor-pointer border-brand-500 bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_10px_0_0_rgba(185,28,28,0.85)] hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(185,28,28,0.8)]'
+        return 'cursor-pointer border-brand-500 bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_10px_0_0_rgba(2,112,224,0.85)] hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(2,112,224,0.8)]'
     }
 
     if (container.stateContainer === 'Atual') {
-        return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-ink-900 shadow-[0_10px_0_0_rgba(239,68,68,0.65)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(239,68,68,0.55)]'
+        return 'cursor-pointer border-brand-200 bg-gradient-to-b from-accent-500 to-brand-500 text-ink-900 shadow-[0_10px_0_0_rgba(13,184,143,0.65)] hover:-translate-y-1 hover:shadow-[0_13px_0_0_rgba(13,184,143,0.55)]'
     }
 
     return 'cursor-not-allowed border-slate-300 bg-slate-200 text-slate-500 shadow-[0_8px_0_0_rgba(203,213,225,0.85)]'

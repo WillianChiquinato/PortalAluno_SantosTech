@@ -12,7 +12,7 @@
         </div>
 
         <div class="mt-4 grid gap-3 sm:grid-cols-3">
-            <article class="rounded-xl border border-red-100 bg-red-50/70 p-3">
+            <article class="rounded-xl border border-brand-100 bg-brand-50/70 p-3">
                 <p class="text-[11px] uppercase tracking-[0.14em] text-ink-500">Corretas</p>
                 <p class="mt-1 text-xl font-semibold text-brand-600">{{ totalCorrect }}</p>
             </article>
@@ -30,14 +30,14 @@
             <button v-for="status in filters" :key="status"
                 class="rounded-full border px-3 py-1 text-xs font-semibold transition hover:-translate-y-0.5" :class="selectedFilter === status
                     ? 'border-brand-500 bg-brand-500 text-white'
-                    : 'border-red-100 bg-white text-ink-700'" @click="selectedFilter = status">
+                    : 'border-brand-100 bg-white text-ink-700'" @click="selectedFilter = status">
                 {{ status }}
             </button>
         </div>
 
         <div class="mt-4 space-y-3">
             <article v-for="answer in filteredAnswers" :key="answer.id"
-                class="rounded-xl border border-red-100 bg-white p-3">
+                class="rounded-xl border border-brand-100 bg-white p-3">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <p class="text-sm font-semibold text-ink-900">{{ answer.question }}</p>
                     <span class="chip" :class="statusClass(answer.status)">{{ answer.status }}</span>
@@ -116,7 +116,7 @@ function formatDate(dateString: string): string {
 
 function statusClass(status: UserAnswerItem['status']) {
     if (status === 'Correta') {
-        return '!border-brand-200 !bg-red-50 !text-brand-600'
+        return '!border-brand-200 !bg-brand-50 !text-brand-600'
     }
 
     if (status === 'Incorreta') {

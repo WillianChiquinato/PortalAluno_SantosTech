@@ -2,8 +2,8 @@
     <Teleport to="body">
         <Transition name="modal-fade">
             <div v-if="model" class="cover-mask" @click.self="handleBack">
-                <div class="cover-modal panel w-[min(92vw,560px)] border-red-100/80 bg-white">
-                    <div class="flex items-center justify-between border-b border-red-100/80 px-6 py-4">
+                <div class="cover-modal panel w-[min(92vw,560px)] border-brand-100/80 bg-white">
+                    <div class="flex items-center justify-between border-b border-brand-100/80 px-6 py-4">
                         <h3 class="text-base font-semibold text-ink-900">{{ props.name }}</h3>
                         <button type="button" class="chip h-8 w-8 justify-center p-0 cursor-pointer" @click="handleBack"
                             :disabled="loading" aria-label="Fechar modal">
@@ -11,7 +11,7 @@
                         </button>
                     </div>
 
-                    <div class="space-y-2 bg-gradient-to-b from-white to-red-50/30 px-6 py-5">
+                    <div class="space-y-2 bg-gradient-to-b from-white to-brand-50/30 px-6 py-5">
                         <p class="text-sm text-ink-700">
                             Enviamos um e-mail para <strong>{{ userEmail }}</strong> com código de
                             confirmação. Por
@@ -24,7 +24,7 @@
                                 <input v-for="(digit, idx) in codeDigits" :key="idx" :ref="setCodeInputRef(idx)"
                                     v-model="codeDigits[idx]" type="text" inputmode="numeric" maxlength="1"
                                     autocomplete="one-time-code"
-                                    class="w-10 h-12 text-center border rounded text-lg focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    class="w-10 h-12 text-center border rounded text-lg focus:outline-none focus:ring-2 focus:ring-brand-400"
                                     @input="onInput(idx, $event)" @keydown.backspace="onBackspace(idx, $event)"
                                     @paste="onPaste($event)" />
                             </div>
@@ -194,7 +194,7 @@ function resendCode() {
 }
 
 .cover-modal {
-    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(220, 38, 38, 0.1) !important;
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.28), 0 10px 24px rgba(24, 122, 191, 0.1) !important;
 }
 
 .modal-fade-enter-active,

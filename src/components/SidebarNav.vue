@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import { useRoute } from 'nuxt/app'
 import { computed, watchEffect } from 'vue'
-import logoColorida from '@/assets/LogoColorida.png'
+import logoColorida from '@/assets/logoPreta.png'
 import { getStudentViewReturnUrl, logout as logoutSession, setStudentViewReturnUrl } from '~/composables/useAuth'
 import { useNotifications } from '~/composables/useNotifications'
 import { usePortalI18n } from '~/composables/usePortalI18n'

@@ -9,12 +9,17 @@
     --color-ink-500: #6b7280;
     --color-sand-50: #ffffff;
     --color-sand-100: #a4adb6;
-    --color-brand-200: #fecaca;
-    --color-brand-500: #dc2626;
-    --color-brand-600: #b91c1c;
-    --color-accent-200: #fee2e2;
-    --color-accent-500: #ef4444;
-    --color-accent-300: #ffd8d8;
+    --color-brand-50: #EBF5FF;
+    --color-brand-100: #BDD9F2;
+    --color-brand-200: #8DC4E8;
+    --color-brand-300: #49A8EB;
+    --color-brand-400: #338FBF;
+    --color-brand-500: #187ABF;
+    --color-brand-600: #0270E0;
+    --color-brand-700: #04325A;
+    --color-accent-200: #CCF2E8;
+    --color-accent-300: #A3EDD9;
+    --color-accent-500: #0DB88F;
     --color-success-200: #99f6e4;
     --color-success-500: #0d9488;
     --color-success-600: #0f766e;
@@ -36,11 +41,17 @@
     --color-ink-500: #a7a7a7;
     --color-sand-50: #0f172a;
     --color-sand-100: #7f95b8;
-    --color-brand-200: #a90707;
-    --color-brand-500: #930808;
-    --color-brand-600: #db5050;
-    --color-accent-200: #06043f;
-    --color-accent-500: #0f1b84;
+    --color-brand-50: #0D2440;
+    --color-brand-100: #0d3657;
+    --color-brand-200: #0d4a6e;
+    --color-brand-300: #1a6fa8;
+    --color-brand-400: #2D8ABD;
+    --color-brand-500: #1a6fa8;
+    --color-brand-600: #49A8EB;
+    --color-brand-700: #BDD9F2;
+    --color-accent-200: #0a2e25;
+    --color-accent-300: #1a1a1a;
+    --color-accent-500: #0a8c6d;
     --color-success-200: #134e4a;
     --color-success-500: #11b7a1;
     --color-success-600: #14b8a6;
@@ -48,7 +59,6 @@
     --color-warning-600: #ffd5a5ee;
     --color-white: #060620;
     --color-red-50: #380404;
-    --color-accent-300: #1a1a1a;
     --color-slate-50: #13213e;
     --color-slate-100: #2d2d2d;
     --color-tag-100: #f0f0f0;
@@ -90,7 +100,7 @@
 
 @layer components {
     .panel {
-        @apply rounded-2xl border border-red-100/80 bg-white/90 shadow-sm backdrop-blur;
+        @apply rounded-2xl border border-brand-100/80 bg-white/90 shadow-sm backdrop-blur;
     }
 
     .dark .panel {
@@ -98,7 +108,7 @@
     }
 
     .chip {
-        @apply inline-flex items-center gap-2 rounded-full border border-red-100 bg-white px-3 py-1 text-xs font-medium text-ink-700;
+        @apply inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white px-3 py-1 text-xs font-medium text-ink-700;
     }
 
     .dark .chip {
@@ -106,7 +116,7 @@
     }
 
     .nav-link {
-        @apply flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-red-50 hover:text-ink-900;
+        @apply flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-brand-50 hover:text-ink-900;
     }
 
     .dark .nav-link {
@@ -122,10 +132,18 @@
     }
 
     .btn-outline {
-        @apply rounded-full border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-600 transition hover:-translate-y-0.5 hover:bg-red-50;
+        @apply rounded-full border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-600 transition hover:-translate-y-0.5 hover:bg-brand-50;
     }
 
     .dark .btn-outline {
-        @apply text-brand-500 hover:bg-red-500/15;
+        @apply text-brand-500 hover:bg-brand-500/15;
+    }
+
+    .input {
+        @apply w-full rounded-xl border border-brand-100 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition placeholder:text-ink-500 focus:border-brand-400 focus:ring-2 focus:ring-brand-100;
+    }
+
+    .dark .input {
+        @apply border-slate-700 bg-slate-800 text-ink-900 focus:border-brand-500 focus:ring-brand-500/20;
     }
 }
