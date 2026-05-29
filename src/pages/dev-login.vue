@@ -117,12 +117,12 @@ const loading = ref(false)
 const errorMsg = ref<string | null>(null)
 
 async function applyTokenAndValidate(token: string) {
-    // Seta o cookie via endpoint server-side — garante que seja válido em localhost
-    await $fetch('/dev-set-token', { method: 'POST', body: { token } })
+    // Seta via endpoint server-side → cookie HttpOnly para localhost
+    await $fetch('/portal-utils/set-token', { method: 'POST', body: { token } })
 
     const ok = await checkAuth(true)
     if (!ok) {
-        errorMsg.value = 'Token setado mas sessão não pôde ser validada. Verifique se o token não expirou (TTL 15 min).'
+        errorMsg.value = 'Token inválido ou expirado. TTL é 2h — copie um token novo do portal.'
         return
     }
     await navigateTo('/dashboard')

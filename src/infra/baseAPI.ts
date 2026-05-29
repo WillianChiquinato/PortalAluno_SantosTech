@@ -10,7 +10,7 @@ let _refreshPromise: Promise<boolean> | null = null
 async function tryRefresh(): Promise<boolean> {
   try {
     // Usa fetch nativo para evitar loop no interceptor do fetchInstance
-    const res = await fetch('/auth-refresh', { method: 'POST', credentials: 'include' })
+    const res = await fetch('/portal-utils/auth-refresh', { method: 'POST', credentials: 'include' })
     return res.ok
   } catch {
     return false
