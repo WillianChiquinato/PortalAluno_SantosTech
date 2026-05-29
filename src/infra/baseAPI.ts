@@ -9,7 +9,9 @@ export const fetchInstance = $fetch.create({
     const { public: { apiBaseUrl } } = useRuntimeConfig()
     const headers = new Headers(options.headers)
 
-    options.baseURL = apiBaseUrl || '/'
+    // HTTP internal URLs (Docker) são bloqueadas como mixed content no browser HTTPS
+    // Nesse caso usa '/' para same-origin (nginx faz o proxy para o API interno)
+    options.baseURL = apiBaseUrl?.startsWith('http://') ? '/' : (apiBaseUrl || '/')
     options.credentials = 'include'
     headers.set('Content-Type', 'application/json')
 
