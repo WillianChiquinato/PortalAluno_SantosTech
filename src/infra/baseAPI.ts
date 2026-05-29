@@ -4,7 +4,28 @@ import { clearAuth } from '~/composables/useAuth'
 
 const AUTH_ORIGIN = 'https://auth.santos-tech.com'
 
-export const fetchInstance = $fetch.create({
+// ─── Refresh singleton ───────────────────────────────────────────────────────
+let _refreshPromise: Promise<boolean> | null = null
+
+async function tryRefresh(): Promise<boolean> {
+  try {
+    // Usa fetch nativo para evitar loop no interceptor do fetchInstance
+    const res = await fetch('/auth-refresh', { method: 'POST', credentials: 'include' })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+function scheduleRefresh(): Promise<boolean> {
+  if (!_refreshPromise) {
+    _refreshPromise = tryRefresh().finally(() => { _refreshPromise = null })
+  }
+  return _refreshPromise
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _base = $fetch.create({
   onRequest({ options }) {
     const { public: { apiBaseUrl } } = useRuntimeConfig()
     const headers = new Headers(options.headers)
@@ -21,14 +42,29 @@ export const fetchInstance = $fetch.create({
   },
 
   onResponseError({ response }) {
-    if (response.status === 401) {
-      clearAuth()
-      // Não redirecionar aqui — o middleware de rota já trata o redirect para
-      // auth quando a sessão está inválida. Redirecionar no 401 cria loop:
-      // API 401 → auth (usuário já autenticado lá) → portal → API 401 → auth → ...
-    }
-
     console.error('API Error:', response)
     throw response._data ?? response
   },
 })
+
+// Wrapper com auto-refresh em 401 + retry automático
+export const fetchInstance: typeof _base = async function fetchWithRefresh(
+  url: string,
+  opts: any = {},
+): Promise<any> {
+  try {
+    return await _base(url, opts)
+  } catch (err: any) {
+    const status = err?.status ?? err?.statusCode ?? err?.response?.status
+    if (status === 401 && !opts._refreshed && import.meta.client) {
+      const ok = await scheduleRefresh()
+      if (ok) {
+        return _base(url, { ...opts, _refreshed: true })
+      }
+      clearAuth()
+    } else if (status === 401) {
+      clearAuth()
+    }
+    throw err
+  }
+} as typeof _base

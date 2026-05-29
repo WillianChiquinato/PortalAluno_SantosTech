@@ -54,5 +54,22 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  return upstream.text()
+  const responseText = await upstream.text()
+
+  // Se for login com sucesso, injeta o access_token no body para o frontend
+  // usar via /dev-set-token (garante que o cookie seja setado corretamente)
+  if (upstream.status === 200 && subPath.includes('/auth/login')) {
+    const accessTokenCookie = setCookies.find(c => c.startsWith('access_token='))
+    if (accessTokenCookie) {
+      const tokenValue = accessTokenCookie.split(';')[0].replace('access_token=', '')
+      try {
+        const parsed = JSON.parse(responseText)
+        return { ...parsed, _devToken: tokenValue }
+      } catch {
+        return responseText
+      }
+    }
+  }
+
+  return responseText
 })
