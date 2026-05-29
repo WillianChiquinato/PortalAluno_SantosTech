@@ -7,22 +7,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  let hasValidSession = false
-
-  if (process.client) {
-    hasValidSession = verifyToken() || (await checkAuth())
-  } else {
-    // SSR: verifica presença do cookie access_token — não chama a API para evitar
-    // problemas de URL relativa no contexto Node.js (apiBaseUrl pode ser vazio no SSR)
-    const { cookie } = useRequestHeaders(['cookie'])
-    hasValidSession = Boolean(
-      cookie && cookie.split(';').some((c) => c.trim().startsWith('access_token=')),
-    )
+  // SSR: não verifica auth — o layout exibe overlay de loading até o client confirmar
+  // Tentar chamar a API no SSR causa loop quando apiBaseUrl aponta para URL interna
+  if (!process.client) {
+    return
   }
 
+  const hasValidSession = verifyToken() || (await checkAuth())
+
   if (!hasValidSession) {
-    const origin = process.client ? window.location.origin : useRequestURL().origin
-    const redirectUrl = origin + to.fullPath
+    const redirectUrl = window.location.origin + to.fullPath
     return navigateTo(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`, { external: true })
   }
 

@@ -1,5 +1,14 @@
 <template>
     <div class="relative min-h-screen bg-sand-50 text-ink-900">
+
+        <!-- Auth loading overlay: visível até o client confirmar a sessão -->
+        <Transition name="auth-fade">
+            <div v-if="!authReady"
+                class="fixed inset-0 z-[100] flex items-center justify-center bg-sand-50">
+                <i class="pi pi-spin pi-spinner text-3xl text-brand-500"></i>
+            </div>
+        </Transition>
+
         <div class="pointer-events-none fixed inset-0 -z-10">
             <div class="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-brand-200/70 blur-3xl"></div>
             <div class="absolute -bottom-40 -left-20 h-80 w-80 rounded-full bg-accent-200/70 blur-3xl"></div>
@@ -19,7 +28,7 @@
 
         <SidebarNav mode="mobile" class="lg:hidden" />
 
-        <!-- 🔥 Overlay Global -->
+        <!-- Overlay Global -->
         <GamificationOverlay />
     </div>
 </template>
@@ -27,4 +36,17 @@
 <script setup lang="ts">
 import SidebarNav from '@/components/SidebarNav.vue'
 import GamificationOverlay from '@/components/GamificationOverlay.vue'
+
+// Compartilha o mesmo estado que authInitializedState() em useAuth.ts
+// Permanece false até checkAuth() completar no client (via middleware)
+const authReady = useState('auth-initialized', () => false)
 </script>
+
+<style scoped>
+.auth-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+.auth-fade-leave-to {
+    opacity: 0;
+}
+</style>
