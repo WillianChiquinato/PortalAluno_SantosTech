@@ -3,7 +3,7 @@ import { checkAuth, verifyToken } from '@/composables/useAuth'
 const AUTH_ORIGIN = 'https://auth.santos-tech.com'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (to.path === '/auth/callback') {
+  if (to.path === '/auth/callback' || to.path === '/dev-login') {
     return
   }
 
@@ -16,6 +16,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const hasValidSession = verifyToken() || (await checkAuth())
 
   if (!hasValidSession) {
+    const config = useRuntimeConfig()
+    if (config.public.devAuth) {
+      return navigateTo('/dev-login')
+    }
     const redirectUrl = window.location.origin + to.fullPath
     return navigateTo(`${AUTH_ORIGIN}?redirect=${encodeURIComponent(redirectUrl)}`, { external: true })
   }

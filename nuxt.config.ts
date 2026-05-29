@@ -10,6 +10,7 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.VITE_API_BASE_URL ?? '',
       presenceWsUrl: process.env.VITE_PRESENCE_WS_URL ?? '',
       wsUrl: process.env.VITE_WS_URL ?? '',
+      devAuth: process.env.NUXT_PUBLIC_DEV_AUTH === 'true',
     },
   },
   vite: {
