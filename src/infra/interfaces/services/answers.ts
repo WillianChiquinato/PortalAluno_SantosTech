@@ -30,7 +30,7 @@ export interface IAnswerByUser {
   exercise: IAnswersExercise
   userExerciseFlowId: number | null
   answerText: string | null
-  selectedOption: string
+  selectedOption: string | null
   isCorrect: boolean | null
   answeredAt: string
   feedback: string | null

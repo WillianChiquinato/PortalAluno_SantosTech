@@ -186,7 +186,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ink-500">{{
                             t('dashboardExerciseGradesAllCourses') }}</p>
                         <span class="chip shrink-0">{{ exerciseCategoryGrades.length }} {{ t('dashboardCategoriesLabel')
-                            }}</span>
+                        }}</span>
                     </div>
 
                     <div v-if="exerciseCategoryGrades.length === 0"
@@ -575,7 +575,7 @@
                                 <p class="grade-ranking-summary-value">{{
                                     currentUserCategorySummary.bestCategory.category }}</p>
                                 <p class="grade-ranking-summary-sub">{{ currentUserCategorySummary.bestCategory.percent
-                                    }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
+                                }}% · #{{ currentUserCategorySummary.bestCategory.position }}º {{
                                         t('dashboardPlace') }}</p>
                             </article>
 
@@ -612,7 +612,7 @@
                         <div class="grade-ranking-prize-note">
                             <p>
                                 {{ t('dashboardOnlyUnlockedCompetePrefix') }} <strong>{{ t('dashboardUnlockedStatus')
-                                    }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
+                                }}</strong> {{ t('dashboardOnlyUnlockedCompeteSuffix') }}
                             </p>
                             <p>
                                 {{ t('dashboardParticipatingInCategory') }}: <strong>{{ eligibleEntriesCount }}</strong>
@@ -1160,15 +1160,16 @@ function mapAnswerStatus(isCorrect: boolean | null | undefined): UserAnswerItem[
     return t('dashboardAnswerStatusPending') as UserAnswerItem['status']
 }
 
-function mapAnswerContent(answerText: string | null, selectedOption: string): string {
+function mapAnswerContent(answerText: string | null, selectedOption: string | null | undefined): string {
     const normalizedText = answerText?.trim()
+    const normalizedOption = selectedOption?.trim()
 
     if (normalizedText) {
         return normalizedText
     }
 
-    if (selectedOption.trim()) {
-        return `${t('dashboardSelectedOptionPrefix')}: ${selectedOption}`
+    if (normalizedOption) {
+        return `${t('dashboardSelectedOptionPrefix')}: ${normalizedOption}`
     }
 
     return t('dashboardAnswerSent')
