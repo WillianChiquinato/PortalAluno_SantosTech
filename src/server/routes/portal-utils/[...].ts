@@ -4,7 +4,12 @@ export default defineEventHandler(async (event) => {
 
   // POST /portal-utils/auth-refresh — proxy para o auth service (dev e prod)
   if (subPath === '/auth-refresh' && event.method === 'POST') {
-    return handleAuthRefresh(event)
+    return handleAuthProxy(event, '/auth/refresh')
+  }
+
+  // POST /portal-utils/auth-logout — proxy para o auth service tirar o token (dev e prod)
+  if (subPath === '/auth-logout' && event.method === 'POST') {
+    return handleAuthProxy(event, '/auth/logout')
   }
 
   // POST /portal-utils/set-token — seta access_token como cookie (dev only)
@@ -16,13 +21,16 @@ export default defineEventHandler(async (event) => {
   throw createError({ statusCode: 404 })
 })
 
-async function handleAuthRefresh(event: any) {
+// Encaminha a requisição (com o cookie do browser) para o auth service e repassa
+// de volta os Set-Cookie — usado tanto para refresh quanto para logout, garantindo
+// que o token seja renovado/removido no domínio auth.santos-tech.com.
+async function handleAuthProxy(event: any, authPath: string) {
   const AUTH_URL = 'https://auth.santos-tech.com'
   const incoming = getRequestHeaders(event)
   const forwardHeaders: Record<string, string> = {}
   if (incoming['cookie']) forwardHeaders['cookie'] = incoming['cookie']
 
-  const upstream = await fetch(`${AUTH_URL}/auth/refresh`, {
+  const upstream = await fetch(`${AUTH_URL}${authPath}`, {
     method: 'POST',
     headers: forwardHeaders,
     redirect: 'manual',

@@ -114,7 +114,14 @@ export async function logout() {
   const { $httpClient } = useNuxtApp()
 
   try {
+    // Remove o token no auth server (auth.santos-tech.com) — limpa o cookie de SSO
+    if (import.meta.client) {
+      await fetch('/portal-utils/auth-logout', { method: 'POST', credentials: 'include' })
+    }
+    // Encerra também a sessão local da API do portal
     await $httpClient.auth.Logout()
+  } catch (error) {
+    console.error('Erro ao encerrar sessão no logout:', error)
   } finally {
     clearAuth()
     if (import.meta.client) {

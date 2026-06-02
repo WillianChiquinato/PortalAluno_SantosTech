@@ -34,6 +34,10 @@
                 <span class="h-2 w-2 rounded-full bg-brand-400"></span>
                 <span>Voltar ao portal</span>
             </button>
+            <button v-if="showCourseSwitch" type="button" class="nav-link w-full" @click="switchCourse">
+                <span class="h-2 w-2 rounded-full bg-brand-400"></span>
+                <span>Trocar turma</span>
+            </button>
             <template v-for="item in footerItems" :key="item.label">
                 <NuxtLink v-if="item.type === 'link'" :to="item.path" class="nav-link">
                     <span class="h-2 w-2 rounded-full bg-slate-300"></span>
@@ -87,6 +91,10 @@
                             @click="showMobileMenu = false">
                             <i class="pi pi-video text-lg"></i> {{ t('navVideos') }}
                         </NuxtLink>
+                        <button v-if="showCourseSwitch" class="block w-full text-left text-base font-medium text-black"
+                            @click="switchCourse">
+                            <i class="pi pi-sync text-lg"></i> Trocar turma
+                        </button>
                         <NuxtLink to="/configuracoes" class="block text-base font-medium text-black"
                             @click="showMobileMenu = false">
                             <i class="pi pi-cog text-lg"></i> {{ t('navSettings') }}
@@ -103,11 +111,13 @@
 
 <script setup lang="ts">
 import { useRoute } from 'nuxt/app'
-import { computed, watchEffect } from 'vue'
+import { computed, onMounted, watchEffect } from 'vue'
 import logoColorida from '@/assets/logoPreta.png'
 import { getStudentViewReturnUrl, logout as logoutSession, setStudentViewReturnUrl } from '~/composables/useAuth'
 import { useNotifications } from '~/composables/useNotifications'
 import { usePortalI18n } from '~/composables/usePortalI18n'
+import { useUserCourses } from '~/composables/useUserCourses'
+import { useUserStore } from '~/infra/store/userStore'
 
 const props = withDefaults(defineProps<{ mode?: 'sidebar' | 'mobile' }>(), {
     mode: 'sidebar',
@@ -119,6 +129,20 @@ const { unreadCount } = useNotifications()
 
 const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
+
+// "Trocar turma" só faz sentido para quem tem mais de uma turma
+const { count: courseCount, fetchCourses } = useUserCourses()
+const showCourseSwitch = computed(() => courseCount.value > 1)
+
+onMounted(() => {
+    fetchCourses()
+})
+
+const switchCourse = async () => {
+    useUserStore().setEnrollmentId(null)
+    showMobileMenu.value = false
+    await navigateTo('/user-courses')
+}
 
 const routeReturnTo = computed(() => {
     const value = Array.isArray(route.query.returnTo)

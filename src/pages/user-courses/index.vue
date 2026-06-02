@@ -1,7 +1,7 @@
 <template>
     <div class="page-root">
         <div class="hero-bg" :style="{
-            backgroundImage: `linear-gradient(150deg, rgba(10,5,5,0.90) 0%, rgba(80,10,10,0.78) 55%, rgba(20,5,5,0.92) 100%), url(${bgSantosGames})`,
+            backgroundImage: `linear-gradient(150deg, rgba(6,14,26,0.92) 0%, rgba(13,58,99,0.80) 55%, rgba(5,16,28,0.94) 100%), url(${bgSantosGames})`,
         }">
             <!-- Noise grain overlay -->
             <div class="grain-overlay" />
@@ -131,27 +131,15 @@ import { onMounted, ref } from 'vue'
 
 import bgSantosGames from '~/assets/Images-Default/background-default.png'
 import type { IUserCourse } from '~/infra/interfaces/services/course'
-import { getStudentViewReturnUrl, logout as logoutSession, setStudentViewReturnUrl } from '~/composables/useAuth'
+import { logout as logoutSession } from '~/composables/useAuth'
+import { useUserCourses } from '~/composables/useUserCourses'
 import { useUserStore } from '~/infra/store/userStore'
 
 definePageMeta({ layout: 'auth' })
 
-const { $httpClient } = useNuxtApp()
 const router = useRouter()
-
-const userCourses = ref<IUserCourse[]>([])
+const { courses: userCourses, fetchCourses } = useUserCourses()
 const loading = ref(true)
-
-async function fetchUserCourses() {
-    try {
-        const response = await $httpClient.course.GetUserCourses()
-        if (!response.success) throw new Error('Failed to fetch user courses')
-        return (response.result as IUserCourse[]) ?? []
-    } catch (error) {
-        console.error('Error fetching user courses:', error)
-        return []
-    }
-}
 
 function selectCourse(course: IUserCourse) {
     const userStore = useUserStore()
@@ -183,7 +171,15 @@ async function goToLogin() {
 }
 
 onMounted(async () => {
-    userCourses.value = await fetchUserCourses()
+    await fetchCourses()
+
+    // 1 turma → seleciona automaticamente e entra direto (mantém skeleton, sem flash do grid).
+    // 0 ou >1 → mostra empty state / seletor.
+    if (userCourses.value.length === 1) {
+        selectCourse(userCourses.value[0])
+        return
+    }
+
     loading.value = false
 })
 </script>

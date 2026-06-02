@@ -32,8 +32,13 @@ export const useUserStore = defineStore('user', {
     },
     setEnrollmentId(id: number | null) {
       this.enrollmentId = id
-      if (id !== null) localStorage.setItem('enrollmentId', String(id))
-      else localStorage.removeItem('enrollmentId')
+      if (!import.meta.client) return
+      // Persistência por sessão (sessionStorage): a turma escolhida sobrevive a
+      // reloads/navegação na mesma sessão, mas é esquecida ao iniciar uma nova
+      // sessão/login — forçando o seletor de turma a aparecer novamente.
+      if (id !== null) sessionStorage.setItem('enrollmentId', String(id))
+      else sessionStorage.removeItem('enrollmentId')
+      localStorage.removeItem('enrollmentId') // limpa chave legada
     },
     setUserEmail(email: string | null) {
       this.userEmail = email
@@ -60,7 +65,10 @@ export const useUserStore = defineStore('user', {
       this.userId = null
       this.userEmail = null
       this.enrollmentId = null
-      localStorage.removeItem('enrollmentId')
+      if (import.meta.client) {
+        sessionStorage.removeItem('enrollmentId')
+        localStorage.removeItem('enrollmentId')
+      }
       this.configurationsLoaded = false
     },
   },

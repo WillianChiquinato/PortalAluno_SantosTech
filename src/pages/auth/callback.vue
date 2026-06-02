@@ -100,7 +100,8 @@ onMounted(async () => {
 
     await loadConfigurations()
     toast.success('Login realizado', 'Sua conta foi autenticada com sucesso.', 3000)
-    await navigateTo('/dashboard')
+    // Resolve a turma: o /user-courses auto-seleciona se houver 1 turma ou exibe o seletor se houver mais de uma.
+    await navigateTo('/user-courses')
 })
 
 definePageMeta({

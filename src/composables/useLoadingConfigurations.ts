@@ -18,7 +18,7 @@ export function getUserIdFromSession(): UserSessionData | null {
   const userData = useUserStore()
 
   const storedEnrollmentId = import.meta.client
-    ? Number(localStorage.getItem('enrollmentId') ?? '0') || null
+    ? Number(sessionStorage.getItem('enrollmentId') ?? '0') || null
     : null
 
   if (userData.userId && userData.userId > 0) {
@@ -37,7 +37,8 @@ export function getUserIdFromSession(): UserSessionData | null {
     return null
   }
 
-  const enrollmentId = loggedUser.enrollmentsId ?? storedEnrollmentId ?? null
+  // A turma escolhida nesta sessão tem prioridade sobre o default da sessão (enrollmentsId)
+  const enrollmentId = storedEnrollmentId ?? loggedUser.enrollmentsId ?? null
 
   userData.setUserId(loggedUser.id)
   userData.setEnrollmentId(enrollmentId)
