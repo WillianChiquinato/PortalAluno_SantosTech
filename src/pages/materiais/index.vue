@@ -90,7 +90,7 @@ async function fetchMaterials() {
             return;
         }
 
-        const response = await $httpClient.material.GetAllMaterialsByCourse(userEnrollment.enrollmentId ?? 0);
+        const response = await $httpClient.material.GetAllMaterialsByCourse(userEnrollment.enrollmentId ?? 0, );
 
         if (response.success) {
             materials.value = response.result;

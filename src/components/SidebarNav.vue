@@ -131,7 +131,12 @@ const isMobile = computed(() => props.mode === 'mobile')
 const showMobileMenu = ref(false)
 
 // "Trocar turma" só faz sentido para quem tem mais de uma turma
-const { count: courseCount, fetchCourses } = useUserCourses()
+const { count: courseCount, fetchCourses, courses } = useUserCourses()
+
+const userStore = useUserStore()
+const currentCourse = computed(() => 
+  courses.value.find(c => c.id === userStore.enrollmentId) ?? courses.value[0]
+)
 const showCourseSwitch = computed(() => courseCount.value > 1)
 
 onMounted(() => {
@@ -162,7 +167,7 @@ const studentViewReturnUrl = computed(() => routeReturnTo.value || getStudentVie
 
 const navItems = computed(() => [
     { label: t('navDashboard'), short: t('navDashboardShort'), icon: 'pi pi-home', path: '/dashboard', note: t('navDashboardNote'), isActive: true },
-    { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/missoes', note: t('navGoalsNote'), isActive: true },
+    { label: t('navGoals'), short: t('navGoalsShort'), icon: 'pi pi-trophy', path: '/missoes', note: t('navGoalsNote'), isActive: currentCourse.value.classType == "Individual" ? false : true },
     { label: t('navStudentTrack'), short: t('navStudentTrackShort'), icon: 'pi pi-compass', path: '/trilha-aluno', note: t('navStudentTrackNote'), isActive: true },
     { label: t('navCoursesTrack'), short: t('navCoursesTrackShort'), icon: 'pi pi-book', path: '/trilha-cursos', note: t('navCoursesTrackNote'), isActive: false },
     { label: t('navMaterial'), short: t('navMaterialShort'), icon: 'pi pi-folder', path: '/materiais', note: t('navMaterialNote'), isActive: true },

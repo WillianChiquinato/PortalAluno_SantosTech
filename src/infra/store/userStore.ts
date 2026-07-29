@@ -6,6 +6,7 @@ export const useUserStore = defineStore('user', {
     userId: null as number | null,
     userEmail: null as string | null,
     enrollmentId: null as number | null,
+    classType: null as string | null,
     configurationsLoaded: false,
     darkModeEnabled: false,
     receiveEmailNotifications: false,
@@ -39,6 +40,13 @@ export const useUserStore = defineStore('user', {
       if (id !== null) sessionStorage.setItem('enrollmentId', String(id))
       else sessionStorage.removeItem('enrollmentId')
       localStorage.removeItem('enrollmentId') // limpa chave legada
+    },
+    setTypeClass(classType: string | null) {
+      this.classType = classType
+
+      if (classType !== null) sessionStorage.setItem('classType', String(classType))
+      else sessionStorage.removeItem('classType')
+      localStorage.removeItem('classType')
     },
     setUserEmail(email: string | null) {
       this.userEmail = email

@@ -30,6 +30,7 @@ export interface ICourseAvailable {
 
 export interface IUserCourse {
   id: number
+  classType: string
   className: string
   classStartedAt: string
   classFinishedAt: string

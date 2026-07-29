@@ -144,6 +144,7 @@ const loading = ref(true)
 function selectCourse(course: IUserCourse) {
     const userStore = useUserStore()
     userStore.setEnrollmentId(course.id)
+    userStore.setTypeClass(course.classType)
     router.push('/dashboard')
 }
 
